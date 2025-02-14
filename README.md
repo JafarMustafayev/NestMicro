@@ -4,10 +4,10 @@
 NestMicro is an enterprise-grade e-commerce platform built with microservices architecture. The platform follows domain-driven design principles and implements a standardized approach to entity tracking and auditing through a shared BaseEntity structure.
 
 ## Technology Stack
-- .NET 8
+- .NET 9
 - C# 12.0
-- Entity Framework Core 8.X.X
-- MassTransit with RabbitMQ 8.2.5
+- Entity Framework Core 9.X.X
+- MassTransit with RabbitMQ 8.3.6
 - SQL Server
 - AutoMapper 12.0.1
 - Swagger/OpenAPI
@@ -39,7 +39,7 @@ All entities in the system inherit from BaseEntity which provides:
 ## Setup Instructions
 
 ### Prerequisites
-- .NET 8 SDK
+- .NET 9 SDK
 - SQL Server
 - RabbitMQ
 - Docker Desktop

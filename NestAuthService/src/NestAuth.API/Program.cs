@@ -5,6 +5,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAuthServices();
 
+//builder.Services.AddConsulConfig();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -18,5 +20,9 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+//app.RegisterWithConsul(app.Lifetime);
+
+//app.MapGet("/health", () => Results.Ok());
 
 app.Run();

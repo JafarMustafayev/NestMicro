@@ -1,10 +1,24 @@
-# This file is used to define the Consul service in the docker-compose file.
+﻿# This file is used to define the Consul service in the docker-compose file.
 
 version: '3.8'
 
 services:
   consul:
-    image: consul:latest
-    container_name: consul
+    image: hashicorp/consul:latest
+    container_name: consul-server
+    restart: unless-stopped
+    volumes:
+      - consul-data:/consul/data
     ports:
-      - "8500:8500"  # Consul UI port
+      - "8500:8500"  # HTTP API və Web UI
+    environment:
+      - CONSUL_BIND_INTERFACE=eth0
+    command: >
+      agent -server
+      -bootstrap-expect=1
+      -ui
+      -client=0.0.0.0
+      -data-dir=/consul/data
+
+volumes:
+  consul-data:

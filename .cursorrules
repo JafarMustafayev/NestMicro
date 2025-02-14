@@ -1,0 +1,155 @@
+# Project Coding Standards and Rules
+
+## Service Architecture Rules
+
+### Product Service (Onion Architecture)
+1. Must strictly follow Onion Architecture with 4 layers:
+   - API Layer
+   - Application Layer
+   - Domain Layer
+   - Infrastructure Layer
+
+2. No business logic in controllers
+3. Domain layer must not have dependencies on other layers
+4. Application layer must contain all business logic
+5. Infrastructure layer must implement interfaces defined in Application layer
+
+### Other Services
+1. Must follow standard folder structure:
+   - Controllers/
+   - Context/
+   - Entities/
+   - DTOs/
+   - ModelConfiguration/
+   - MapProfiles/
+   - Consumers/
+   - Services/
+
+## Coding Standards
+
+### General
+1. Use async/await for all I/O operations
+2. Implement proper exception handling
+3. Use dependency injection
+4. Follow SOLID principles
+5. Use meaningful variable and method names
+6. Add XML comments for public methods and classes
+
+### API Development
+1. Use RESTful conventions
+2. Implement API versioning
+3. Return appropriate HTTP status codes
+4. Include Swagger documentation for all endpoints
+5. Use DTOs for request/response models
+6. Implement proper model validation
+
+### Database
+1. Use Entity Framework Core
+2. Implement proper database migrations
+3. Use fluent API for model configurations
+4. Follow naming conventions:
+   - Tables: PascalCase, plural
+   - Columns: PascalCase
+   - Foreign keys: EntityNameId
+
+### Message Queue
+1. Use MassTransit for RabbitMQ integration
+2. Implement proper consumer error handling
+3. Use retry policies
+4. Implement circuit breakers
+5. Follow message naming convention: 
+   - Commands: Verb + Noun + "Command"
+   - Events: Noun + Verb + "Event"
+
+### AutoMapper
+1. Create separate profile classes
+2. Use proper naming conventions for maps
+3. Validate mapping configurations at startup
+
+### Testing
+1. Follow TDD approach
+2. Write unit tests for services
+3. Write integration tests for APIs
+4. Use meaningful test names: Should_ExpectedBehavior_When_StateUnderTest
+
+## Documentation Requirements
+
+### Swagger/OpenAPI
+1. Document all endpoints
+2. Include example requests/responses
+3. Document authentication requirements
+4. Document possible response codes
+5. Group endpoints logically
+6. Include rate limiting information
+
+### Code Documentation
+1. Add XML comments for:
+   - Public methods
+   - Controller actions
+   - Service methods
+   - Complex business logic
+2. Include example usage where appropriate
+3. Document exceptions that may be thrown
+
+## Security Rules
+
+1. Use JWT for authentication
+2. Implement proper authorization
+3. Validate all inputs
+4. Use HTTPS
+5. Implement rate limiting
+6. Follow security best practices:
+   - No sensitive data in logs
+   - Proper password hashing
+   - Secure communication between services
+
+## Performance Rules
+
+1. Implement caching where appropriate
+2. Use async operations
+3. Optimize database queries
+4. Implement pagination for list endpoints
+5. Use compression for responses
+6. Monitor performance metrics
+
+## Logging Rules
+
+1. Use structured logging
+2. Include correlation IDs
+3. Log appropriate information:
+   - Errors
+   - Authentication attempts
+   - Critical operations
+4. Don't log sensitive data
+5. Include context information
+
+## Version Control
+
+1. Use feature branching
+2. Write meaningful commit messages
+3. Follow conventional commits:
+   - feat: new feature
+   - fix: bug fix
+   - docs: documentation
+   - style: formatting
+   - refactor: code restructuring
+   - test: adding tests
+   - chore: maintenance
+
+## CI/CD Rules
+
+1. Implement automated builds
+2. Run tests in pipeline
+3. Perform code quality checks
+4. Use Docker for containerization
+5. Implement proper environment configurations
+6. Use health checks for deployment verification
+
+## Monitoring
+
+1. Implement health checks
+2. Monitor service metrics
+3. Set up alerting
+4. Track performance metrics
+5. Monitor queue health
+6. Track API usage and errors 

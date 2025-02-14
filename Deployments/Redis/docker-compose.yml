@@ -1,1 +1,22 @@
-# Redis
+# This file is used to deploy a Redis container using Docker Compose.
+
+version: '3.8'
+
+services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - redis_network
+
+networks:
+  redis_network:
+    driver: bridge
+
+volumes:
+  redis_data:
+    driver: local

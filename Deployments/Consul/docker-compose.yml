@@ -1,2 +1,10 @@
-# CONSUL
+# This file is used to define the Consul service in the docker-compose file.
 
+version: '3.8'
+
+services:
+  consul:
+    image: consul:latest
+    container_name: consul
+    ports:
+      - "8500:8500"  # Consul UI port

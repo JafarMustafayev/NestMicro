@@ -4,13 +4,15 @@ public static class ServicesRegistrator
 {
     public static void AddAuthServices(this IServiceCollection services)
     {
+        var serverIsAvailable = InternetChecker.IsServerAvailable(Configuration.GetConfiguratinValue<string>("ServerIP")).Result;
+
         services.AddDbContext<AppDbContext>(options =>
         {
             var subsection = string.Empty;
 
-            subsection = InternetChecker.IsServerAvailable(Configuration.GetConfiguratinValue("ServerIP")).Result ? "SqlConnectionOnServer" : "SqlConnectionOnPrem";
+            subsection = serverIsAvailable ? "SqlConnectionOnServer" : "SqlConnectionOnPrem";
 
-            options.UseSqlServer(Configuration.GetConfiguratinValue("ConnectionStrings", subsection));
+            options.UseSqlServer(Configuration.GetConfiguratinValue<string>("ConnectionStrings", subsection));
         });
 
         services.AddIdentity<AppUser, AppRole>(options =>

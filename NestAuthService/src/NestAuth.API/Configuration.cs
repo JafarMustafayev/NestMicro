@@ -2,14 +2,14 @@
 
 public static class Configuration
 {
-    internal static string GetConfiguratinValue(string section)
+    internal static T GetConfiguratinValue<T>(string section)
     {
         ConfigurationManager configurationManager = new();
 
         configurationManager.SetBasePath(GetSecretsPath());
         configurationManager.AddJsonFile("Secrets.json", optional: true, reloadOnChange: true);
 
-        var value = configurationManager.GetSection(section).Value;
+        var value = configurationManager.GetValue<T>(section);
 
         if (value != null)
         { return value; }
@@ -17,7 +17,7 @@ public static class Configuration
         {
             configurationManager.SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
             configurationManager.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-            value = configurationManager.GetSection(section).Value;
+            value = configurationManager.GetValue<T>(section);
             ;
 
             if (value != null)
@@ -27,7 +27,7 @@ public static class Configuration
         }
     }
 
-    internal static string GetConfiguratinValue(string section, string subSection)
+    internal static T GetConfiguratinValue<T>(string section, string subSection)
     {
         ConfigurationManager configurationManager = new();
 
@@ -36,7 +36,7 @@ public static class Configuration
 
         var str = configurationManager.GetSection(section);
 
-        var value = str.GetValue<string>(subSection);
+        var value = str.GetValue<T>(subSection);
 
         if (value is not null)
         {
@@ -47,10 +47,46 @@ public static class Configuration
             configurationManager.SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
             configurationManager.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
             str = configurationManager.GetSection(section);
-            value = str.GetValue<string>(subSection);
+            value = str.GetValue<T>(subSection);
 
             if (str != null || value != null)
             { return value; }
+            else
+            { throw new Exception($"'{section}' or '{subSection}' is not found "); }
+        }
+    }
+
+    internal static T GetConfiguratinValue<T>(string section, string secondSection, string subSection)
+    {
+        ConfigurationManager configurationManager = new();
+
+        configurationManager.SetBasePath(GetSecretsPath());
+        configurationManager.AddJsonFile("Secrets.json", optional: true, reloadOnChange: true);
+
+        var sct = configurationManager.GetSection(section);
+
+        var subsct = sct.GetSection(secondSection);
+
+        var value = subsct.GetValue<T>(subSection);
+
+        if (value is not null)
+        {
+            return value;
+        }
+        else
+        {
+            configurationManager.SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
+            configurationManager.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+            sct = configurationManager.GetSection(section);
+
+            subsct = sct.GetSection(secondSection);
+
+            value = subsct.GetValue<T>(subSection);
+
+            if (value is not null)
+            {
+                return value;
+            }
             else
             { throw new Exception($"'{section}' or '{subSection}' is not found "); }
         }

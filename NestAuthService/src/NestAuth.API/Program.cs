@@ -5,7 +5,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAuthServices();
 
-//builder.Services.AddConsulConfig();
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(5181);
+});
 
 var app = builder.Build();
 
@@ -15,14 +18,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
 app.UseAuthorization();
 
 app.MapControllers();
 
-//app.RegisterWithConsul(app.Lifetime);
-
-//app.MapGet("/health", () => Results.Ok());
+app.RegisterWithConsul(app.Lifetime);
 
 app.Run();

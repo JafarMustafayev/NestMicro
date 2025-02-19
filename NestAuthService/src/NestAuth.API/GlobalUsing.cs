@@ -1,4 +1,6 @@
 ﻿global using Consul;
+global using FluentValidation;
+global using FluentValidation.AspNetCore;
 global using Microsoft.AspNetCore.Identity;
 global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Mvc;
@@ -12,3 +14,4 @@ global using NestAuth.API.Context;
 global using NestAuth.API.DTOs;
 global using NestAuth.API.Entities;
 global using NestAuth.API.Implementations;
+global using NestAuth.API.Validation;

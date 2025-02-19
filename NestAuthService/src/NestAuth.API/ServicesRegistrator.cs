@@ -12,6 +12,8 @@ public static class ServicesRegistrator
 
         AddConsul(services, serverIsAvailable);
 
+        AddFluent(services);
+
         AddServices(services);
 
         AddMassTransit(services);
@@ -36,8 +38,9 @@ public static class ServicesRegistrator
             options.Password.RequireLowercase = false;
             options.Password.RequireUppercase = false;
             options.Password.RequireNonAlphanumeric = false;
-            options.Password.RequiredLength = 6;
+            options.Password.RequiredLength = 8;
             options.User.RequireUniqueEmail = true;
+            options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._";
             options.SignIn.RequireConfirmedEmail = true;
         })
             .AddEntityFrameworkStores<AppDbContext>()
@@ -54,12 +57,19 @@ public static class ServicesRegistrator
         }));
     }
 
+    private static void AddFluent(this IServiceCollection services)
+    {
+        services.AddFluentValidationAutoValidation();
+        services.AddFluentValidationClientsideAdapters();
+        services.AddValidatorsFromAssembly(typeof(RegisterRequestValidator).Assembly);
+    }
+
     private static void AddServices(this IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
     }
 
-    private static async void AddMassTransit(this IServiceCollection services)
+    private static void AddMassTransit(this IServiceCollection services)
     {
     }
 

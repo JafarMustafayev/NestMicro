@@ -9,5 +9,11 @@
         {
             return Ok(new[] { "value1", "value2" });
         }
+
+        [HttpPost]
+        public IActionResult test([FromForm] RegisterRequest register)
+        {
+            return Ok(register);
+        }
     }
 }

@@ -14,10 +14,9 @@ if (builder.Environment.IsDevelopment())
 
     builder.WebHost.ConfigureKestrel(serverOptions =>
     {
-        serverOptions.ListenAnyIP(5005);
+        serverOptions.ListenAnyIP(Configuration.GetConfiguratinValue<int>("Consul", "ConsulClientRegister", "ServerPort"));
     });
 }
-
 builder.Services.AddServices();
 builder.Services.AddOcelot().AddConsul();
 builder.Configuration.AddJsonFile

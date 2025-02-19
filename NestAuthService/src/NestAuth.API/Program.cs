@@ -12,7 +12,7 @@ if (builder.Environment.IsDevelopment())
 
     builder.WebHost.ConfigureKestrel(serverOptions =>
     {
-        serverOptions.ListenAnyIP(5181);
+        serverOptions.ListenAnyIP(NestAuth.API.Configuration.GetConfiguratinValue<int>("Consul", "ConsulClientRegister", "ServerPort"));
     });
 }
 

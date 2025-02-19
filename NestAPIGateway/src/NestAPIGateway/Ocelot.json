@@ -1,20 +1,24 @@
 {
   "Routes": [
     {
-      "DownstreamPathTemplate": "/api/auth/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5181
-        }
-      ],
-
+      "UseServiceDiscovery": true,
+      "ServiceName": "AuthService",
       "UpstreamPathTemplate": "/auth/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "DownstreamPathTemplate": "/api/auth/{everything}",
+      "DownstreamScheme": "http",
       "LoadBalancerOptions": {
-        "Type": "LeastConnection"
+        "Type": "RoundRobin"
       }
     }
-  ]
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "http://192.168.1.68:5000",
+    "ServiceDiscoveryProvider": {
+      "Host": "192.168.1.68",
+      "Port": 8500,
+      "Type": "Consul",
+      "PollingInterval": 1000
+    }
+  }
 }

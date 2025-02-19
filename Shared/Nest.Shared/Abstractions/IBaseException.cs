@@ -2,6 +2,6 @@
 
 public interface IBaseException
 {
+    public string ErrorMessage { get; }
     public int StatusCode { get; }
-    public string CustomMessage { get; }
 }

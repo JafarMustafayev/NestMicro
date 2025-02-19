@@ -11,7 +11,7 @@ public static class Coder
         }
         catch (Exception)
         {
-            throw new InvalidOperationCustomException();
+            throw new OperationFailedException();
         }
     }
 
@@ -24,7 +24,7 @@ public static class Coder
         }
         catch (Exception)
         {
-            throw new InvalidOperationCustomException();
+            throw new OperationFailedException();
         }
     }
 }

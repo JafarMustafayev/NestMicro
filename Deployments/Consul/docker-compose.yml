@@ -26,6 +26,8 @@ services:
       -ui
       -client="0.0.0.0"
       -data-dir=/consul/data
+      -node="192.168.1.68"               
+      -advertise=192.168.1.68
 
 volumes:
   consul-data:

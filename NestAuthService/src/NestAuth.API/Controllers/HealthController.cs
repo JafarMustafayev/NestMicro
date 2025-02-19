@@ -7,7 +7,11 @@
         [HttpGet]
         public IActionResult Get()
         {
-            return Ok("Healthy");
+            return Ok(new
+            {
+                Status = "Healthy",
+                Timestamp = DateTime.UtcNow
+            });
         }
     }
 }

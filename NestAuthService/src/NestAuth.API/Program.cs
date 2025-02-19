@@ -1,3 +1,5 @@
+//Authservice API Program.cs
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -22,6 +24,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.RegisterWithConsul(app.Lifetime);
+await app.RegisterWithConsul(app.Lifetime);
 
-app.Run();
+await app.RunAsync();

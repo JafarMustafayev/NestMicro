@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-namespace NestAuth.API.Controllers
+﻿namespace NestAuth.API.Controllers
 {
     [Route("/api/[controller]/[action]")]
     [ApiController]

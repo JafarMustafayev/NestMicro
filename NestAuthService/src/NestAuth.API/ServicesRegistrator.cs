@@ -6,15 +6,30 @@ public static class ServicesRegistrator
     {
         var serverIsAvailable = InternetChecker.IsServerAvailable(Configuration.GetConfiguratinValue<string>("ServerIP")).Result;
 
+        ConnectSqlServer(services, serverIsAvailable);
+
+        AddIdentity(services);
+
+        AddConsul(services, serverIsAvailable);
+
+        AddServices(services);
+
+        AddMassTransit(services);
+    }
+
+    private static void ConnectSqlServer(this IServiceCollection services, bool serverIsAvailable)
+    {
         services.AddDbContext<AppDbContext>(options =>
         {
             var subsection = string.Empty;
 
-            subsection = serverIsAvailable ? "SqlConnectionOnServer" : "SqlConnectionOnPrem";
-
-            options.UseSqlServer(Configuration.GetConfiguratinValue<string>("ConnectionStrings", subsection));
+            options.UseSqlServer(Configuration.GetConfiguratinValue<string>("ConnectionStrings",
+                (serverIsAvailable ? "SqlConnectionOnServer" : "SqlConnectionOnPrem")));
         });
+    }
 
+    private static void AddIdentity(IServiceCollection services)
+    {
         services.AddIdentity<AppUser, AppRole>(options =>
         {
             options.Password.RequireDigit = false;
@@ -27,24 +42,28 @@ public static class ServicesRegistrator
         })
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
+    }
 
+    private static void AddConsul(IServiceCollection services, bool serverIsAvailable)
+    {
         services.AddSingleton<IConsulClient, ConsulClient>(p => new ConsulClient(consulConfig =>
         {
-            var subsection = serverIsAvailable ? "ConsulServerOnServer" : "ConsulServerOnPrem";
-            consulConfig.Address = new Uri(Configuration.GetConfiguratinValue<string>("Consul", "ConsulServer", subsection)); //Consul server address
+            consulConfig.Address = new Uri(Configuration.GetConfiguratinValue<string>
+                ("Consul", "ConsulServer",
+                (serverIsAvailable ? "ConsulServerOnServer" : "ConsulServerOnPrem"))); //Consul server address
         }));
     }
 
-    public static void AddServices(this IServiceCollection services)
+    private static void AddServices(this IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
     }
 
-    public static async void AddMassTransit(this IServiceCollection services)
+    private static async void AddMassTransit(this IServiceCollection services)
     {
     }
 
-    public static void RegisterWithConsul(this IApplicationBuilder app, IHostApplicationLifetime lifetime)
+    public static async Task RegisterWithConsul(this IApplicationBuilder app, IHostApplicationLifetime lifetime)
     {
         var section = "Consul";
 
@@ -52,9 +71,9 @@ public static class ServicesRegistrator
 
         var route = Configuration.GetConfiguratinValue<string>(section, "ConsulClientHealthCheck", "HealthCheckRoute");
 
-        var consulClientHealthCheck = serverIsAvailable ?
-            $"{Configuration.GetConfiguratinValue<string>(section, "ConsulClientHealthCheck", "HealthCheckAddressOnServer")}{route}" :
-            $"{Configuration.GetConfiguratinValue<string>(section, "ConsulClientHealthCheck", "HealthCheckAddressOnPrem")}{route}";
+        var consulClientHealthCheck =
+            $"{Configuration.GetConfiguratinValue<string>(section, "ConsulClientHealthCheck",
+            (serverIsAvailable ? "HealthCheckAddressOnServer" : "HealthCheckAddressOnPrem"))}{route}";
 
         var consulClient = app.ApplicationServices.GetRequiredService<IConsulClient>();
         var registration = new AgentServiceRegistration()
@@ -63,32 +82,30 @@ public static class ServicesRegistrator
             Name = Configuration.GetConfiguratinValue<string>(section, "ConsulClientRegister", "ServerName"),
             Address = Configuration.GetConfiguratinValue<string>(section, "ConsulClientRegister", "ServerAddress"),
             Port = Configuration.GetConfiguratinValue<int>(section, "ConsulClientRegister", "ServerPort"),
-            Tags = new[] { "NestAuth", "Auth", "Identity", "Server" },
+            Tags = new[] { "NestA0uth", "Auth", "Identity", "Server" },
             Check = new AgentServiceCheck()
             {
                 HTTP = consulClientHealthCheck, // health check address
                 Timeout = TimeSpan.FromSeconds(5),
-                Interval = TimeSpan.FromSeconds(10),
+                Interval = TimeSpan.FromSeconds(5),
                 DeregisterCriticalServiceAfter = TimeSpan.FromMinutes(1),
                 TLSSkipVerify = true
-            }
+            },
+            EnableTagOverride = true
         };
-
         try
         {
-            consulClient.Agent.ServiceDeregister(registration.ID).Wait();
-            consulClient.Agent.ServiceRegister(registration).Wait();
+            await consulClient.Agent.ServiceDeregister(registration.ID);
+            await consulClient.Agent.ServiceRegister(registration);
 
-            Console.WriteLine($"Service registered with Consul. Health check URL: {registration.Check.HTTP}");
-
-            lifetime.ApplicationStopping.Register(() =>
+            lifetime.ApplicationStopping.Register(async () =>
             {
-                consulClient.Agent.ServiceDeregister(registration.ID).Wait();
+                await consulClient.Agent.ServiceDeregister(registration.ID);
             });
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error registering with Consul: {ex.Message}");
+            Console.WriteLine($" -------\n\nError registering with Consul: {ex.Message}\n\n -------");
         }
     }
 }

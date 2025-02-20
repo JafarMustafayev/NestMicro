@@ -10,6 +10,7 @@ global using Nest.Shared.Enums;
 global using Nest.Shared.Utils;
 global using NestAuth.API;
 global using NestAuth.API.Abstractions;
+global using NestAuth.API.Consts;
 global using NestAuth.API.Context;
 global using NestAuth.API.DTOs;
 global using NestAuth.API.Entities;

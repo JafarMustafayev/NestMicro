@@ -118,4 +118,21 @@ public static class ServicesRegistrator
             Console.WriteLine($" -------\n\nError registering with Consul: {ex.Message}\n\n -------");
         }
     }
+
+    public static async Task SeedingDB(this IServiceScope scope)
+    {
+        using (scope)
+        {
+            var serviceProvider = scope.ServiceProvider;
+            try
+            {
+                await DbInitializer.SeedAsync(serviceProvider);
+            }
+            catch (Exception ex)
+            {
+                var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ex, "An error occurred while seeding the database.");
+            }
+        }
+    }
 }

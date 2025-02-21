@@ -76,14 +76,38 @@ public class AuthService : IAuthService
         throw new NotImplementedException();
     }
 
-    public Task<ResponseDto> LoginAsync(LoginRequest request)
+    public async Task<ResponseDto> VerifyEmailAsync(string userId, string token, string email)
     {
-        throw new NotImplementedException();
+        userId = userId.Decode();
+        email = email.Decode();
+        token = token.Decode();
+
+        var user = await _userManager.FindByEmailAsync(email);
+
+        if (user == null || user.Id != userId)
+        {
+            throw new AuthenticationException();
+        }
+
+        var res = await _userManager.ConfirmEmailAsync(user, token);
+
+        if (!res.Succeeded)
+    {
+            throw new AuthenticationException("Email verification failed");
     }
 
-    public Task<ResponseDto> VerifyEmailAsync(string userId, string token, string email)
+        await _userManager.UpdateSecurityStampAsync(user);
+
+        user.UserStatus = UserStatus.Active;
+
+        return new()
     {
-        throw new NotImplementedException();
+            Errors = null,
+            IsSuccess = true,
+            Message = "Email verified successfully",
+            StatusCode = 200,
+            Data = null
+        };
     }
 
     public Task<ResponseDto> ForgotPasswordAsync(ForgotPasswordRequest request)

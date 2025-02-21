@@ -23,8 +23,12 @@
             var res = await _authService.RegisterAsync(register);
             return StatusCode(res.StatusCode, res);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> VerifyEmail(string userId, string token, string email)
         {
-            return Ok(register);
+            var res = await _authService.VerifyEmailAsync(userId, token, email);
+            return StatusCode(res.StatusCode, res);
         }
     }
 }

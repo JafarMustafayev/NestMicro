@@ -17,7 +17,61 @@ public class AuthService : IAuthService
         _roleManager = roleManager;
     }
 
-    public Task<ResponseDto> RegisterAsync(RegisterRequest request)
+    public async Task<ResponseDto> RegisterAsync(RegisterRequest request)
+    {
+        AppUser? user = await _userManager.FindByEmailAsync(request.Email);
+        if (user != null)
+        {
+            throw new DuplicateEntityException("User with this email already exists");
+        }
+
+        user = await _userManager.FindByNameAsync(request.UserName);
+        if (user != null)
+        {
+            throw new DuplicateEntityException("User with this username already exists");
+        }
+
+        //todo: add mapping to AutoMapper if needed
+        user = new()
+        {
+            Email = request.Email,
+            UserName = request.UserName,
+            UserStatus = UserStatus.PendingVerification,
+            CreatedAt = DateTime.Now
+        };
+
+        var result = await _userManager.CreateAsync(user, request.Password);
+
+        if (!result.Succeeded)
+        {
+            var errors = string.Empty;
+            foreach (var item in result.Errors.Select(e => e.Description).ToList())
+            {
+                errors += item + Environment.NewLine;
+            }
+            throw new OperationFailedException(errors);
+        }
+
+        //await _userManager.AddToRoleAsync(user, Roles.Customer);
+
+        var confirmedEmailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        string confirmeUrl = Configuration.GetConfiguratinValue<string>("ClientUrl");
+        confirmeUrl = string.Concat(confirmeUrl, $"/auth/verifyemail?token={confirmedEmailToken.Encode()}&userId={user.Id.Encode()}&email={user.Email?.Encode()}");
+
+        // send email
+
+        return new()
+        {
+            Errors = null,
+            IsSuccess = true,
+            Message = "User registered successfully",
+            StatusCode = 200,
+            Data = new
+            {
+                emailVerifyUrl = confirmeUrl,
+            }
+        };
+    }
     {
         throw new NotImplementedException();
     }

@@ -1,4 +1,4 @@
-﻿namespace NestAuth.API.Implementations;
+﻿namespace NestAuth.API.Services;
 
 public class AuthService : IAuthService
 {
@@ -10,6 +10,7 @@ public class AuthService : IAuthService
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager,
         RoleManager<AppRole> roleManager)
+
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -26,12 +27,12 @@ public class AuthService : IAuthService
         throw new NotImplementedException();
     }
 
-    public Task<ResponseDto> VerifyEmailAsync(string userId, string token)
+    public Task<ResponseDto> VerifyEmailAsync(string userId, string token, string email)
     {
         throw new NotImplementedException();
     }
 
-    public Task<ResponseDto> ForgotPasswordAsync(string email)
+    public Task<ResponseDto> ForgotPasswordAsync(ForgotPasswordRequest request)
     {
         throw new NotImplementedException();
     }
@@ -46,7 +47,7 @@ public class AuthService : IAuthService
         throw new NotImplementedException();
     }
 
-    public Task<ResponseDto> AssignRoleAsync(string userId, string role)
+    public Task<ResponseDto> AssignRoleAsync(AssignRoleRequest request)
     {
         throw new NotImplementedException();
     }

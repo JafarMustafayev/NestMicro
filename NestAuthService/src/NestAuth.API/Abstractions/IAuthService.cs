@@ -6,17 +6,15 @@ public interface IAuthService
 
     Task<ResponseDto> LoginAsync(LoginRequest request);
 
-    Task<ResponseDto> VerifyEmailAsync(string userId, string token);
+    Task<ResponseDto> VerifyEmailAsync(string userId, string token, string email);
 
-    Task<ResponseDto> ForgotPasswordAsync(string email);
+    Task<ResponseDto> ForgotPasswordAsync(ForgotPasswordRequest request);
 
     Task<ResponseDto> ResetPasswordAsync(ResetPasswordRequest request);
 
-    //Task<ResponseDto> ExternalLoginAsync(ExternalLoginRequest request);
-
     Task<ResponseDto> RefreshTokenAsync(string refreshToken);
 
-    Task<ResponseDto> AssignRoleAsync(string userId, string role);
+    Task<ResponseDto> AssignRoleAsync(AssignRoleRequest request);
 
     Task<ResponseDto> BlockUserAsync(string userId);
 

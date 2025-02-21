@@ -38,7 +38,7 @@ public static class Configuration
 
         var value = str.GetValue<T>(subSection);
 
-        if (value is not null)
+        if (value != null)
         {
             return value;
         }
@@ -49,7 +49,7 @@ public static class Configuration
             str = configurationManager.GetSection(section);
             value = str.GetValue<T>(subSection);
 
-            if (str != null || value != null)
+            if (value != null)
             { return value; }
             else
             { throw new Exception($"'{section}' or '{subSection}' is not found "); }

@@ -1,0 +1,50 @@
+Src/
+    Dtos/
+        Product/
+            CreateProductDto.cs
+            UpdateProductDto.cs
+            ProductDto.cs
+        Category/
+            CreateCategoryDto.cs
+            UpdateCategoryDto.cs
+            CategoryDto.cs
+
+    Validation/
+        Product/
+            CreateProductValidator.cs
+            UpdateProductValidator.cs
+        Category/
+            CreateCategoryValidator.cs
+            UpdateCategoryValidator.cs
+
+    Controllers/
+        ProductController.cs
+        CategoryController.cs
+
+    Interfaces/
+        Product/
+            IProductService.cs
+            IProductRepository.cs
+        Category/
+            ICategoryService.cs
+            ICategoryRepository.cs
+
+    Services/
+        Product/
+            ProductService.cs
+        Category/
+            CategoryService.cs
+
+    Repositories/
+        Product/
+            ProductRepository.cs
+        Category/
+            CategoryRepository.cs
+
+    Entities/
+        Product.cs
+        Category.cs
+
+    Mapping/
+        ProductProfile.cs
+        CategoryProfile.cs

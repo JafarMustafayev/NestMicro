@@ -37,5 +37,47 @@
             var res = await _authService.LoginAsync(login);
             return StatusCode(res.StatusCode, res);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> ForgotPassword([FromForm] ForgotPasswordRequest request)
+        {
+            var res = await _authService.ForgotPasswordAsync(request);
+            return StatusCode(res.StatusCode, res);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword([FromForm] ResetPasswordRequest resetPassword)
+        {
+            var res = await _authService.ResetPasswordAsync(resetPassword);
+            return StatusCode(res.StatusCode, res);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RefreshToken([FromForm] string refreshToken)
+        {
+            var res = await _authService.RefreshTokenAsync(refreshToken);
+            return StatusCode(res.StatusCode, res);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AssignRole([FromForm] AssignRoleRequest request)
+        {
+            var res = await _authService.AssignRoleAsync(request);
+            return StatusCode(res.StatusCode, res);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> BlockUser([FromForm] string userId)
+        {
+            var res = await _authService.BlockUserAsync(userId);
+            return StatusCode(res.StatusCode, res);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UnblockUser([FromForm] string userId)
+        {
+            var res = await _authService.UnblockUserAsync(userId);
+            return StatusCode(res.StatusCode, res);
+        }
     }
 }

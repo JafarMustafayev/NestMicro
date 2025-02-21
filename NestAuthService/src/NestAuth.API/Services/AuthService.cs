@@ -5,16 +5,19 @@ public class AuthService : IAuthService
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<AppRole> _roleManager;
     private readonly SignInManager<AppUser> _signInManager;
+    private readonly ITokenHandler _tokenHandler;
 
     public AuthService(
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager,
-        RoleManager<AppRole> roleManager)
+        RoleManager<AppRole> roleManager,
+        ITokenHandler tokenHandler)
 
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _roleManager = roleManager;
+        _tokenHandler = tokenHandler;
     }
 
     public async Task<ResponseDto> RegisterAsync(RegisterRequest request)
@@ -73,11 +76,6 @@ public class AuthService : IAuthService
         };
     }
 
-    public Task<ResponseDto> LoginAsync(LoginRequest request)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task<ResponseDto> VerifyEmailAsync(string userId, string token, string email)
     {
         userId = userId.Decode();
@@ -94,21 +92,67 @@ public class AuthService : IAuthService
         var res = await _userManager.ConfirmEmailAsync(user, token);
 
         if (!res.Succeeded)
-    {
+        {
             throw new AuthenticationException("Email verification failed");
-    }
+        }
 
         await _userManager.UpdateSecurityStampAsync(user);
 
         user.UserStatus = UserStatus.Active;
 
         return new()
-    {
+        {
             Errors = null,
             IsSuccess = true,
             Message = "Email verified successfully",
             StatusCode = 200,
             Data = null
+        };
+    }
+
+    public async Task<ResponseDto> LoginAsync(LoginRequest request)
+    {
+        AppUser? user = await _userManager.FindByEmailAsync(request.EmailOrUsername);
+        if (user == null)
+        {
+            user = await _userManager.FindByNameAsync(request.EmailOrUsername);
+            if (user == null)
+            {
+                throw new AuthenticationException("UserName or Password is invalid");
+            }
+        }
+
+        if (user.UserStatus == UserStatus.Banned)
+        {
+            throw new AuthenticationException("User is blocked");
+        }
+
+        var result = await _signInManager.PasswordSignInAsync(user, request.Password, false, false);
+
+        if (!result.Succeeded)
+        {
+            throw new AuthenticationException("UserName or Password is invalid");
+        }
+
+        var res = await _tokenHandler.GenerateAccessTokenAsync(user);
+
+        return new()
+        {
+            Errors = null,
+            IsSuccess = true,
+            Message = "User logged in successfully",
+            StatusCode = 200,
+            Data = new
+            {
+                TokenInfo = res,
+                User = new
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    Roles = await _userManager.GetRolesAsync(user)
+                }
+            }
         };
     }
 

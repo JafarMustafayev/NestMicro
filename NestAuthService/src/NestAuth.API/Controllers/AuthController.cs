@@ -30,5 +30,12 @@
             var res = await _authService.VerifyEmailAsync(userId, token, email);
             return StatusCode(res.StatusCode, res);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Login([FromForm] LoginRequest login)
+        {
+            var res = await _authService.LoginAsync(login);
+            return StatusCode(res.StatusCode, res);
+        }
     }
 }

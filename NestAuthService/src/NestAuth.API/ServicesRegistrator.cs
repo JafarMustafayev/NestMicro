@@ -67,6 +67,8 @@ public static class ServicesRegistrator
     private static void AddServices(this IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
+
+        services.AddScoped<ITokenHandler, Services.TokenHandler>();
     }
 
     private static void AddMassTransit(this IServiceCollection services)

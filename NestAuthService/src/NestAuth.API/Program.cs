@@ -32,6 +32,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.UseCustomExceptionHandler();
+
 await app.RegisterWithConsul(app.Lifetime);
 
 await app.RunAsync();

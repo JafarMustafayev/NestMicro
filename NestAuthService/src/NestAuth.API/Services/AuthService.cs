@@ -72,6 +72,8 @@ public class AuthService : IAuthService
             }
         };
     }
+
+    public Task<ResponseDto> LoginAsync(LoginRequest request)
     {
         throw new NotImplementedException();
     }

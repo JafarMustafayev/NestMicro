@@ -1,4 +1,4 @@
-﻿namespace NestAuth.API.Abstractions;
+﻿namespace NestAuth.API.Abstractions.Repositories;
 
 public interface IRepository<T> where T : BaseEntityID, new()
 {

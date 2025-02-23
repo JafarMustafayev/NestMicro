@@ -1,4 +1,4 @@
-﻿namespace NestAuth.API.Abstractions;
+﻿namespace NestAuth.API.Abstractions.Servisec;
 
 public interface ITokenService
 {

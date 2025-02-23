@@ -14,6 +14,8 @@ public static class ServicesRegistrator
 
         AddFluent(services);
 
+        AddRepository(services);
+
         AddServices(services);
 
         AddMassTransit(services);
@@ -64,11 +66,17 @@ public static class ServicesRegistrator
         services.AddValidatorsFromAssembly(typeof(RegisterRequestValidator).Assembly);
     }
 
+    private static void AddRepository(this IServiceCollection services)
+    {
+        services.AddScoped<IRepository<UserRefreshToken>, Repository<UserRefreshToken>>();
+        services.AddScoped<ITokenRepository, TokenRepository>();
+    }
+
     private static void AddServices(this IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
 
-        services.AddScoped<ITokenHandler, Services.TokenHandler>();
+        services.AddScoped<ITokenService, Services.TokenService>();
     }
 
     private static void AddMassTransit(this IServiceCollection services)

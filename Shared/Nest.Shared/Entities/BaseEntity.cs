@@ -1,9 +1,17 @@
 ﻿namespace Nest.Shared.Entities;
 
-public class BaseEntity
+public class BaseEntityID
 {
     public string Id { get; set; }
 
+    public BaseEntityID()
+    {
+        Id = Guid.NewGuid().ToString();
+    }
+}
+
+public class BaseEntity : BaseEntityID
+{
     public string WhoCreated { get; set; }
 
     public DateTime CreatedAt { get; set; }
@@ -22,7 +30,6 @@ public class BaseEntity
 
     public BaseEntity()
     {
-        Id = Guid.NewGuid().ToString();
         CreatedAt = DateTime.UtcNow;
         IsDeleted = false;
         WhoCreated = string.Empty;

@@ -5,13 +5,13 @@ public class AuthService : IAuthService
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<AppRole> _roleManager;
     private readonly SignInManager<AppUser> _signInManager;
-    private readonly ITokenHandler _tokenHandler;
+    private readonly ITokenService _tokenHandler;
 
     public AuthService(
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager,
         RoleManager<AppRole> roleManager,
-        ITokenHandler tokenHandler)
+        ITokenService tokenHandler)
 
     {
         _userManager = userManager;

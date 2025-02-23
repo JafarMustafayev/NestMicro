@@ -277,14 +277,42 @@ public class AuthService : IAuthService
         throw new NotImplementedException();
     }
 
-    public Task<ResponseDto> BlockUserAsync(string userId)
+    public async Task<ResponseDto> BlockUserAsync(string userId)
     {
-        throw new NotImplementedException();
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            throw new AuthenticationException("User not found");
+        }
+        user.UserStatus = UserStatus.Banned;
+        await _userManager.UpdateAsync(user);
+        return new()
+        {
+            Errors = null,
+            IsSuccess = true,
+            Message = "User blocked successfully",
+            StatusCode = StatusCodes.Status200OK,
+            Data = null
+        };
     }
 
-    public Task<ResponseDto> UnblockUserAsync(string userId)
+    public async Task<ResponseDto> UnblockUserAsync(string userId)
     {
-        throw new NotImplementedException();
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            throw new AuthenticationException("User not found");
+        }
+        user.UserStatus = UserStatus.Active;
+        await _userManager.UpdateAsync(user);
+        return new()
+        {
+            Errors = null,
+            IsSuccess = true,
+            Message = "User unblocked successfully",
+            StatusCode = StatusCodes.Status200OK,
+            Data = null
+        };
     }
 
     public Task<ResponseDto> LogoutAsync(string userId)

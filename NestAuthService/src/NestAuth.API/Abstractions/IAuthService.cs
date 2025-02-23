@@ -12,7 +12,7 @@ public interface IAuthService
 
     Task<ResponseDto> ResetPasswordAsync(ResetPasswordRequest request);
 
-    Task<ResponseDto> RefreshTokenAsync(string refreshToken);
+    Task<ResponseDto> RefreshTokenAsync(RefreshTokenRequest request);
 
     Task<ResponseDto> AssignRoleAsync(AssignRoleRequest request);
 

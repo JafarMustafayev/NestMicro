@@ -53,9 +53,9 @@
         }
 
         [HttpPost]
-        public async Task<IActionResult> RefreshToken([FromForm] string refreshToken)
+        public async Task<IActionResult> RefreshToken([FromForm] RefreshTokenRequest request)
         {
-            var res = await _authService.RefreshTokenAsync(refreshToken);
+            var res = await _authService.RefreshTokenAsync(request);
             return StatusCode(res.StatusCode, res);
         }
 

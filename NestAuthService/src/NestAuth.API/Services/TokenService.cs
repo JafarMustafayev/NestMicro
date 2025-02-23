@@ -81,7 +81,7 @@ public class TokenService : ITokenService
         var result = await _tokenRepository.AnyAsync(
             x => x.UserId == userId &&
             x.Token == refreshToken &&
-            (!x.IsUsed && !x.IsRevoked && x.Expires < DateTime.UtcNow));
+            (!x.IsUsed && !x.IsRevoked && x.Expires > DateTime.UtcNow));
 
         return result;
     }

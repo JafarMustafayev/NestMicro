@@ -166,9 +166,47 @@ public class AuthService : IAuthService
         throw new NotImplementedException();
     }
 
-    public Task<ResponseDto> RefreshTokenAsync(string refreshToken)
+    public async Task<ResponseDto> RefreshTokenAsync(RefreshTokenRequest request)
     {
-        throw new NotImplementedException();
+        if (string.IsNullOrEmpty(request.RefreshToken) || string.IsNullOrEmpty(request.UserId))
+        {
+            throw new AuthenticationException("Invalid refresh token or userId");
+        }
+
+        var isValid = await _tokenHandler.ValidateRefreshTokenAsync(request.UserId, request.RefreshToken);
+        if (!isValid)
+        {
+            throw new AuthenticationException("Invalid refresh token or userId");
+        }
+
+        await _tokenHandler.MarkRefreshTokenAsUsedAsync(request.UserId, request.RefreshToken);
+
+        var user = await _userManager.FindByIdAsync(request.UserId);
+        if (user == null)
+        {
+            throw new AuthenticationException("Invalid refresh token or userId");
+        }
+
+        var tokenResponse = await _tokenHandler.GenerateAccessTokenAsync(user);
+
+        return new()
+        {
+            Errors = null,
+            IsSuccess = true,
+            Message = "Token refreshed successfully",
+            StatusCode = 200,
+            Data = new
+            {
+                TokenInfo = tokenResponse,
+                User = new
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    Roles = await _userManager.GetRolesAsync(user)
+                }
+            }
+        };
     }
 
     public Task<ResponseDto> AssignRoleAsync(AssignRoleRequest request)

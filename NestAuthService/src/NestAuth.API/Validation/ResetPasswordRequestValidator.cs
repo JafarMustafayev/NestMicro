@@ -7,10 +7,9 @@ public class ResetPasswordRequestValidator : AbstractValidator<ResetPasswordRequ
         RuleFor(x => x.Email)
             .NotEmpty().WithMessage("Email address cannot be empty.")
             .NotNull().WithMessage("Email address cannot be null.")
-            .MinimumLength(5).WithMessage("Email must be at least 5 characters long.")
-            .EmailAddress().WithMessage("Email must be a valid email address format.");
+            .MinimumLength(5).WithMessage("Email must be at least 5 characters long.");
 
-        RuleFor(x => x.ResetToken)
+        RuleFor(x => x.Token)
             .NotEmpty().WithMessage("Reset token cannot be empty.")
             .NotNull().WithMessage("Reset token cannot be null.")
             .MinimumLength(5).WithMessage("Reset token must be at least 5 characters long.");

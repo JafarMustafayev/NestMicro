@@ -61,14 +61,14 @@ public class AuthService : IAuthService
         string confirmeUrl = Configuration.GetConfiguratinValue<string>("ClientUrl");
         confirmeUrl = string.Concat(confirmeUrl, $"/auth/verifyemail?token={confirmedEmailToken.Encode()}&userId={user.Id.Encode()}&email={user.Email?.Encode()}");
 
-        // send email
+        // TODO: send email
 
         return new()
         {
             Errors = null,
             IsSuccess = true,
             Message = "User registered successfully",
-            StatusCode = 200,
+            StatusCode = StatusCodes.Status200OK,
             Data = new
             {
                 emailVerifyUrl = confirmeUrl,
@@ -105,7 +105,7 @@ public class AuthService : IAuthService
             Errors = null,
             IsSuccess = true,
             Message = "Email verified successfully",
-            StatusCode = 200,
+            StatusCode = StatusCodes.Status200OK,
             Data = null
         };
     }
@@ -141,7 +141,7 @@ public class AuthService : IAuthService
             Errors = null,
             IsSuccess = true,
             Message = "User logged in successfully",
-            StatusCode = 200,
+            StatusCode = StatusCodes.Status200OK,
             Data = new
             {
                 TokenInfo = res,
@@ -156,14 +156,77 @@ public class AuthService : IAuthService
         };
     }
 
-    public Task<ResponseDto> ForgotPasswordAsync(ForgotPasswordRequest request)
+    public async Task<ResponseDto> ForgotPasswordAsync(string email)
     {
-        throw new NotImplementedException();
+        var isValid = Regex.IsMatch(email, "[^@ \\t\\r\\n]+@[^@ \\t\\r\\n]+\\.[^@ \\t\\r\\n]+");
+
+        if (!isValid)
+        {
+            throw new Nest.Shared.Exceptions.ValidationException("Invalid Email address");
+        }
+
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            throw new AuthenticationException("User not found");
+        }
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+        var resetUrl = Configuration.GetConfiguratinValue<string>("ClientUrl");
+        resetUrl = string.Concat(resetUrl, $"/auth/resetpassword?token={token.Encode()}&email={user.Email.Encode()}");
+
+        // TODO:send email
+
+        return new()
+        {
+            IsSuccess = true,
+            Message = "Password reset link sent to your email",
+            Errors = null,
+            StatusCode = StatusCodes.Status200OK,
+            Data = new
+            {
+                resetUrl = resetUrl,
+            }
+        };
     }
 
-    public Task<ResponseDto> ResetPasswordAsync(ResetPasswordRequest request)
+    public async Task<ResponseDto> ResetPasswordAsync(ResetPasswordRequest request)
     {
-        throw new NotImplementedException();
+        var isValid = Regex.IsMatch(request.Email.Decode(), "[^@ \\t\\r\\n]+@[^@ \\t\\r\\n]+\\.[^@ \\t\\r\\n]+");
+        if (!isValid)
+        {
+            throw new Nest.Shared.Exceptions.ValidationException("Invalid Email address");
+        }
+
+        var user = await _userManager.FindByEmailAsync(request.Email.Decode());
+        if (user == null)
+        {
+            throw new AuthenticationException("Invalid Email address");
+        }
+
+        var result = await _userManager.ResetPasswordAsync(user, request.Token.Decode(), request.NewPassword);
+
+        if (!result.Succeeded)
+        {
+            var errors = string.Empty;
+            foreach (var item in result.Errors.Select(e => e.Description).ToList())
+            {
+                errors += item + Environment.NewLine;
+            }
+            throw new OperationFailedException(errors);
+        }
+
+        await _userManager.UpdateSecurityStampAsync(user);
+
+        return new()
+        {
+            IsSuccess = true,
+            Message = "Password reset successfully",
+            Errors = null,
+            Data = null,
+            StatusCode = StatusCodes.Status200OK
+        };
     }
 
     public async Task<ResponseDto> RefreshTokenAsync(RefreshTokenRequest request)
@@ -194,7 +257,7 @@ public class AuthService : IAuthService
             Errors = null,
             IsSuccess = true,
             Message = "Token refreshed successfully",
-            StatusCode = 200,
+            StatusCode = StatusCodes.Status200OK,
             Data = new
             {
                 TokenInfo = tokenResponse,

@@ -8,7 +8,7 @@ public interface IAuthService
 
     Task<ResponseDto> VerifyEmailAsync(string userId, string token, string email);
 
-    Task<ResponseDto> ForgotPasswordAsync(ForgotPasswordRequest request);
+    Task<ResponseDto> ForgotPasswordAsync(string email);
 
     Task<ResponseDto> ResetPasswordAsync(ResetPasswordRequest request);
 

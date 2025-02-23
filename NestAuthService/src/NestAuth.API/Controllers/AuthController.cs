@@ -39,9 +39,9 @@
         }
 
         [HttpPost]
-        public async Task<IActionResult> ForgotPassword([FromForm] ForgotPasswordRequest request)
+        public async Task<IActionResult> ForgotPassword([FromForm] string email)
         {
-            var res = await _authService.ForgotPasswordAsync(request);
+            var res = await _authService.ForgotPasswordAsync(email);
             return StatusCode(res.StatusCode, res);
         }
 

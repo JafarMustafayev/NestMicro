@@ -40,7 +40,7 @@ public class AuthService : IAuthService
             Email = request.Email,
             UserName = request.UserName,
             UserStatus = UserStatus.PendingVerification,
-            CreatedAt = DateTime.Now
+            CreatedAt = DateTime.UtcNow
         };
 
         var result = await _userManager.CreateAsync(user, request.Password);

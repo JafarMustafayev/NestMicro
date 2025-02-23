@@ -27,7 +27,7 @@ public static class DbInitializer
                     UserName = "admin",
                     Email = "admin@example.com",
                     EmailConfirmed = true,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow,
                     UserStatus = UserStatus.Active,
                 };
 

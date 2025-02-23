@@ -22,7 +22,7 @@ public class TokenService : ITokenService
         JwtTokenResponse response = new()
         {
             RefreshToken = rft.Token,
-            ExpiresIn = DateTime.Now.AddMinutes(addMinutes),
+            ExpiresIn = DateTime.UtcNow.AddMinutes(addMinutes),
             IssuedAt = rft.CreatedAt,
         };
 

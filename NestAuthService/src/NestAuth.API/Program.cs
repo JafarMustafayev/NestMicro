@@ -18,9 +18,9 @@ if (builder.Environment.IsDevelopment())
 
 var app = builder.Build();
 
-var scope = app.Services.CreateAsyncScope();
+//var scope = app.Services.CreateAsyncScope();
 
-await scope.SeedingDB();
+//await scope.SeedingDB();
 
 if (app.Environment.IsDevelopment())
 {

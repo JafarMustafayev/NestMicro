@@ -4,6 +4,8 @@ public class UserRefreshToken : BaseEntityID
 {
     public string UserId { get; set; }
 
+    public string SessionId { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public string Token { get; set; }
@@ -22,9 +24,12 @@ public class UserRefreshToken : BaseEntityID
 
     public virtual AppUser User { get; set; }
 
+    public virtual UserSession Session { get; set; }
+
     public UserRefreshToken()
     {
         UserId = string.Empty;
+        SessionId = string.Empty;
         CreatedAt = DateTime.UtcNow;
         Token = string.Empty;
         Expires = DateTime.UtcNow;
@@ -33,6 +38,5 @@ public class UserRefreshToken : BaseEntityID
         ReplacedByTokenId = string.Empty;
         CreatedByIp = string.Empty;
         RevokedByIp = string.Empty;
-        User = null;
     }
 }

@@ -7,6 +7,9 @@ public class AppUser : IdentityUser<string>
     public UserStatus UserStatus { get; set; }
 
     public virtual ICollection<UserRefreshToken> RefreshTokens { get; set; }
+    public virtual ICollection<UserSession> Sessions { get; set; }
+
+    public virtual ICollection<UserDevice> Devices { get; set; }
 
     public AppUser()
     {

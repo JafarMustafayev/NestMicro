@@ -14,7 +14,7 @@ public interface IAuthService
 
     Task<ResponseDto> RefreshTokenAsync(RefreshTokenRequest request);
 
-    Task<ResponseDto> AssignRoleAsync(AssignRoleRequest request);
+    Task<ResponseDto> ChangePasswordAsync(ChangePasswordRequest request);
 
     Task<ResponseDto> BlockUserAsync(string userId);
 

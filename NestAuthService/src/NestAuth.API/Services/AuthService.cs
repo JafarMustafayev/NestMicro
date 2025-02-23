@@ -272,9 +272,33 @@ public class AuthService : IAuthService
         };
     }
 
-    public Task<ResponseDto> AssignRoleAsync(AssignRoleRequest request)
+    public async Task<ResponseDto> ChangePasswordAsync(ChangePasswordRequest request)
     {
-        throw new NotImplementedException();
+        var user = await _userManager.FindByIdAsync(request.UserId);
+        if (user == null)
+        {
+            throw new AuthenticationException("User not found");
+        }
+        var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.Password);
+        if (!result.Succeeded)
+        {
+            var errors = string.Empty;
+            foreach (var item in result.Errors.Select(e => e.Description).ToList())
+            {
+                errors += item + Environment.NewLine;
+            }
+            throw new OperationFailedException(errors);
+        }
+        await _userManager.UpdateSecurityStampAsync(user);
+
+        return new()
+        {
+            Errors = null,
+            IsSuccess = true,
+            Message = "Password changed successfully",
+            StatusCode = StatusCodes.Status200OK,
+            Data = null
+        };
     }
 
     public async Task<ResponseDto> BlockUserAsync(string userId)

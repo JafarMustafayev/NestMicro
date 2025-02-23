@@ -60,9 +60,9 @@
         }
 
         [HttpPost]
-        public async Task<IActionResult> AssignRole([FromForm] AssignRoleRequest request)
+        public async Task<IActionResult> ChangePassword([FromForm] ChangePasswordRequest request)
         {
-            var res = await _authService.AssignRoleAsync(request);
+            var res = await _authService.ChangePasswordAsync(request);
             return StatusCode(res.StatusCode, res);
         }
 

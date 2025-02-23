@@ -90,9 +90,9 @@ public class TokenService : ITokenService
     {
         var token = await _tokenRepository.GetByExpressionAsync(x => x.UserId == userId && x.Token == refreshToken);
 
-        if (token == null)
+        if (token == null || token.Expires < DateTime.UtcNow)
         {
-            throw new AuthenticationException("Token is invalid.");
+            throw new AuthenticationException("Invalid or expired refresh token.");
         }
 
         token.IsUsed = true;
@@ -103,9 +103,9 @@ public class TokenService : ITokenService
     {
         var token = await _tokenRepository.GetByExpressionAsync(x => x.UserId == userId && x.Token == refreshToken);
 
-        if (token == null)
+        if (token == null || token.Expires < DateTime.UtcNow)
         {
-            throw new AuthenticationException("Token is invalid.");
+            throw new AuthenticationException("Invalid or expired refresh token.");
         }
 
         token.IsRevoked = true;

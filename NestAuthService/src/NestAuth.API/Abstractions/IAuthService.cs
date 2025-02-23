@@ -20,5 +20,5 @@ public interface IAuthService
 
     Task<ResponseDto> UnblockUserAsync(string userId);
 
-    Task<ResponseDto> LogoutAsync(string userId);
+    Task<ResponseDto> LogoutAsync(LogOutRequest request);
 }

@@ -315,8 +315,24 @@ public class AuthService : IAuthService
         };
     }
 
-    public Task<ResponseDto> LogoutAsync(string userId)
+    public async Task<ResponseDto> LogoutAsync(LogOutRequest request)
     {
-        throw new NotImplementedException();
+        var user = await _userManager.FindByIdAsync(request.UserId);
+        if (user == null)
+        {
+            throw new AuthenticationException("User not found");
+        }
+        await _signInManager.SignOutAsync();
+
+        await _tokenHandler.RevokeRefreshTokenAsync(request.UserId, request.RefreshToken);
+
+        return new()
+        {
+            Errors = null,
+            IsSuccess = true,
+            Message = "User logged out successfully",
+            StatusCode = StatusCodes.Status200OK,
+            Data = null
+        };
     }
 }

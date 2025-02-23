@@ -79,5 +79,12 @@
             var res = await _authService.UnblockUserAsync(userId);
             return StatusCode(res.StatusCode, res);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Logout([FromForm] LogOutRequest request)
+        {
+            var res = await _authService.LogoutAsync(request);
+            return StatusCode(res.StatusCode, res);
+        }
     }
 }

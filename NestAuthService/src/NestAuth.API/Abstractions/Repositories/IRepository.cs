@@ -21,9 +21,9 @@ public interface IRepository<T> where T : BaseEntityID, new()
         List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenIncludes)>? thenIncludes = null);
 
     public (IQueryable<T?> Items, int Count) GetAllByExpression(
+        int page,
+        int take,
         Expression<Func<T, bool>> expression,
-        int page = 1,
-        int take = 20,
         bool isTracking = false,
         Expression<Func<T, object>>? orderBy = null,
         bool isDesingOrder = false,

@@ -2,17 +2,15 @@
 
 public interface IUserSessionService
 {
-    Task<IEnumerable<UserSession>> GetUserSessionsAsync(string userId);
+    IQueryable<UserSession> GetActiveSessionsByUser(string userId);
 
     Task<UserSession> GetUserSessionByIdAsync(string userId, string sessionId);
 
-    Task<UserSession> CreateUserSessionAsync(UserSession userSession);
+    IQueryable<UserSession> GetUserSessionsByDevice(string userId, string deviceId);
 
-    Task<UserSession> RevokeUserSessionAsync(string sessionId, string revokedByIp);
+    Task<string> CreateSessionAsync(string userId, string deviceId, string createdByIp);
 
-    Task<UserSession> EndUserSessionAsync(string sessionId);
+    Task<bool> RevokeSessionAsync(string sessionId, string revokedByIp);
 
-    Task<IEnumerable<UserSession>> GetUserSessionsByDeviceAsync(string userId, string deviceId);
-
-    Task<IEnumerable<UserSession>> GetActiveUserSessionsAsync();
+    Task<bool> RevokeAllSessionsAsync(string userId, string revokedByIp);
 }

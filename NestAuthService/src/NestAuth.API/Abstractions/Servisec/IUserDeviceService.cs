@@ -2,15 +2,19 @@
 
 public interface IUserDeviceService
 {
-    Task<IEnumerable<UserDevice>> GetUserDevicesAsync(string userId);
+    IQueryable<UserDevice> GetUserDevicesAsync(string userId);
 
     Task<UserDevice> GetUserDeviceByIdAsync(string userId, string deviceId);
 
-    Task<UserDevice> AddUserDeviceAsync(UserDevice userDevice);
+    Task<UserDevice> RegisterDeviceAsync(RegisterDeviceDto device);
 
     Task<UserDevice> UpdateUserDeviceAsync(string deviceId, UserDevice updatedDevice);
 
-    Task<UserDevice> BlockUserDeviceAsync(string deviceId);
+    Task<bool> UpdateLastLoginAsync(string deviceId, string ipAddress);
 
-    Task<bool> DeleteUserDeviceAsync(string userId, string deviceId);
+    Task<UserDevice> BlockDeviceAsync(string deviceId);
+
+    Task<bool> UnblockDeviceAsync(string deviceId);
+
+    Task<bool> RemoveDeviceAsync(string userId, string deviceId);
 }

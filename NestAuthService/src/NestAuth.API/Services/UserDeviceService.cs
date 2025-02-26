@@ -2,7 +2,14 @@
 
 public class UserDeviceService : IUserDeviceService
 {
-    public Task<IEnumerable<UserDevice>> GetUserDevicesAsync(string userId)
+    private readonly IUserDeviceRepository _repository;
+
+    public UserDeviceService(IUserDeviceRepository repository)
+    {
+        _repository = repository;
+    }
+
+    public IQueryable<UserDevice> GetUserDevicesAsync(string userId)
     {
         throw new NotImplementedException();
     }
@@ -12,7 +19,7 @@ public class UserDeviceService : IUserDeviceService
         throw new NotImplementedException();
     }
 
-    public Task<UserDevice> AddUserDeviceAsync(UserDevice userDevice)
+    public Task<UserDevice> RegisterDeviceAsync(RegisterDeviceDto device)
     {
         throw new NotImplementedException();
     }
@@ -22,12 +29,22 @@ public class UserDeviceService : IUserDeviceService
         throw new NotImplementedException();
     }
 
-    public Task<UserDevice> BlockUserDeviceAsync(string deviceId)
+    public Task<bool> UpdateLastLoginAsync(string deviceId, string ipAddress)
     {
         throw new NotImplementedException();
     }
 
-    public Task<bool> DeleteUserDeviceAsync(string userId, string deviceId)
+    public Task<UserDevice> BlockDeviceAsync(string deviceId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<bool> UnblockDeviceAsync(string deviceId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<bool> RemoveDeviceAsync(string userId, string deviceId)
     {
         throw new NotImplementedException();
     }

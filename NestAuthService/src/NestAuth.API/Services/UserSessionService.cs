@@ -2,7 +2,15 @@
 
 public class UserSessionService : IUserSessionService
 {
-    public Task<IEnumerable<UserSession>> GetUserSessionsAsync(string userId)
+    private readonly IUserSessionRepository _userSessionRepository;
+
+    public UserSessionService(
+        IUserSessionRepository userSessionRepository)
+    {
+        _userSessionRepository = userSessionRepository;
+    }
+
+    public IQueryable<UserSession> GetActiveSessionsByUser(string userId)
     {
         throw new NotImplementedException();
     }
@@ -12,27 +20,22 @@ public class UserSessionService : IUserSessionService
         throw new NotImplementedException();
     }
 
-    public Task<UserSession> CreateUserSessionAsync(UserSession userSession)
+    public IQueryable<UserSession> GetUserSessionsByDevice(string userId, string deviceId)
     {
         throw new NotImplementedException();
     }
 
-    public Task<UserSession> RevokeUserSessionAsync(string sessionId, string revokedByIp)
+    public Task<string> CreateSessionAsync(string userId, string deviceId, string createdByIp)
     {
         throw new NotImplementedException();
     }
 
-    public Task<UserSession> EndUserSessionAsync(string sessionId)
+    public Task<bool> RevokeSessionAsync(string sessionId, string revokedByIp)
     {
         throw new NotImplementedException();
     }
 
-    public Task<IEnumerable<UserSession>> GetUserSessionsByDeviceAsync(string userId, string deviceId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<IEnumerable<UserSession>> GetActiveUserSessionsAsync()
+    public Task<bool> RevokeAllSessionsAsync(string userId, string revokedByIp)
     {
         throw new NotImplementedException();
     }

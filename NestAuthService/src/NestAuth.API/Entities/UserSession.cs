@@ -11,5 +11,4 @@ public class UserSession : BaseEntityID
     public string RevokedByIp { get; set; }
 
     public virtual AppUser User { get; set; }
-    public virtual UserDevice Device { get; set; }
 }

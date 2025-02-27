@@ -5,19 +5,22 @@ public class AuthService : IAuthService
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<AppRole> _roleManager;
     private readonly SignInManager<AppUser> _signInManager;
-    private readonly ITokenService _tokenHandler;
+    private readonly ITokenService _tokenService;
+    private readonly IUserSessionService _userSessionService;
 
     public AuthService(
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager,
         RoleManager<AppRole> roleManager,
-        ITokenService tokenHandler)
+        ITokenService tokenService,
+        IUserSessionService userSessionService)
 
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _roleManager = roleManager;
-        _tokenHandler = tokenHandler;
+        _tokenService = tokenService;
+        _userSessionService = userSessionService;
     }
 
     public async Task<ResponseDto> RegisterAsync(RegisterRequest request)
@@ -134,7 +137,8 @@ public class AuthService : IAuthService
             throw new AuthenticationException("UserName or Password is invalid");
         }
 
-        var res = await _tokenHandler.GenerateAccessTokenAsync(user);
+        var sessionId = await _userSessionService.CreateSessionAsync(user.Id);
+        var accessToken = await _tokenService.GenerateAccessTokenAsync(user, sessionId);
 
         return new()
         {
@@ -144,7 +148,7 @@ public class AuthService : IAuthService
             StatusCode = StatusCodes.Status200OK,
             Data = new
             {
-                TokenInfo = res,
+                TokenInfo = accessToken,
                 User = new
                 {
                     Id = user.Id,
@@ -236,13 +240,15 @@ public class AuthService : IAuthService
             throw new AuthenticationException("Invalid refresh token or userId");
         }
 
-        var isValid = await _tokenHandler.ValidateRefreshTokenAsync(request.UserId, request.RefreshToken);
+        var isValid = await _tokenService.ValidateRefreshTokenAsync(request.UserId, request.RefreshToken);
         if (!isValid)
         {
             throw new AuthenticationException("Invalid refresh token or userId");
         }
 
-        await _tokenHandler.MarkRefreshTokenAsUsedAsync(request.UserId, request.RefreshToken);
+        await _tokenService.MarkRefreshTokenAsUsedAsync(request.UserId, request.RefreshToken);
+
+        var sessionId = await _tokenService.GetSessionId(request.UserId, request.RefreshToken);
 
         var user = await _userManager.FindByIdAsync(request.UserId);
         if (user == null)
@@ -250,7 +256,7 @@ public class AuthService : IAuthService
             throw new AuthenticationException("Invalid refresh token or userId");
         }
 
-        var tokenResponse = await _tokenHandler.GenerateAccessTokenAsync(user);
+        var tokenResponse = await _tokenService.GenerateAccessTokenAsync(user, sessionId);
 
         return new()
         {
@@ -348,7 +354,11 @@ public class AuthService : IAuthService
         }
         await _signInManager.SignOutAsync();
 
-        await _tokenHandler.RevokeRefreshTokenAsync(request.UserId, request.RefreshToken);
+        var sessionId = await _tokenService.GetSessionId(request.UserId, request.RefreshToken);
+
+        await _userSessionService.RevokeSessionAsync(sessionId);
+
+        await _tokenService.RevokeRefreshTokenAsync(request.UserId, request.RefreshToken);
 
         return new()
         {

@@ -33,7 +33,7 @@ public class UserRefreshToken : BaseEntityID
         UserId = string.Empty;
         SessionId = string.Empty;
         CreatedAt = DateTime.UtcNow;
-        Token = string.Empty;
+        Token = $"{Guid.NewGuid()}-{Guid.NewGuid()}";
         Expires = DateTime.UtcNow;
         IsUsed = false;
         IsRevoked = false;

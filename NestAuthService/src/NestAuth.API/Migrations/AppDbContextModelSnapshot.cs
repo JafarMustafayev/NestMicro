@@ -247,12 +247,7 @@ namespace NestAuth.API.Migrations
                     b.Property<bool>("IsUsed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("ReplacedByTokenId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("RevokedByIp")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SessionId")
@@ -268,8 +263,6 @@ namespace NestAuth.API.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ReplacedByTokenId");
 
                     b.HasIndex("SessionId");
 
@@ -294,14 +287,13 @@ namespace NestAuth.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ExpiresAt")
+                    b.Property<DateTime?>("ExpiresAt")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsRevoked")
                         .HasColumnType("bit");
 
                     b.Property<string>("RevokedByIp")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
@@ -368,12 +360,6 @@ namespace NestAuth.API.Migrations
 
             modelBuilder.Entity("NestAuth.API.Entities.UserRefreshToken", b =>
                 {
-                    b.HasOne("NestAuth.API.Entities.UserRefreshToken", "ReplacedByToken")
-                        .WithMany()
-                        .HasForeignKey("ReplacedByTokenId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("NestAuth.API.Entities.UserSession", "Session")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("SessionId")
@@ -385,8 +371,6 @@ namespace NestAuth.API.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("ReplacedByToken");
 
                     b.Navigation("Session");
 

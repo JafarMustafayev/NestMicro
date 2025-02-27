@@ -11,6 +11,7 @@ public class AppUser : IdentityUser<string>
 
     public AppUser()
     {
+        Id = Guid.NewGuid().ToString();
         UserStatus = UserStatus.PendingVerification;
     }
 }

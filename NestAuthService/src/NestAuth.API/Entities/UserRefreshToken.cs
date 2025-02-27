@@ -18,14 +18,15 @@ public class UserRefreshToken : BaseEntityID
 
     public string CreatedByIp { get; set; }
 
-    public string RevokedByIp { get; set; }
-    public string ReplacedByTokenId { get; set; }
+    public string? RevokedByIp { get; set; }
+
+    //public string? ReplacedByTokenId { get; set; }
 
     public virtual AppUser User { get; set; }
 
     public virtual UserSession Session { get; set; }
 
-    public virtual UserRefreshToken ReplacedByToken { get; set; }
+    //public virtual UserRefreshToken? ReplacedByToken { get; set; }
 
     public UserRefreshToken()
     {
@@ -36,7 +37,8 @@ public class UserRefreshToken : BaseEntityID
         Expires = DateTime.UtcNow;
         IsUsed = false;
         IsRevoked = false;
-        ReplacedByTokenId = string.Empty;
+
+        //ReplacedByTokenId = string.Empty;
         CreatedByIp = string.Empty;
         RevokedByIp = string.Empty;
     }

@@ -61,7 +61,7 @@ public class AuthService : IAuthService
         //await _userManager.AddToRoleAsync(user, Roles.Customer);
 
         var confirmedEmailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        string confirmeUrl = Configuration.GetConfiguratinValue<string>("ClientUrl");
+        string confirmeUrl = Configurations.GetConfiguratinValue<string>("ClientUrl");
         confirmeUrl = string.Concat(confirmeUrl, $"/auth/verifyemail?token={confirmedEmailToken.Encode()}&userId={user.Id.Encode()}&email={user.Email?.Encode()}");
 
         // TODO: send email
@@ -177,7 +177,7 @@ public class AuthService : IAuthService
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
-        var resetUrl = Configuration.GetConfiguratinValue<string>("ClientUrl");
+        var resetUrl = Configurations.GetConfiguratinValue<string>("ClientUrl");
         resetUrl = string.Concat(resetUrl, $"/auth/resetpassword?token={token.Encode()}&email={user.Email.Encode()}");
 
         // TODO:send email

@@ -20,7 +20,7 @@ public class TokenService : ITokenService
 
     public async Task<JwtTokenResponse> GenerateAccessTokenAsync(AppUser user, string sessionId)
     {
-        var addMinutes = Configuration.GetConfiguratinValue<int>("IdentityParameters", "TokenExpirationInMinutes");
+        var addMinutes = Configurations.GetConfiguratinValue<int>("IdentityParameters", "TokenExpirationInMinutes");
 
         var rft = await GenerateRefreshTokenAsync(user.Id, sessionId);
 
@@ -31,7 +31,7 @@ public class TokenService : ITokenService
             IssuedAt = rft.CreatedAt,
         };
 
-        SymmetricSecurityKey securityKey = new(Encoding.UTF8.GetBytes(Configuration.GetConfiguratinValue<string>("IdentityParameters", "SecurityKey")));
+        SymmetricSecurityKey securityKey = new(Encoding.UTF8.GetBytes(Configurations.GetConfiguratinValue<string>("IdentityParameters", "SecurityKey")));
         SigningCredentials signingCredentials = new(securityKey, SecurityAlgorithms.HmacSha256Signature);
 
         var claims = new List<Claim>()
@@ -49,8 +49,8 @@ public class TokenService : ITokenService
         //}
 
         JwtSecurityToken securityToken = new(
-            audience: Configuration.GetConfiguratinValue<string>("IdentityParameters", "Audience"),
-            issuer: Configuration.GetConfiguratinValue<string>("IdentityParameters", "Issuer"),
+            audience: Configurations.GetConfiguratinValue<string>("IdentityParameters", "Audience"),
+            issuer: Configurations.GetConfiguratinValue<string>("IdentityParameters", "Issuer"),
             expires: response.ExpiresIn,
             signingCredentials: signingCredentials,
             claims: claims
@@ -67,7 +67,7 @@ public class TokenService : ITokenService
         UserRefreshToken refreshToken = new()
         {
             UserId = userId,
-            Expires = DateTime.UtcNow.AddMinutes(Configuration.GetConfiguratinValue<int>("IdentityParameters", "RefreshTokenExpirationInMinutes")),
+            Expires = DateTime.UtcNow.AddMinutes(Configurations.GetConfiguratinValue<int>("IdentityParameters", "RefreshTokenExpirationInMinutes")),
             CreatedByIp = _userDeviceInfoService.GetClientIp(),
             SessionId = sessionId,
         };

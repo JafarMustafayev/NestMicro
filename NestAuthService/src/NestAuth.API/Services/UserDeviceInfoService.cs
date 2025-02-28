@@ -1,6 +1,4 @@
-﻿using UAParser;
-
-namespace NestAuth.API.Services;
+﻿namespace NestAuth.API.Services;
 
 public class UserDeviceInfoService : IUserDeviceInfoService
 {

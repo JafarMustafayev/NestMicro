@@ -1,0 +1,116 @@
+/YourServiceName.API                   ✅ (Microservice-in API layı)
+│── /Controllers                        ✅ (MVC və ya Minimal API Controller-ları)
+│   ├── ProductController.cs
+│   ├── StockController.cs
+│   ├── OrderController.cs
+│── /Middlewares                        ✅ (Custom middleware-lər)
+│   ├── ExceptionHandlingMiddleware.cs
+│   ├── RequestLoggingMiddleware.cs
+│── /Routes                             ✅ (Minimal API Route qruplaşmaları üçün)
+│   ├── ProductRoutes.cs
+│   ├── OrderRoutes.cs
+│── /Filters                            ✅ (Action və Model Filters)
+│   ├── ValidationFilter.cs
+│   ├── AuthorizationFilter.cs
+│── Program.cs
+│── appsettings.json
+│── Dockerfile
+│── docker-compose.yml
+
+/Application                            ✅ (Business Logic və Abstractions Layer)
+│── /DTOs                               ✅ (Data Transfer Objects - Request & Response)
+│   ├── ProductDTOs
+│   │   ├── CreateProductDTO.cs
+│   │   ├── UpdateProductDTO.cs
+│   │   ├── ProductResponseDTO.cs
+│   ├── OrderDTOs
+│   │   ├── CreateOrderDTO.cs
+│   │   ├── OrderDetailsDTO.cs
+│── /Validators                         ✅ (FluentValidation Validator-lar)
+│   ├── ProductValidator.cs
+│   ├── OrderValidator.cs
+│── /Profiles                           ✅ (AutoMapper profilləri)
+│   ├── ProductProfile.cs
+│   ├── OrderProfile.cs
+│── /Abstractions                       ✅ (Interface-lər və Abstract Class-lar)
+│   ├── IProductService.cs
+│   ├── IOrderService.cs
+│── /Services                           ✅ (Business logic implementation)
+│   ├── ProductService.cs
+│   ├── OrderService.cs
+
+/Domain                                 ✅ (Domain Layer - Əsas Model və Qaydalar)
+│── /Entities                           ✅ (Database Entity-ləri)
+│   ├── Product.cs
+│   ├── Order.cs
+│   ├── Customer.cs
+│── /Enums                              ✅ (Enum tipləri)
+│   ├── OrderStatus.cs
+│   ├── UserRoles.cs
+│── /ValueObjects                       ✅ (DDD Value Objects)
+│   ├── Money.cs
+│   ├── Address.cs
+│── /Aggregates                         ✅ (DDD Aggregate Roots)
+│   ├── OrderAggregate.cs
+
+/Infrastructure                         ✅ (Infrastructure Layer - Data, Messaging, Auth və s.)
+│── /Persistence                        ✅ (Database ilə əlaqəli kodlar)
+│   ├── /Configurations                 ✅ (IEntityTypeConfiguration-lər)
+│   │   ├── ProductConfiguration.cs
+│   │   ├── OrderConfiguration.cs
+│   ├── /Repositories                   ✅ (Repository Pattern implementation)
+│   │   ├── ProductRepository.cs
+│   │   ├── OrderRepository.cs
+│   ├── /Migrations                     ✅ (Entity Framework Migration-lar)
+│   │   ├── 20240225_InitialCreate.cs
+│   │   ├── 20240226_AddNewColumns.cs
+│   ├── AppDbContext.cs
+│── /Messaging                          ✅ (RabbitMQ, MassTransit və Kafka üçün)
+│   ├── IEventBus.cs
+│   ├── RabbitMQBus.cs
+│   ├── /Events                         ✅ (Event modelləri)
+│   │   ├── ProductCreatedEvent.cs
+│   │   ├── OrderPlacedEvent.cs
+│   ├── /Handlers                       ✅ (Event handler-lar)
+│   │   ├── ProductEventHandler.cs
+│   │   ├── OrderEventHandler.cs
+│── /Caching                            ✅ (Redis və ya MemoryCache)
+│   ├── ICacheService.cs
+│   ├── RedisCacheService.cs
+│── /Identity                           ✅ (JWT və Identity)
+│   ├── AuthService.cs
+│   ├── JwtTokenGenerator.cs
+│   ├── TokenOptions.cs
+
+/Shared                                ✅ (Ortak modullar və helperlər)
+│── /Common                            ✅ (Utility metodlar)
+│   ├── DateHelper.cs
+│   ├── StringHelper.cs
+│── /Contracts                         ✅ (İki və ya daha çox servis arasında paylaşılan DTO-lar və interfeyslər)
+│   ├── IOrderCreated.cs
+│   ├── IProductUpdated.cs
+│── /Logging                           ✅ (Logging konfiqurasiyası)
+│   ├── SerilogConfig.cs
+│   ├── FileLogger.cs
+
+/Tests                                 ✅ (Layihə üçün testlər)
+│── /UnitTests                         ✅ (Xüsusilə unit testlər üçün)
+│   ├── ProductServiceTests.cs
+│   ├── OrderServiceTests.cs
+│── /IntegrationTests                  ✅ (Servislər arası testlər)
+│   ├── OrderAPITests.cs
+│── /FunctionalTests                   ✅ (End-to-end testlər)
+│   ├── UserLoginTests.cs
+
+/Logs                                  ✅ (Əgər lokal log faylları saxlanacaqsa)
+│── error.log
+│── info.log
+
+/Docs                                  ✅ (Layihənin sənədləşdirilməsi üçün)
+│── API_Documentation.md
+│── ArchitectureOverview.md
+
+/Scripts                               ✅ (Docker, Kubernetes və CI/CD üçün scriptlər)
+│── deploy.sh
+│── migrate-db.sh
+│── setup-env.ps1

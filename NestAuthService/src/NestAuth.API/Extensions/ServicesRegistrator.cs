@@ -1,4 +1,4 @@
-﻿namespace NestNotification.API.Extensions;
+﻿namespace NestAuth.API.Extensions;
 
 public static class ServicesRegistrator
 {

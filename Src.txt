@@ -1,50 +1,104 @@
+
+Common/
+    Extensions/
+        DateTimeExtensions.cs
+        StringExtensions.cs
+
+    Helpers/
+        JwtTokenHelper.cs
+            PasswordHasher.cs`
+
+---------------------------------------------
+
 Src/
+    Abstractions/
+        Repositories/
+            IRepository.cs
+            ICategoryRepository.cs
+        Services/
+            IMailService.cs
+            IProductService.cs
+
+    Attributes/
+        AuthorizeRolesAttribute.cs
+
+    Configurations/
+        CategoryConfiguration.cs
+        ProductConfiguration.cs
+
+    Context/
+        AppDbContext.cs
+
+    Controllers/
+        CategoryController.cs
+        ProductController.cs
+
     Dtos/
-        Product/
-            CreateProductDto.cs
-            UpdateProductDto.cs
-            ProductDto.cs
         Category/
+            CategoryDto.cs
             CreateCategoryDto.cs
             UpdateCategoryDto.cs
-            CategoryDto.cs
+        Product/
+            CreateProductDto.cs
+            ProductDto.cs
+            UpdateProductDto.cs
+
+    Entities/
+        Category.cs
+        Product.cs
+
+    Filters/
+        ValidationFilter.cs
+
+    Infrastructure/
+        Caching/
+            RedisCacheService.cs
+        Logging/
+            FileLogger.cs
+        Messaging/
+            RabbitMQ/
+                RabbitMqService.cs
+
+    Mapping/
+        CategoryProfile.cs
+        ProductProfile.cs
+
+    Middlewares/
+        ExceptionHandlingMiddleware.cs
+
+    Migrations/
+        20250228123456_InitialCreate.cs
+        20250228123456_InitialCreate.Designer.cs
+
+    Repositories/
+        Category/
+            CategoryRepository.cs
+        Product/
+            ProductRepository.cs
+
+    Services/
+        Category/
+            CategoryService.cs
+        Product/
+            ProductService.cs
 
     Validation/
-        Product/
-            CreateProductValidator.cs
-            UpdateProductValidator.cs
         Category/
             CreateCategoryValidator.cs
             UpdateCategoryValidator.cs
-
-    Controllers/
-        ProductController.cs
-        CategoryController.cs
-
-    Interfaces/
         Product/
-            IProductService.cs
-            IProductRepository.cs
-        Category/
-            ICategoryService.cs
-            ICategoryRepository.cs
+            CreateProductValidator.cs
+            UpdateProductValidator.cs
 
-    Services/
-        Product/
-            ProductService.cs
-        Category/
-            CategoryService.cs
 
-    Repositories/
-        Product/
-            ProductRepository.cs
-        Category/
-            CategoryRepository.cs
+---------------------------------------------
 
-    Entities/
-        Product.cs
-        Category.cs
 
-    Mapping/
-        ProductProfile.cs
-        CategoryProfile.cs
+Tests/
+    IntegrationTests/
+        CategoryControllerTests.cs
+        ProductControllerTests.cs
+    UnitTests/
+        Services/
+            CategoryServiceTests.cs
+            ProductServiceTests.cs

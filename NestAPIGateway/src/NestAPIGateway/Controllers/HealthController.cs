@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-namespace NestAPIGateway.Controllers
+﻿namespace NestAPIGateway.Controllers
 {
     [Route("/[controller]")]
     [ApiController]

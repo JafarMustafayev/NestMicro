@@ -13,7 +13,7 @@ if (builder.Environment.IsDevelopment())
 
     builder.WebHost.ConfigureKestrel(serverOptions =>
     {
-        serverOptions.ListenAnyIP(NestNotification.API.Extensions.Configuration.GetConfiguratinValue<int>("Consul", "ConsulClientRegister", "ServerPort"));
+        serverOptions.ListenAnyIP(Configurations.GetConfiguratinValue<int>("Consul", "ConsulClientRegister", "ServerPort"));
     });
 }
 

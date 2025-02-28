@@ -1,6 +1,6 @@
-﻿namespace NestAuth.API;
+﻿namespace NestAuth.API.Extensions;
 
-public static class Configuration
+public static class Configurations
 {
     internal static T GetConfiguratinValue<T>(string section)
     {

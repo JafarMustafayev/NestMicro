@@ -70,6 +70,7 @@ public static class ServicesRegistrator
     {
         services.AddScoped<IRepository<UserRefreshToken>, Repository<UserRefreshToken>>();
         services.AddScoped<ITokenRepository, TokenRepository>();
+        services.AddScoped<IUserSessionRepository, UserSessionRepository>();
     }
 
     private static void AddServices(this IServiceCollection services)
@@ -77,6 +78,10 @@ public static class ServicesRegistrator
         services.AddScoped<IAuthService, AuthService>();
 
         services.AddScoped<ITokenService, Services.TokenService>();
+
+        services.AddScoped<IUserSessionService, UserSessionService>();
+
+        services.AddScoped<IUserDeviceInfoService, UserDeviceInfoService>();
     }
 
     private static void AddMassTransit(this IServiceCollection services)

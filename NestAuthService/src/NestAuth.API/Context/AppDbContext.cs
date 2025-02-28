@@ -7,4 +7,6 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, string>
     }
 
     public DbSet<UserRefreshToken> UserRefreshTokens { get; set; }
+
+    public DbSet<UserSession> UserSessions { get; set; }
 }

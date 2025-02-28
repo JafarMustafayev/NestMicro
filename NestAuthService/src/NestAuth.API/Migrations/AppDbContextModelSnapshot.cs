@@ -226,51 +226,6 @@ namespace NestAuth.API.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("NestAuth.API.Entities.UserDevice", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("DeviceName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DeviceType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("FirstLoginAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsBlocked")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LastIpAddress")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("LastLoginAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("OperatingSystem")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserAgent")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserDevice");
-                });
-
             modelBuilder.Entity("NestAuth.API.Entities.UserRefreshToken", b =>
                 {
                     b.Property<string>("Id")
@@ -292,12 +247,7 @@ namespace NestAuth.API.Migrations
                     b.Property<bool>("IsUsed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("ReplacedByTokenId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("RevokedByIp")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SessionId")
@@ -333,18 +283,17 @@ namespace NestAuth.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("DeviceId")
+                    b.Property<string>("DeviceInfo")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ExpiresAt")
+                    b.Property<DateTime?>("ExpiresAt")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsRevoked")
                         .HasColumnType("bit");
 
                     b.Property<string>("RevokedByIp")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
@@ -353,11 +302,9 @@ namespace NestAuth.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DeviceId");
-
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserSession");
+                    b.ToTable("UserSessions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -411,21 +358,10 @@ namespace NestAuth.API.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("NestAuth.API.Entities.UserDevice", b =>
-                {
-                    b.HasOne("NestAuth.API.Entities.AppUser", "User")
-                        .WithMany("Devices")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("NestAuth.API.Entities.UserRefreshToken", b =>
                 {
                     b.HasOne("NestAuth.API.Entities.UserSession", "Session")
-                        .WithMany()
+                        .WithMany("RefreshTokens")
                         .HasForeignKey("SessionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -443,35 +379,25 @@ namespace NestAuth.API.Migrations
 
             modelBuilder.Entity("NestAuth.API.Entities.UserSession", b =>
                 {
-                    b.HasOne("NestAuth.API.Entities.UserDevice", "Device")
-                        .WithMany("Sessions")
-                        .HasForeignKey("DeviceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("NestAuth.API.Entities.AppUser", "User")
                         .WithMany("Sessions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Device");
-
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("NestAuth.API.Entities.AppUser", b =>
                 {
-                    b.Navigation("Devices");
-
                     b.Navigation("RefreshTokens");
 
                     b.Navigation("Sessions");
                 });
 
-            modelBuilder.Entity("NestAuth.API.Entities.UserDevice", b =>
+            modelBuilder.Entity("NestAuth.API.Entities.UserSession", b =>
                 {
-                    b.Navigation("Sessions");
+                    b.Navigation("RefreshTokens");
                 });
 #pragma warning restore 612, 618
         }

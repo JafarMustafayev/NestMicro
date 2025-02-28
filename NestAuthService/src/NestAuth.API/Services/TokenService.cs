@@ -2,22 +2,30 @@
 
 public class TokenService : ITokenService
 {
-    private readonly UserManager<AppUser> _userManager;
+    //private readonly UserManager<AppUser> _userManager;
     private readonly ITokenRepository _tokenRepository;
 
+    private readonly IUserSessionService _userSessionService;
+    private readonly IUserDeviceInfoService _userDeviceInfoService;
+
     public TokenService(
-        UserManager<AppUser> userManager,
-        ITokenRepository tokenRepository)
+
+        //UserManager<AppUser> userManager,
+        ITokenRepository tokenRepository,
+        IUserSessionService userSessionService,
+        IUserDeviceInfoService userDeviceInfoService)
     {
-        _userManager = userManager;
+        //_userManager = userManager;
         _tokenRepository = tokenRepository;
+        _userSessionService = userSessionService;
+        _userDeviceInfoService = userDeviceInfoService;
     }
 
-    public async Task<JwtTokenResponse> GenerateAccessTokenAsync(AppUser user)
+    public async Task<JwtTokenResponse> GenerateAccessTokenAsync(AppUser user, string sessionId)
     {
         var addMinutes = Configuration.GetConfiguratinValue<int>("IdentityParameters", "TokenExpirationInMinutes");
 
-        var rft = await GenerateRefreshTokenAsync(user.Id);
+        var rft = await GenerateRefreshTokenAsync(user.Id, sessionId);
 
         JwtTokenResponse response = new()
         {
@@ -57,23 +65,30 @@ public class TokenService : ITokenService
         return response;
     }
 
-    public async Task<UserRefreshToken> GenerateRefreshTokenAsync(string userId)
+    public async Task<UserRefreshToken> GenerateRefreshTokenAsync(string userId, string sessionId)
     {
         UserRefreshToken refreshToken = new()
         {
             UserId = userId,
-            Token = $"{Guid.NewGuid()}-{Guid.NewGuid()}",
             Expires = DateTime.UtcNow.AddMinutes(Configuration.GetConfiguratinValue<int>("IdentityParameters", "RefreshTokenExpirationInMinutes")),
-            IsUsed = false,
-            IsRevoked = false,
-            CreatedByIp = string.Empty,
-            RevokedByIp = string.Empty
+            CreatedByIp = _userDeviceInfoService.GetClientIp(),
+            SessionId = sessionId,
         };
 
         await _tokenRepository.AddAsync(refreshToken);
         await _tokenRepository.SaveChangesAsync();
 
         return refreshToken;
+    }
+
+    public async Task<string> GetSessionId(string userId, string refreshToken)
+    {
+        var token = await _tokenRepository.GetByExpressionAsync(x => x.UserId == userId && x.Token == refreshToken);
+        if (token == null)
+        {
+            throw new AuthenticationException("Invalid or expired refresh token.");
+        }
+        return token.SessionId;
     }
 
     public async Task<bool> ValidateRefreshTokenAsync(string userId, string refreshToken)
@@ -96,6 +111,8 @@ public class TokenService : ITokenService
         }
 
         token.IsUsed = true;
+        token.Expires = DateTime.UtcNow;
+        _tokenRepository.Update(token);
         await _tokenRepository.SaveChangesAsync();
     }
 
@@ -109,6 +126,8 @@ public class TokenService : ITokenService
         }
 
         token.IsRevoked = true;
+        token.RevokedByIp = _userDeviceInfoService.GetClientIp();
+        _tokenRepository.Update(token);
         await _tokenRepository.SaveChangesAsync();
     }
 }

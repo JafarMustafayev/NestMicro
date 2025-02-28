@@ -2,15 +2,15 @@
 
 public interface IUserSessionService
 {
-    IQueryable<UserSession> GetActiveSessionsByUser(string userId);
+    public IQueryable<UserSession> GetActiveSessionsByUser(string userId);
 
-    Task<UserSession> GetUserSessionByIdAsync(string userId, string sessionId);
+    public Task<UserSession> GetUserSessionByIdAsync(string userId, string sessionId);
 
-    IQueryable<UserSession> GetUserSessionsByDevice(string userId, string deviceId);
+    //public IQueryable<UserSession> GetUserSessionsByDevice(string userId, string deviceId);
 
-    Task<string> CreateSessionAsync(string userId, string deviceId, string createdByIp);
+    public Task<string> CreateSessionAsync(string userId);
 
-    Task<bool> RevokeSessionAsync(string sessionId, string revokedByIp);
+    public Task<bool> RevokeSessionAsync(string sessionId);
 
-    Task<bool> RevokeAllSessionsAsync(string userId, string revokedByIp);
+    public Task<bool> RevokeAllSessionsAsync(string userId);
 }

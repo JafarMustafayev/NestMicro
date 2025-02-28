@@ -1,8 +1,3 @@
-using NestAPIGateway;
-using Ocelot.DependencyInjection;
-using Ocelot.Middleware;
-using Ocelot.Provider.Consul;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -14,7 +9,7 @@ if (builder.Environment.IsDevelopment())
 
     builder.WebHost.ConfigureKestrel(serverOptions =>
     {
-        serverOptions.ListenAnyIP(Configuration.GetConfiguratinValue<int>("Consul", "ConsulClientRegister", "ServerPort"));
+        serverOptions.ListenAnyIP(Configurations.GetConfiguratinValue<int>("Consul", "ConsulClientRegister", "ServerPort"));
     });
 }
 builder.Services.AddServices();

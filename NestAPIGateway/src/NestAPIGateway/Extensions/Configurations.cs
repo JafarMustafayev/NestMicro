@@ -1,6 +1,6 @@
-﻿namespace NestAPIGateway;
+﻿namespace NestAPIGateway.Extensions;
 
-public static class Configuration
+public static class Configurations
 {
     internal static T GetConfiguratinValue<T>(string section)
     {

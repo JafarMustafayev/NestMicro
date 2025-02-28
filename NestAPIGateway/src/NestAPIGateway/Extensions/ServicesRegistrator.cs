@@ -1,13 +1,10 @@
-﻿using Consul;
-using Nest.Shared.Utils;
-
-namespace NestAPIGateway;
+﻿namespace NestAPIGateway.Extensions;
 
 public static class ServicesRegistrator
 {
     public static void AddServices(this IServiceCollection services)
     {
-        var serverIsAvailable = InternetChecker.IsServerAvailable(Configuration.GetConfiguratinValue<string>("ServerIP")).Result;
+        var serverIsAvailable = InternetChecker.IsServerAvailable(Configurations.GetConfiguratinValue<string>("ServerIP")).Result;
 
         AddConsul(services, serverIsAvailable);
     }
@@ -16,9 +13,9 @@ public static class ServicesRegistrator
     {
         services.AddSingleton<IConsulClient, ConsulClient>(p => new ConsulClient(consulConfig =>
         {
-            consulConfig.Address = new Uri(Configuration.GetConfiguratinValue<string>
+            consulConfig.Address = new Uri(Configurations.GetConfiguratinValue<string>
                 ("Consul", "ConsulServer",
-                (serverIsAvailable ? "ConsulServerOnServer" : "ConsulServerOnPrem"))); //Consul server address
+                serverIsAvailable ? "ConsulServerOnServer" : "ConsulServerOnPrem")); //Consul server address
         }));
     }
 
@@ -26,21 +23,21 @@ public static class ServicesRegistrator
     {
         var section = "Consul";
 
-        var serverIsAvailable = InternetChecker.IsServerAvailable(Configuration.GetConfiguratinValue<string>("ServerIP")).Result;
+        var serverIsAvailable = InternetChecker.IsServerAvailable(Configurations.GetConfiguratinValue<string>("ServerIP")).Result;
 
-        var route = Configuration.GetConfiguratinValue<string>(section, "ConsulClientHealthCheck", "HealthCheckRoute");
+        var route = Configurations.GetConfiguratinValue<string>(section, "ConsulClientHealthCheck", "HealthCheckRoute");
 
         var consulClientHealthCheck =
-            $"{Configuration.GetConfiguratinValue<string>(section, "ConsulClientHealthCheck",
+            $"{Configurations.GetConfiguratinValue<string>(section, "ConsulClientHealthCheck",
             (serverIsAvailable ? "HealthCheckAddressOnServer" : "HealthCheckAddressOnPrem"))}{route}";
 
         var consulClient = app.ApplicationServices.GetRequiredService<IConsulClient>();
         var registration = new AgentServiceRegistration()
         {
-            ID = Configuration.GetConfiguratinValue<string>(section, "ConsulClientRegister", "ServerId"),
-            Name = Configuration.GetConfiguratinValue<string>(section, "ConsulClientRegister", "ServerName"),
-            Address = Configuration.GetConfiguratinValue<string>(section, "ConsulClientRegister", "ServerAddress"),
-            Port = Configuration.GetConfiguratinValue<int>(section, "ConsulClientRegister", "ServerPort"),
+            ID = Configurations.GetConfiguratinValue<string>(section, "ConsulClientRegister", "ServerId"),
+            Name = Configurations.GetConfiguratinValue<string>(section, "ConsulClientRegister", "ServerName"),
+            Address = Configurations.GetConfiguratinValue<string>(section, "ConsulClientRegister", "ServerAddress"),
+            Port = Configurations.GetConfiguratinValue<int>(section, "ConsulClientRegister", "ServerPort"),
             Tags = new[] { "Api Gateway" },
             Check = new AgentServiceCheck()
             {

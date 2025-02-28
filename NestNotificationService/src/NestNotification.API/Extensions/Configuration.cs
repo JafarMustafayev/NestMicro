@@ -1,4 +1,4 @@
-﻿namespace NestNotification.API;
+﻿namespace NestNotification.API.Extensions;
 
 public static class Configuration
 {
@@ -100,4 +100,3 @@ public static class Configuration
         return path;
     }
 }
-

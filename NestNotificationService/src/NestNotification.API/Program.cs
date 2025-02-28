@@ -1,4 +1,5 @@
 // Nest Notification API Program.cs
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -12,7 +13,7 @@ if (builder.Environment.IsDevelopment())
 
     builder.WebHost.ConfigureKestrel(serverOptions =>
     {
-        serverOptions.ListenAnyIP(NestNotification.API.Configuration.GetConfiguratinValue<int>("Consul", "ConsulClientRegister", "ServerPort"));
+        serverOptions.ListenAnyIP(NestNotification.API.Extensions.Configuration.GetConfiguratinValue<int>("Consul", "ConsulClientRegister", "ServerPort"));
     });
 }
 

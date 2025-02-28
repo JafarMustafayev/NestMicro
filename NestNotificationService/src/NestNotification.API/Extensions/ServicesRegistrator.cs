@@ -1,4 +1,4 @@
-﻿namespace NestNotification.API;
+﻿namespace NestNotification.API.Extensions;
 
 public static class ServicesRegistrator
 {
@@ -49,6 +49,9 @@ public static class ServicesRegistrator
 
     private static void AddRepository(this IServiceCollection services)
     {
+        services.AddScoped<IEmailLogRepository, EmailLogRepository>();
+        services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
+        services.AddScoped<IFailedEmailRepository, FailedEmailRepository>();
     }
 
     private static void AddServices(this IServiceCollection services)

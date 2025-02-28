@@ -21,7 +21,7 @@ global using NestAuth.API.Context;
 global using NestAuth.API.DTOs;
 global using NestAuth.API.Entities;
 global using NestAuth.API.Middlewares;
-global using NestAuth.API.Repository;
+global using NestAuth.API.Repositories;
 global using NestAuth.API.Services;
 global using NestAuth.API.Validation;
 global using System.IdentityModel.Tokens.Jwt;

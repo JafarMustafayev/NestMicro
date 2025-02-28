@@ -1,4 +1,4 @@
-﻿namespace NestAuth.API.Repository;
+﻿namespace NestAuth.API.Repositories;
 
 public class UserSessionRepository : Repository<UserSession>, IUserSessionRepository
 {

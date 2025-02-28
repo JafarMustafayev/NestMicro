@@ -1,4 +1,4 @@
-﻿namespace NestAuth.API.Repository;
+﻿namespace NestAuth.API.Repositories;
 
 public class Repository<T> : IRepository<T> where T : BaseEntityID, new()
 

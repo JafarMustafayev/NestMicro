@@ -13,4 +13,6 @@ public interface ITokenService
     public Task MarkRefreshTokenAsUsedAsync(string userId, string refreshToken);
 
     public Task RevokeRefreshTokenAsync(string userId, string refreshToken);
+
+    public Task RevokeUserRefreshAllTokens(string userId);
 }

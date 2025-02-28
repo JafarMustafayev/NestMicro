@@ -4,18 +4,21 @@ public class UserSessionService : IUserSessionService
 {
     private readonly IUserSessionRepository _userSessionRepository;
     private readonly IUserDeviceInfoService _userDeviceInfoService;
+    private readonly ITokenService _tokenService;
 
     public UserSessionService(
         IUserSessionRepository userSessionRepository,
-        IUserDeviceInfoService userDeviceInfoService)
+        IUserDeviceInfoService userDeviceInfoService,
+        ITokenService tokenService)
     {
         _userSessionRepository = userSessionRepository;
         _userDeviceInfoService = userDeviceInfoService;
+        _tokenService = tokenService;
     }
 
-    public IQueryable<UserSession> GetActiveSessionsByUser(string userId)
+    public ResponseDto GetActiveSessionsByUser(string userId)
     {
-        Expression<Func<UserSession, bool>> expression = x => x.UserId == userId && x.ExpiresAt > DateTime.UtcNow && !x.IsRevoked;
+        Expression<Func<UserSession, bool>> expression = x => x.UserId == userId && !x.IsRevoked;
 
         var res = _userSessionRepository.GetAllByExpression(expression);
 
@@ -24,12 +27,33 @@ public class UserSessionService : IUserSessionService
             throw new EntityNotFoundException();
         }
 
-        return res.Items.Where(x => x != null).Cast<UserSession>();
+        var dtos = new List<UserSessionDto>();
+
+        foreach (var d in res.Items.Where(x => x != null).Cast<UserSession>())
+        {
+            dtos.Add(new UserSessionDto
+            {
+                Id = d.Id,
+                UserId = d.UserId,
+                Device = d.DeviceInfo,
+                CreatedAt = d.CreatedAt,
+                IsRevoked = d.IsRevoked,
+                ExpiresAt = d.ExpiresAt
+            });
+        }
+
+        return new()
+        {
+            IsSuccess = true,
+            StatusCode = 200,
+            Data = dtos,
+            Message = "Active sessions retrieved successfully"
+        };
     }
 
-    public async Task<UserSession> GetUserSessionByIdAsync(string userId, string sessionId)
+    public async Task<ResponseDto> GetUserSessionByIdAsync(string userId, string sessionId)
     {
-        Expression<Func<UserSession, bool>> expression = x => x.UserId == userId && x.ExpiresAt > DateTime.UtcNow && !x.IsRevoked && x.Id == sessionId;
+        Expression<Func<UserSession, bool>> expression = x => x.UserId == userId && !x.IsRevoked && x.Id == sessionId;
 
         var res = await _userSessionRepository.GetByExpressionAsync(expression);
 
@@ -38,7 +62,21 @@ public class UserSessionService : IUserSessionService
             throw new EntityNotFoundException();
         }
 
-        return res;
+        return new()
+        {
+            IsSuccess = true,
+            StatusCode = 200,
+            Data = new UserSessionDto()
+            {
+                Id = res.Id,
+                UserId = res.UserId,
+                Device = res.DeviceInfo,
+                CreatedAt = res.CreatedAt,
+                IsRevoked = res.IsRevoked,
+                ExpiresAt = res.ExpiresAt
+            },
+            Message = "Session retrieved successfully"
+        };
     }
 
     //public IQueryable<UserSession> GetUserSessionsByDevice(string userId, string deviceId)
@@ -66,7 +104,7 @@ public class UserSessionService : IUserSessionService
         return session.Id;
     }
 
-    public async Task<bool> RevokeSessionAsync(string sessionId)
+    public async Task<ResponseDto> RevokeSessionAsync(string sessionId)
     {
         Expression<Func<UserSession, bool>> expression = x => !x.IsRevoked && x.Id == sessionId;
 
@@ -84,14 +122,18 @@ public class UserSessionService : IUserSessionService
         _userSessionRepository.Update(res);
 
         await _userSessionRepository.SaveChangesAsync();
-        return true;
+
+        return new()
+        {
+            IsSuccess = true,
+            StatusCode = 200,
+            Message = "Session revoked successfully"
+        };
     }
 
-    public async Task<bool> RevokeAllSessionsAsync(string userId)
+    public async Task<ResponseDto> RevokeAllSessionsAsync(string userId)
     {
-        Expression<Func<UserSession, bool>> expression = x => x.ExpiresAt > DateTime.UtcNow && !x.IsRevoked;
-
-        var res = _userSessionRepository.GetAllByExpression(expression);
+        var res = _userSessionRepository.GetAllByExpression(x => !x.IsRevoked);
 
         if (res.Count == 0)
         {
@@ -108,6 +150,14 @@ public class UserSessionService : IUserSessionService
         }
 
         await _userSessionRepository.SaveChangesAsync();
-        return true;
+
+        await _tokenService.RevokeUserRefreshAllTokens(userId);
+
+        return new()
+        {
+            IsSuccess = true,
+            StatusCode = 200,
+            Message = "All sessions revoked successfully"
+        };
     }
 }

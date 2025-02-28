@@ -5,19 +5,16 @@ public class TokenService : ITokenService
     //private readonly UserManager<AppUser> _userManager;
     private readonly ITokenRepository _tokenRepository;
 
-    private readonly IUserSessionService _userSessionService;
     private readonly IUserDeviceInfoService _userDeviceInfoService;
 
     public TokenService(
 
         //UserManager<AppUser> userManager,
         ITokenRepository tokenRepository,
-        IUserSessionService userSessionService,
         IUserDeviceInfoService userDeviceInfoService)
     {
         //_userManager = userManager;
         _tokenRepository = tokenRepository;
-        _userSessionService = userSessionService;
         _userDeviceInfoService = userDeviceInfoService;
     }
 
@@ -128,6 +125,22 @@ public class TokenService : ITokenService
         token.IsRevoked = true;
         token.RevokedByIp = _userDeviceInfoService.GetClientIp();
         _tokenRepository.Update(token);
+        await _tokenRepository.SaveChangesAsync();
+    }
+
+    public async Task RevokeUserRefreshAllTokens(string userId)
+    {
+        var tokens = _tokenRepository.GetAllByExpression(x => x.UserId == userId && !x.IsRevoked && x.Expires > DateTime.UtcNow);
+        if (tokens.Count > 0)
+        {
+            foreach (var token in tokens.Items)
+            {
+                token.IsRevoked = true;
+                token.RevokedByIp = _userDeviceInfoService.GetClientIp();
+
+                _tokenRepository.Update(token);
+            }
+        }
         await _tokenRepository.SaveChangesAsync();
     }
 }

@@ -56,6 +56,7 @@ public static class ServicesRegistrator
 
     private static void AddServices(this IServiceCollection services)
     {
+        services.AddScoped<IMailService, MailService>();
     }
 
     private static void AddMassTransit(this IServiceCollection services)

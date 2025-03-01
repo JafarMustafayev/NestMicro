@@ -25,11 +25,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Abstractions\Servisec\" />
-		<Folder Include="Services\" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <ProjectReference Include="..\..\..\Shared\Nest.Shared\Nest.Shared.csproj" />
 	</ItemGroup>
 

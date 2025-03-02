@@ -2,7 +2,21 @@
 
 public class MailService : IMailService
 {
-    public Task<string> EmailSender(MailRequest request)
+    private readonly IEmailLogRepository _emailLogRepository;
+    private readonly IEmailTemplateRepository _emailTemplateRepository;
+    private readonly IEmailQueueRepository _failedEmailRepository;
+
+    public MailService(
+        IEmailLogRepository emailLogRepository,
+        IEmailTemplateRepository emailTemplateRepository,
+        IEmailQueueRepository failedEmailRepository)
+    {
+        _emailLogRepository = emailLogRepository;
+        _emailTemplateRepository = emailTemplateRepository;
+        _failedEmailRepository = failedEmailRepository;
+    }
+
+    public async Task<string> EmailSender(MailRequest mailRequest)
     {
         throw new NotImplementedException();
     }
@@ -58,6 +72,66 @@ public class MailService : IMailService
     }
 
     public Task DeleteEmailTemplateAsync(string templateId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task SendPriorityEmailAsync(SendEmailDto emailDto, EmailPriority priority = EmailPriority.High)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task SendPriorityTemplatedEmailAsync(SendTemplatedEmailDto emailDto, EmailPriority priority = EmailPriority.High)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task ScheduleEmailAsync(SendEmailDto emailDto, DateTime scheduledAt, EmailPriority priority = EmailPriority.Normal)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task ScheduleTemplatedEmailAsync(SendTemplatedEmailDto emailDto, DateTime scheduledAt, EmailPriority priority = EmailPriority.Normal)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task ScheduleBulkEmailAsync(SendBulkEmailDto emailDto, DateTime scheduledAt, EmailPriority priority = EmailPriority.Low)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task ScheduleBulkTemplatedEmailAsync(SendBulkTemplatedEmailDto emailDto, DateTime scheduledAt, EmailPriority priority = EmailPriority.Low)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task ProcessEmailQueueAsync(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<EmailQueueSummaryDto> GetEmailQueueSummaryAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<EmailTemplate> GetEmailTemplateByNameAsync(string templateName)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task RetryAllFailedEmailsAsync(int maxRetries = 3)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task CancelPendingEmailAsync(string emailId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task CancelAllPendingEmailsAsync(string recipientEmail)
     {
         throw new NotImplementedException();
     }

@@ -61,7 +61,7 @@ public static class ServicesRegistrator
         }
         catch (Exception ex)
         {
-            Console.WriteLine($" -------\n\nError registering with Consul: {ex.Message}\n\n -------");
+            Console.WriteLine($"Error registering with Consul: {ex.Message}");
         }
     }
 }

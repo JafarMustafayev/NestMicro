@@ -8,7 +8,7 @@ public class AppDbContext : DbContext
 
     public DbSet<EmailTemplate> EmailTemplates { get; set; }
     public DbSet<EmailLog> EmailLogs { get; set; }
-    public DbSet<FailedEmail> FailedEmails { get; set; }
+    public DbSet<EmailQueue> EmailQueues { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

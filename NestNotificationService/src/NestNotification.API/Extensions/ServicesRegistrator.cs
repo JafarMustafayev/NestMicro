@@ -51,7 +51,7 @@ public static class ServicesRegistrator
     {
         services.AddScoped<IEmailLogRepository, EmailLogRepository>();
         services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
-        services.AddScoped<IFailedEmailRepository, FailedEmailRepository>();
+        services.AddScoped<IEmailQueueRepository, EmailQueueRepository>();
     }
 
     private static void AddServices(this IServiceCollection services)

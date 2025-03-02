@@ -9,20 +9,20 @@ public static class ExceptionHandlerMiddleware
             errorApp.Run(async context =>
             {
                 var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
-                int statusCode = (int)HttpStatusCode.InternalServerError;
-                string message = contextFeature.Error.Message;
-
-                //string message = "Internal Server Error";
-
-                if (contextFeature != null && contextFeature.Error is IBaseException)
+                if (contextFeature != null)
                 {
-                    var exception = (IBaseException)contextFeature.Error;
-                    statusCode = exception.StatusCode;
-                    message = exception.ErrorMessage;
+                    int statusCode = (int)HttpStatusCode.InternalServerError;
+                    string message = contextFeature.Error.Message;
+
+                    if (contextFeature.Error is IBaseException exception)
+                    {
+                        statusCode = exception.StatusCode;
+                        message = exception.ErrorMessage;
+                    }
+                    context.Response.StatusCode = statusCode;
+                    await context.Response.WriteAsJsonAsync(new ResponseDto { StatusCode = statusCode, Errors = new string[] { message } });
+                    await context.Response.CompleteAsync();
                 }
-                context.Response.StatusCode = statusCode;
-                await context.Response.WriteAsJsonAsync(new ResponseDto { StatusCode = statusCode, Message = message });
-                await context.Response.CompleteAsync();
             });
         });
 

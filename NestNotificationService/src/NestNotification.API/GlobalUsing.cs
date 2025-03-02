@@ -11,6 +11,7 @@ global using Nest.Shared.Utils;
 global using NestNotification.API.Abstractions.Repositories;
 global using NestNotification.API.Abstractions.Servisec;
 global using NestNotification.API.Context;
+global using NestNotification.API.DTOs;
 global using NestNotification.API.Entities;
 global using NestNotification.API.Enums;
 global using NestNotification.API.Extensions;

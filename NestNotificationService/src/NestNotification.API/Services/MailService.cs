@@ -2,22 +2,27 @@
 
 public class MailService : IMailService
 {
-    public Task SendEmailAsync(string to, string subject, string body, bool isHtml = true, byte[] fileData = null, string fileName = null, string fileMimeType = null)
+    public Task<string> EmailSender(MailRequest request)
     {
         throw new NotImplementedException();
     }
 
-    public Task SendTemplatedEmailAsync(string to, string templateId, Dictionary<string, string> placeholders, byte[] fileData = null, string fileName = null, string fileMimeType = null)
+    public Task SendEmailAsync(SendEmailDto emailDto)
     {
         throw new NotImplementedException();
     }
 
-    public Task SendBulkEmailAsync(List<string> recipients, string subject, string body, bool isHtml = true, byte[] fileData = null, string fileName = null, string fileMimeType = null)
+    public Task SendTemplatedEmailAsync(SendTemplatedEmailDto emailDto)
     {
         throw new NotImplementedException();
     }
 
-    public Task SendBulkTemplatedEmailAsync(List<string> recipients, string templateId, Dictionary<string, string> placeholders, byte[] fileData = null, string fileName = null, string fileMimeType = null)
+    public Task SendBulkEmailAsync(SendBulkEmailDto emailDto)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task SendBulkTemplatedEmailAsync(SendBulkTemplatedEmailDto emailDto)
     {
         throw new NotImplementedException();
     }
@@ -42,12 +47,12 @@ public class MailService : IMailService
         throw new NotImplementedException();
     }
 
-    public Task AddEmailTemplateAsync(EmailTemplate template)
+    public Task AddEmailTemplateAsync(CreateEmailTemplateDto templateDto)
     {
         throw new NotImplementedException();
     }
 
-    public Task UpdateEmailTemplateAsync(EmailTemplate template)
+    public Task UpdateEmailTemplateAsync(UpdateEmailTemplateDto templateDto)
     {
         throw new NotImplementedException();
     }

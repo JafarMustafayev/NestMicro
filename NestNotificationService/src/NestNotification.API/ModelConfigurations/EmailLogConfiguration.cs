@@ -1,4 +1,4 @@
-﻿namespace NestNotification.API.Configurations;
+﻿namespace NestNotification.API.ModelConfigurations;
 
 public class EmailLogConfiguration : IEntityTypeConfiguration<EmailLog>
 {

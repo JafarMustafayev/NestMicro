@@ -37,8 +37,8 @@ public class TokenService : ITokenService
         var claims = new List<Claim>()
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Name, user.UserName),
+            new Claim(ClaimTypes.Email, user.Email ?? "Email"),
+            new Claim(ClaimTypes.Name, user.UserName ?? "UserName"),
         };
 
         //var roles = await _userManager.GetRolesAsync(user);
@@ -135,10 +135,12 @@ public class TokenService : ITokenService
         {
             foreach (var token in tokens.Items)
             {
-                token.IsRevoked = true;
-                token.RevokedByIp = _userDeviceInfoService.GetClientIp();
-
-                _tokenRepository.Update(token);
+                if (token != null)
+                {
+                    token.IsRevoked = true;
+                    token.RevokedByIp = _userDeviceInfoService.GetClientIp();
+                    _tokenRepository.Update(token);
+                }
             }
         }
         await _tokenRepository.SaveChangesAsync();

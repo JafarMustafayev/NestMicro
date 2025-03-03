@@ -11,21 +11,28 @@ public class UserDeviceInfoService : IUserDeviceInfoService
 
     public string GetClientIp()
     {
-        var headers = _httpContextAccessor.HttpContext.Request.Headers;
+        var headers = _httpContextAccessor?.HttpContext?.Request.Headers;
+
+        if (headers == null)
+        {
+            return string.Empty;
+        }
+
         var ip = headers["X-Forwarded-For"].FirstOrDefault()
-                 ?? _httpContextAccessor.HttpContext.Connection.RemoteIpAddress?.ToString();
+                 ?? _httpContextAccessor?.HttpContext?.Connection.RemoteIpAddress?.ToString();
 
         if (ip != null && ip.Contains("::ffff:"))
         {
             ip = ip.Replace("::ffff:", "");  // IPv6 mapped IPv4 formatını təmizlə
+            return ip == "::1" ? "127.0.0.1" : ip;
         }
 
-        return ip == "::1" ? "127.0.0.1" : ip;
+        return string.Empty;
     }
 
     public string GetUserAgent()
     {
-        return _httpContextAccessor.HttpContext.Request.Headers["User-Agent"].ToString();
+        return _httpContextAccessor?.HttpContext?.Request?.Headers.UserAgent.ToString() ?? string.Empty;
     }
 
     public string GetDeviceType()

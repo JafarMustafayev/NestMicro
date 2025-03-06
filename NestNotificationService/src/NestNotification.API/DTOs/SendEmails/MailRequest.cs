@@ -1,11 +1,12 @@
-﻿namespace NestNotification.API.DTOs;
+﻿namespace NestNotification.API.DTOs.SendEmails;
 
 public class MailRequest
 {
     public string To { get; set; }
-    public string? Subject { get; set; }
+    public string Subject { get; set; }
     public string Body { get; set; }
     public ICollection<(byte[] File, string FileName, string FileMimeType)>? Attachments { get; set; }
+    public string? QueueId { get; set; }
 
     public MailRequest()
     {
@@ -13,5 +14,6 @@ public class MailRequest
         Subject = string.Empty;
         Body = string.Empty;
         Attachments = null;
+        QueueId = string.Empty;
     }
 }

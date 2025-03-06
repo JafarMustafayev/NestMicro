@@ -1,4 +1,4 @@
-﻿namespace NestNotification.API.DTOs;
+﻿namespace NestNotification.API.DTOs.SendEmails.BasicEmail;
 
 public class SendTemplatedEmailDto
 {
@@ -6,4 +6,11 @@ public class SendTemplatedEmailDto
     public string TemplateId { get; set; }
     public Dictionary<string, string> Placeholders { get; set; }
     public ICollection<(byte[] File, string FileName, string FileMimeType)>? Files { get; set; }
+
+    public SendTemplatedEmailDto()
+    {
+        To = string.Empty;
+        TemplateId = string.Empty;
+        Placeholders = new Dictionary<string, string>();
+    }
 }

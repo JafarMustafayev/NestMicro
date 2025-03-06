@@ -19,7 +19,7 @@ public class Repository<T> : IRepository<T> where T : BaseEntityID, new()
         List<Expression<Func<T, object>>>? includes = null,
         List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenIncludes)>? thenIncludes = null)
     {
-        var query = isTracking ? Table.AsQueryable() : Table.AsNoTracking().AsNoTracking();
+        var query = isTracking ? Table.AsQueryable() : Table.AsQueryable().AsNoTracking();
 
         if (includes != null)
         {
@@ -48,7 +48,7 @@ public class Repository<T> : IRepository<T> where T : BaseEntityID, new()
         List<Expression<Func<T, object>>>? includes = null,
         List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenIncludes)>? thenIncludes = null)
     {
-        var query = isTracking ? Table.AsQueryable() : Table.AsNoTracking().AsNoTracking();
+        var query = isTracking ? Table.AsQueryable() : Table.AsQueryable().AsNoTracking();
 
         if (includes != null)
         {
@@ -80,7 +80,7 @@ public class Repository<T> : IRepository<T> where T : BaseEntityID, new()
         List<Expression<Func<T, object>>>? includes = null,
         List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenIncludes)>? thenIncludes = null)
     {
-        var query = isTracking ? Table.AsQueryable() : Table.AsNoTracking().AsNoTracking();
+        var query = isTracking ? Table.AsQueryable() : Table.AsQueryable().AsNoTracking();
 
         if (includes != null)
         {
@@ -116,7 +116,7 @@ public class Repository<T> : IRepository<T> where T : BaseEntityID, new()
         List<Expression<Func<T, object>>>? includes = null,
         List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenIncludes)>? thenIncludes = null)
     {
-        var query = isTracking ? Table.AsQueryable() : Table.AsNoTracking().AsNoTracking();
+        var query = isTracking ? Table.AsQueryable() : Table.AsQueryable().AsNoTracking();
 
         if (includes != null)
         {
@@ -145,7 +145,7 @@ public class Repository<T> : IRepository<T> where T : BaseEntityID, new()
         List<Expression<Func<T, object>>>? includes = null,
         List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenincludes)>? thenincludes = null)
     {
-        var query = isTracking ? Table.AsQueryable() : Table.AsNoTracking().AsNoTracking();
+        var query = isTracking ? Table.AsQueryable() : Table.AsQueryable().AsNoTracking();
 
         if (includes != null)
         {
@@ -166,7 +166,7 @@ public class Repository<T> : IRepository<T> where T : BaseEntityID, new()
        List<Expression<Func<T, object>>>? includes = null,
        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenincludes)>? thenincludes = null)
     {
-        var query = isTracking ? Table.AsQueryable() : Table.AsNoTracking().AsNoTracking();
+        var query = isTracking ? Table.AsQueryable() : Table.AsQueryable().AsNoTracking();
 
         if (includes != null)
         {

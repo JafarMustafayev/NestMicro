@@ -6,6 +6,8 @@ public class SendBulkEmailDto
     public string Subject { get; set; }
     public string Body { get; set; }
     public bool IsHtml { get; set; }
+    public EmailPriority Priority { get; set; }
+
     public ICollection<(byte[] File, string FileName, string FileMimeType)>? Files { get; set; }
 
     public SendBulkEmailDto()

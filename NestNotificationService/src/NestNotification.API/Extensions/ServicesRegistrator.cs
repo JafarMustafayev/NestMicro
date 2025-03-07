@@ -10,13 +10,15 @@ public static class ServicesRegistrator
 
         services.AddConsul(serverIsAvailable);
 
-        //services.AddFluent();
+        services.AddFluent();
 
         services.AddRepository();
 
         services.AddServices();
 
         services.AddMassTransit();
+
+        services.AddAutoMapper(typeof(GetEmailTemplateDto).Assembly);
     }
 
     private static void ConnectSqlServer(this IServiceCollection services, bool serverIsAvailable)
@@ -40,12 +42,12 @@ public static class ServicesRegistrator
         }));
     }
 
-    //private static void AddFluent(this IServiceCollection services)
-    //{
-    //    services.AddFluentValidationAutoValidation();
-    //    services.AddFluentValidationClientsideAdapters();
-    //    services.AddValidatorsFromAssembly(typeof(RegisterRequestValidator).Assembly);
-    //}
+    private static void AddFluent(this IServiceCollection services)
+    {
+        services.AddFluentValidationAutoValidation();
+        services.AddFluentValidationClientsideAdapters();
+        services.AddValidatorsFromAssembly(typeof(CreateEmailTemplateValidator).Assembly);
+    }
 
     private static void AddRepository(this IServiceCollection services)
     {
@@ -56,7 +58,8 @@ public static class ServicesRegistrator
 
     private static void AddServices(this IServiceCollection services)
     {
-        services.AddScoped<IMailService, MailService>();
+        services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IEmailTemplateService, EmailTemplateService>();
     }
 
     private static void AddMassTransit(this IServiceCollection services)

@@ -2,7 +2,7 @@
 
 public class SendScheduledTemplateEmailDto
 {
-    public string To { get; set; }
+    public string ToEmail { get; set; }
     public string TemplateId { get; set; }
     public Dictionary<string, string> Placeholders { get; set; }
     public DateTime ScheduledAt { get; set; }
@@ -10,7 +10,7 @@ public class SendScheduledTemplateEmailDto
 
     public SendScheduledTemplateEmailDto()
     {
-        To = string.Empty;
+        ToEmail = string.Empty;
         TemplateId = string.Empty;
         Placeholders = new Dictionary<string, string>();
     }

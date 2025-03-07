@@ -2,7 +2,7 @@
 
 public class SendScheduledEmailDto
 {
-    public string To { get; set; }
+    public string ToEmail { get; set; }
     public string Subject { get; set; }
     public string Body { get; set; }
     public bool IsHtml { get; set; }
@@ -11,7 +11,7 @@ public class SendScheduledEmailDto
 
     public SendScheduledEmailDto()
     {
-        To = string.Empty;
+        ToEmail = string.Empty;
         Subject = string.Empty;
         Body = string.Empty;
         IsHtml = false;

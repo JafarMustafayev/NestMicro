@@ -4,7 +4,7 @@ public class SendBulkTemplatedEmailDto
 {
     public List<string> Recipients { get; set; }
     public string TemplateId { get; set; }
-
+    public EmailPriority Priority { get; set; }
     public Dictionary<string, string> Placeholders { get; set; }
     public ICollection<(byte[] File, string FileName, string FileMimeType)>? Files { get; set; }
 

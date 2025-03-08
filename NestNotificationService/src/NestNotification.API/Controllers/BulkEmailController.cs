@@ -12,28 +12,28 @@
         }
 
         [HttpPost]
-        public async Task<IActionResult> Send([FromForm] SendBulkEmailDto emailDto)
+        public async Task<IActionResult> Send([FromBody] SendBulkEmailDto emailDto)
         {
             var res = await _emailService.SendBulkEmailAsync(emailDto);
             return StatusCode(res.StatusCode, res);
         }
 
         [HttpPost]
-        public async Task<IActionResult> SendBulkTemplated([FromForm] SendBulkTemplatedEmailDto emailDto)
+        public async Task<IActionResult> SendBulkTemplated([FromBody] SendBulkTemplatedEmailDto emailDto)
         {
             var res = await _emailService.SendBulkTemplatedEmailAsync(emailDto);
             return StatusCode(res.StatusCode, res);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Schedule([FromForm] SendScheduleBulkEmailDto sendScheduleBulkEmailDto)
+        public async Task<IActionResult> Schedule([FromBody] SendScheduleBulkEmailDto sendScheduleBulkEmailDto)
         {
             var res = await _emailService.ScheduleBulkEmailAsync(sendScheduleBulkEmailDto);
             return StatusCode(res.StatusCode, res);
         }
 
         [HttpPost]
-        public async Task<IActionResult> ScheduleBulkTemplated([FromForm] SendScheduleBulkTemplatedEmailDto sendScheduleBulkTemplatedEmailDto)
+        public async Task<IActionResult> ScheduleBulkTemplated([FromBody] SendScheduleBulkTemplatedEmailDto sendScheduleBulkTemplatedEmailDto)
         {
             var res = await _emailService.ScheduleBulkTemplatedEmailAsync(sendScheduleBulkTemplatedEmailDto);
             return StatusCode(res.StatusCode, res);

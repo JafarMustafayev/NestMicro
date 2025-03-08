@@ -33,21 +33,21 @@
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddEmailTemplateAsync([FromForm] CreateEmailTemplateDto templateDto)
+        public async Task<IActionResult> AddEmailTemplateAsync([FromBody] CreateEmailTemplateDto templateDto)
         {
             var res = await _emailTemplateService.AddEmailTemplateAsync(templateDto);
             return StatusCode(res.StatusCode, res);
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateEmailTemplateAsync([FromForm] UpdateEmailTemplateDto templateDto)
+        public async Task<IActionResult> UpdateEmailTemplateAsync([FromBody] UpdateEmailTemplateDto templateDto)
         {
             var res = await _emailTemplateService.UpdateEmailTemplateAsync(templateDto);
             return StatusCode(res.StatusCode, res);
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteEmailTemplateAsync([FromForm] DeleteEmailTemplateDto templateDto)
+        public async Task<IActionResult> DeleteEmailTemplateAsync([FromBody] DeleteEmailTemplateDto templateDto)
         {
             var res = await _emailTemplateService.DeleteEmailTemplateAsync(templateDto);
             return StatusCode(res.StatusCode, res);

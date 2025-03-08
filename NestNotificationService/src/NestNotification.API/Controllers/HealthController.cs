@@ -20,16 +20,5 @@
                 Timestamp = DateTime.UtcNow
             });
         }
-
-        [HttpPost]
-        public async Task<IActionResult> SendEmailAsync(SendScheduledEmailDto emailDto)
-        {
-            await _mailService.ScheduleEmailAsync(emailDto);
-            return Ok(new
-            {
-                EmailId = "emailId",
-                Timestamp = DateTime.UtcNow
-            });
-        }
     }
 }

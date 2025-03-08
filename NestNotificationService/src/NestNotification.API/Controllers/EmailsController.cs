@@ -12,14 +12,14 @@
         }
 
         [HttpPost]
-        public async Task<IActionResult> SendEmail([FromForm] SendEmailDto emailDto)
+        public async Task<IActionResult> SendEmail([FromBody] SendEmailDto emailDto)
         {
             var res = await _emailService.SendEmailAsync(emailDto);
             return StatusCode(res.StatusCode, res);
         }
 
         [HttpPost]
-        public async Task<IActionResult> SendTemplatedEmail([FromForm] SendTemplatedEmailDto emailDto)
+        public async Task<IActionResult> SendTemplatedEmail([FromBody] SendTemplatedEmailDto emailDto)
         {
             var res = await _emailService.SendTemplatedEmailAsync(emailDto);
             return StatusCode(res.StatusCode, res);

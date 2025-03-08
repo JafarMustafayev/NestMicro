@@ -2,6 +2,7 @@
 
 public class GetEmailTemplateDto
 {
+    public string Id { get; set; }
     public string TemplateName { get; set; }
     public string Subject { get; set; }
     public bool IsHtml { get; set; }
@@ -9,6 +10,7 @@ public class GetEmailTemplateDto
 
     public GetEmailTemplateDto()
     {
+        Id = string.Empty;
         TemplateName = string.Empty;
         Subject = string.Empty;
         Body = string.Empty;

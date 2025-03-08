@@ -9,6 +9,10 @@ public class EmailTemplateProfile : Profile
         CreateMap<UpdateEmailTemplateDto, EmailTemplate>()
             .ForMember(dest => dest.LastModifiedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
 
+        CreateMap<DeleteEmailTemplateDto, EmailTemplate>()
+            .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => true))
+            .ForMember(dest => dest.DeletedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
+
         CreateMap<EmailTemplate, GetEmailTemplateDto>();
     }
 }

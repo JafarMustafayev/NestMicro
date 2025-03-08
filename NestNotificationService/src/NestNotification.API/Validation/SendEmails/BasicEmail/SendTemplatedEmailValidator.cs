@@ -1,4 +1,4 @@
-﻿namespace NestNotification.API.DTOs.SendEmails.BasicEmail;
+﻿namespace NestNotification.API.Validation.SendEmails.BasicEmail;
 
 public class SendTemplatedEmailValidator : AbstractValidator<SendTemplatedEmailDto>
 {

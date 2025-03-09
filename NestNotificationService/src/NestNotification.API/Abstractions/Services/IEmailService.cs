@@ -24,17 +24,14 @@ public interface IEmailService
 
     Task<ResponseDto> CancelAllPendingEmailsAsync(string recipientEmail);
 
-    Task<ResponseDto> SendPriorityEmailAsync(SendEmailDto emailDto);
-
-    Task<ResponseDto> SendPriorityTemplatedEmailAsync(SendTemplatedEmailDto emailDto);
-
     Task<ResponseDto> ScheduleEmailAsync(SendScheduledEmailDto sendScheduledEmailDto);
 
     Task<ResponseDto> ScheduleTemplatedEmailAsync(SendScheduledTemplateEmailDto sendScheduledTemplateEmailDto);
 
     Task<ResponseDto> ScheduleBulkEmailAsync(SendScheduleBulkEmailDto sendScheduleBulkEmailDto);
 
-    Task<ResponseDto> ScheduleBulkTemplatedEmailAsync(SendScheduleBulkTemplatedEmailDto sendScheduleBulkTemplatedEmailDto);
+    Task<ResponseDto> ScheduleBulkTemplatedEmailAsync(
+        SendScheduleBulkTemplatedEmailDto sendScheduleBulkTemplatedEmailDto);
 
     public Task ProcessEmailQueueAsync(CancellationToken cancellationToken);
 }

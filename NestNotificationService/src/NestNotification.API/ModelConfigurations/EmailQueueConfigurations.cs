@@ -18,8 +18,8 @@ public class EmailQueueConfigurations : IEntityTypeConfiguration<EmailQueue>
 
         builder.Property(x => x.CreatedAt).IsRequired();
 
-        builder.Property(x => x.Priority).IsRequired().HasDefaultValue(EmailPriority.Normal);
+        builder.Property(x => x.Priority).IsRequired();
 
-        builder.Property(x => x.Status).IsRequired().HasDefaultValue(EmailStatus.Pending);
+        builder.Property(x => x.Status).IsRequired();
     }
 }

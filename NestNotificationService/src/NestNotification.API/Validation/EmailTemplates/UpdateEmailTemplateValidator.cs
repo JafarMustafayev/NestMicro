@@ -4,7 +4,7 @@ public class UpdateEmailTemplateValidator : AbstractValidator<UpdateEmailTemplat
 {
     public UpdateEmailTemplateValidator()
     {
-        RuleFor(x => x.Id)
+        RuleFor(x => x.TemplateId)
             .NotEmpty().WithMessage("Email template id cannot be empty.")
             .NotNull().WithMessage("Email template id cannot be null.")
             .MinimumLength(1).WithMessage("Email template id must be at least 2 character long.")

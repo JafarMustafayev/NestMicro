@@ -4,10 +4,13 @@ public class SendBulkEmailValidator : AbstractValidator<SendBulkEmailDto>
 {
     public SendBulkEmailValidator()
     {
-        RuleFor(x => x.Recipients)
+        RuleForEach(x => x.Recipients)
             .NotEmpty().WithMessage("The 'recipients' field cannot be empty.")
             .NotNull().WithMessage("The 'recipients' field cannot be null.")
-            .Must(x => x.Count > 0).WithMessage("The 'recipients' field must contain at least one recipient.");
+            .EmailAddress().WithMessage("The 'recipients' field must be a valid email address format.");
+
+        RuleFor(x => x.Recipients)
+            .Must(x => x.Count > 0).WithMessage("The 'recipients' field cannot be empty.");
 
         RuleFor(x => x.Subject)
             .NotEmpty().WithMessage("The 'subject' field cannot be empty.")

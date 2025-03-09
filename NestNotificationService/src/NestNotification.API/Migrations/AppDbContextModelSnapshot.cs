@@ -70,9 +70,7 @@ namespace NestNotification.API.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Priority")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(1);
+                        .HasColumnType("int");
 
                     b.Property<int>("RetryCount")
                         .ValueGeneratedOnAdd()
@@ -83,9 +81,7 @@ namespace NestNotification.API.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
+                        .HasColumnType("int");
 
                     b.Property<string>("Subject")
                         .IsRequired()

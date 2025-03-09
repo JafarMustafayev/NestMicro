@@ -38,6 +38,7 @@ public class EmailTemplateService : IEmailTemplateService
         {
             throw new EntityNotFoundException($"Template with ID '{templateId}' not found");
         }
+
         return new()
         {
             Data = _mapper.Map<GetEmailTemplateDto>(template),
@@ -54,6 +55,7 @@ public class EmailTemplateService : IEmailTemplateService
         {
             throw new EntityNotFoundException($"Template with name '{templateName}' not found");
         }
+
         return new()
         {
             Data = _mapper.Map<GetEmailTemplateDto>(template),
@@ -65,7 +67,8 @@ public class EmailTemplateService : IEmailTemplateService
 
     public async Task<ResponseDto> AddEmailTemplateAsync(CreateEmailTemplateDto templateDto)
     {
-        var existingTemplate = await _emailTemplateRepository.GetByExpressionAsync(x => x.TemplateName == templateDto.TemplateName);
+        var existingTemplate =
+            await _emailTemplateRepository.GetByExpressionAsync(x => x.TemplateName == templateDto.TemplateName);
         if (existingTemplate != null)
         {
             throw new DuplicateEntityException($"Template with name '{templateDto.TemplateName}' already exists");
@@ -91,10 +94,10 @@ public class EmailTemplateService : IEmailTemplateService
 
     public async Task<ResponseDto> UpdateEmailTemplateAsync(UpdateEmailTemplateDto templateDto)
     {
-        var template = await _emailTemplateRepository.GetByIdAsync(templateDto.Id);
+        var template = await _emailTemplateRepository.GetByIdAsync(templateDto.TemplateId);
         if (template == null)
         {
-            throw new Exception($"Template with ID '{templateDto.Id}' not found");
+            throw new Exception($"Template with ID '{templateDto.TemplateId}' not found");
         }
 
         var map = _mapper.Map<EmailTemplate>(templateDto);
@@ -119,11 +122,10 @@ public class EmailTemplateService : IEmailTemplateService
             throw new EntityNotFoundException($"Template with ID '{templateDto.TemplateId}' not found");
         }
 
-        template.IsDeleted = true;
-        template.DeletedBy = templateDto.DeletedBy;
-        template.DeletedAt = DateTime.UtcNow;
+        _mapper.Map(templateDto, template);
 
         _emailTemplateRepository.Update(template);
+        await _emailTemplateRepository.SaveChangesAsync();
         _logger.LogInformation("Email template '{TemplateName}' deleted", template.TemplateName);
 
         return new()

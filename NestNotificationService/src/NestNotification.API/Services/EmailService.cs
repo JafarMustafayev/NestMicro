@@ -35,7 +35,7 @@ public class EmailService : IEmailService
                 Host = Configurations.GetConfiguratinValue<string>("MailSettings", "Host"),
                 Port = Configurations.GetConfiguratinValue<int>("MailSettings", "Port"),
                 Credentials = new NetworkCredential(
-                    Configurations.GetConfiguratinValue<string>("MailSettings", "Mail"),
+                    Configurations.GetConfiguratinValue<string>("MailSettings", "Username"),
                     Configurations.GetConfiguratinValue<string>("MailSettings", "Password"))
             };
 
@@ -43,7 +43,7 @@ public class EmailService : IEmailService
             {
                 Subject = request.Subject,
                 Body = request.Body,
-                IsBodyHtml = true,
+                IsBodyHtml = (request.Body.Contains("</html>") || request.Body.Contains("</body>")),
                 From = new MailAddress(
                     Configurations.GetConfiguratinValue<string>("MailSettings", "Mail"),
                     Configurations.GetConfiguratinValue<string>("MailSettings", "DisplayName")),
@@ -72,7 +72,7 @@ public class EmailService : IEmailService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Email sending failed to {Email}", request.ToEmail);
-            throw;
+            throw ex;
         }
     }
 
@@ -204,8 +204,10 @@ public class EmailService : IEmailService
 
     public ResponseDto GetEmailLogs(int page, int pageSize)
     {
-        var res = _emailLogRepository.GetAll(page, pageSize, false).Where(e => e != null).ToList()!;
-        var map = _mapper.Map<List<GetEmailLog>>(res);
+        Expression<Func<EmailLog, object>> order = x => x.SentAt;
+
+        var res = _emailLogRepository.GetAll(page, pageSize, false, order).Where(e => e != null).ToList()!;
+        var map = _mapper.Map<List<GetEmailLogDto>>(res);
         return new()
         {
             IsSuccess = true,
@@ -218,12 +220,21 @@ public class EmailService : IEmailService
     public async Task<ResponseDto> GetEmailStatusAsync(string emailId)
     {
         var email = await _emailQueueRepository.GetByIdAsync(emailId);
+
+        if (email == null)
+        {
+            throw new EntityNotFoundException($"Email with ID {emailId} not found");
+        }
+
         return new()
         {
             IsSuccess = true,
             Message = "Email status retrieved successfully",
             StatusCode = StatusCodes.Status200OK,
-            Data = email?.Status.ToString()
+            Data = new
+            {
+                EmailStatus = email?.Status.ToString()
+            }
         };
     }
 
@@ -255,7 +266,8 @@ public class EmailService : IEmailService
 
     public async Task<ResponseDto> RetryAllFailedEmailsAsync(int maxRetries = 3)
     {
-        var failedEmails = _emailQueueRepository.GetAllByExpression(x => x.Status == EmailStatus.Failed && x.RetryCount < maxRetries);
+        var failedEmails =
+            _emailQueueRepository.GetAllByExpression(x => x.Status == EmailStatus.Failed && x.RetryCount < maxRetries);
 
         if (failedEmails.Items != null)
         {
@@ -270,6 +282,7 @@ public class EmailService : IEmailService
                     _emailQueueRepository.Update(email);
                 }
             }
+
             _logger.LogInformation("Marked {Count} failed emails for retry", failedEmails.Count);
             await _emailQueueRepository.SaveChangesAsync();
 
@@ -332,7 +345,8 @@ public class EmailService : IEmailService
         await _emailQueueRepository.SaveChangesAsync();
 
         _logger.LogInformation("Cancelled {Count} pending emails for recipient {Recipient}",
-            pendingEmails.Count, recipientEmail);
+            pendingEmails.Count,
+            recipientEmail);
 
         return new()
         {
@@ -343,107 +357,6 @@ public class EmailService : IEmailService
     }
 
     #endregion Basic Email Sending
-
-    #region Priority Email Methods
-
-    public async Task<ResponseDto> SendPriorityEmailAsync(SendEmailDto emailDto)
-    {
-        var map = _mapper.Map<EmailQueue>(emailDto);
-
-        await _emailQueueRepository.AddAsync(map);
-        _logger.LogInformation("Priority email queued with ID: {EmailId}", map.Id);
-
-        if (emailDto.Priority == EmailPriority.High)
-        {
-            try
-            {
-                await ProcessSingleEmailAsync(map);
-            }
-            catch (Exception ex)
-            {
-                map.Status = EmailStatus.Failed;
-                map.RetryCount++;
-                map.ErrorMessage = ex.Message;
-                _emailQueueRepository.Update(map);
-                await _emailQueueRepository.SaveChangesAsync();
-
-                return new()
-                {
-                    IsSuccess = false,
-                    Message = ex.Message,
-                    StatusCode = StatusCodes.Status500InternalServerError
-                };
-            }
-        }
-
-        await _emailQueueRepository.SaveChangesAsync();
-        return new()
-        {
-            IsSuccess = true,
-            Message = "Priority email queued successfully",
-            StatusCode = StatusCodes.Status200OK
-        };
-    }
-
-    public async Task<ResponseDto> SendPriorityTemplatedEmailAsync(SendTemplatedEmailDto emailDto)
-
-    {
-        var template = await _emailTemplateRepository.GetByIdAsync(emailDto.TemplateId);
-        if (template == null)
-        {
-            throw new EntityNotFoundException($"This email template not found");
-        }
-
-        var body = template.Body;
-
-        foreach (var param in emailDto.Placeholders)
-        {
-            body = body.Replace($"{{{param.Key}}}", param.Value);
-        }
-
-        var map = _mapper.Map<EmailQueue>(emailDto);
-
-        map.Subject = template.Subject;
-        map.Body = body;
-        map.IsHtml = template.IsHtml;
-
-        await _emailQueueRepository.AddAsync(map);
-        await _emailQueueRepository.SaveChangesAsync();
-
-        _logger.LogInformation("Priority templated email queued with ID: {EmailId}", map.Id);
-
-        if (emailDto.Priority == EmailPriority.High)
-        {
-            try
-            {
-                await ProcessSingleEmailAsync(map);
-            }
-            catch (Exception ex)
-            {
-                map.Status = EmailStatus.Failed;
-                map.RetryCount++;
-                map.ErrorMessage = ex.Message;
-                _emailQueueRepository.Update(map);
-                await _emailQueueRepository.SaveChangesAsync();
-
-                return new()
-                {
-                    IsSuccess = false,
-                    Message = ex.Message,
-                    StatusCode = StatusCodes.Status500InternalServerError
-                };
-            }
-        }
-
-        return new()
-        {
-            IsSuccess = true,
-            Message = "Priority templated email queued successfully",
-            StatusCode = StatusCodes.Status200OK
-        };
-    }
-
-    #endregion Priority Email Methods
 
     #region Scheduled Email Methods
 
@@ -491,7 +404,9 @@ public class EmailService : IEmailService
         await _emailQueueRepository.AddAsync(map);
         await _emailQueueRepository.SaveChangesAsync();
 
-        _logger.LogInformation("Templated email scheduled for {ScheduledTime} with ID: {EmailId}", emailDto.ScheduledAt, map.Id);
+        _logger.LogInformation("Templated email scheduled for {ScheduledTime} with ID: {EmailId}",
+            emailDto.ScheduledAt,
+            map.Id);
 
         return new()
         {
@@ -524,7 +439,9 @@ public class EmailService : IEmailService
 
         await _emailQueueRepository.AddRangeAsync(emailQueues);
         await _emailQueueRepository.SaveChangesAsync();
-        _logger.LogInformation("Bulk email scheduled for {ScheduledTime} for {Count} recipients", emailDto.ScheduledAt, emailDto.Recipients.Count);
+        _logger.LogInformation("Bulk email scheduled for {ScheduledTime} for {Count} recipients",
+            emailDto.ScheduledAt,
+            emailDto.Recipients.Count);
 
         return new()
         {
@@ -566,7 +483,9 @@ public class EmailService : IEmailService
 
         await _emailQueueRepository.AddRangeAsync(emailQueues);
         await _emailQueueRepository.SaveChangesAsync();
-        _logger.LogInformation("Bulk templated email scheduled for {ScheduledTime} for {Count} recipients", emailDto.ScheduledAt, emailDto.Recipients.Count);
+        _logger.LogInformation("Bulk templated email scheduled for {ScheduledTime} for {Count} recipients",
+            emailDto.ScheduledAt,
+            emailDto.Recipients.Count);
 
         return new()
         {
@@ -587,9 +506,11 @@ public class EmailService : IEmailService
             try
             {
                 // 1. Əvvəlcə yüksək prioritetli emailləri emal et
-                var highPriorityEmails = _emailQueueRepository.GetAllByExpression(1, 10,
+                var highPriorityEmails = _emailQueueRepository.GetAllByExpression(1,
+                    10,
                     x => x.Priority == EmailPriority.High &&
-                    x.Status == EmailStatus.Pending, false).Items;
+                         x.Status == EmailStatus.Pending,
+                    false).Items;
 
                 foreach (var email in highPriorityEmails)
                 {
@@ -602,11 +523,11 @@ public class EmailService : IEmailService
                 // 2. Planlaşdırılmış emaillərdən vaxtı çatanları emal et
                 var scheduledEmails = _emailQueueRepository.GetAllByExpression(
                     x => x.Status == EmailStatus.Pending &&
-                    x.Priority == EmailPriority.Scheduled &&
-                    x.ScheduledAt.HasValue &&
-                    x.ScheduledAt.Value.Date == DateTime.UtcNow.Date &&
-                    x.ScheduledAt.Value.Hour == DateTime.UtcNow.Hour &&
-                    x.ScheduledAt.Value.Minute == DateTime.UtcNow.Minute,
+                         x.Priority == EmailPriority.Scheduled &&
+                         x.ScheduledAt.HasValue &&
+                         x.ScheduledAt.Value.Date == DateTime.UtcNow.Date &&
+                         x.ScheduledAt.Value.Hour == DateTime.UtcNow.Hour &&
+                         x.ScheduledAt.Value.Minute == DateTime.UtcNow.Minute,
                     false).Items;
 
                 foreach (var email in scheduledEmails)
@@ -618,9 +539,11 @@ public class EmailService : IEmailService
                 }
 
                 // 3. Normal prioritetli emailləri emal et
-                var normalPriorityEmails = _emailQueueRepository.GetAllByExpression(1, 20,
+                var normalPriorityEmails = _emailQueueRepository.GetAllByExpression(1,
+                    20,
                     x => x.Priority == EmailPriority.Normal &&
-                    x.Status == EmailStatus.Pending, true).Items;
+                         x.Status == EmailStatus.Pending,
+                    true).Items;
 
                 foreach (var email in normalPriorityEmails)
                 {
@@ -631,9 +554,11 @@ public class EmailService : IEmailService
                 }
 
                 // 4. Aşağı prioritetli emailləri emal et
-                var lowPriorityEmails = _emailQueueRepository.GetAllByExpression(1, 20,
+                var lowPriorityEmails = _emailQueueRepository.GetAllByExpression(1,
+                    20,
                     x => x.Priority == EmailPriority.Low &&
-                    x.Status == EmailStatus.Pending, false).Items;
+                         x.Status == EmailStatus.Pending,
+                    false).Items;
 
                 foreach (var email in lowPriorityEmails)
                 {
@@ -643,10 +568,7 @@ public class EmailService : IEmailService
                     }
                 }
 
-                //Çox tez-tez sorğu göndərməmək üçün kiçik fasilə
-
                 Console.WriteLine(DateTime.Now.ToLongTimeString());
-
                 await Task.Delay(5000, cancellationToken);
             }
             catch (Exception ex)

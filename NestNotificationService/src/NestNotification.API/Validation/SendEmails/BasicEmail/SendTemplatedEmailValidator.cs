@@ -16,6 +16,10 @@ public class SendTemplatedEmailValidator : AbstractValidator<SendTemplatedEmailD
             .MinimumLength(1).WithMessage("The 'templateId' field must be at least 2 character long.")
             .MaximumLength(128).WithMessage("The 'templateId' field must be at most 128 characters long.");
 
+        RuleForEach(x => x.Placeholders)
+            .NotEmpty().WithMessage("The 'placeholders' field cannot be empty.")
+            .NotNull().WithMessage("The 'placeholders' field cannot be null.");
+
         RuleFor(x => x.Placeholders)
             .NotEmpty().WithMessage("The 'placeholders' field cannot be empty.")
             .NotNull().WithMessage("The 'placeholders' field cannot be null.");

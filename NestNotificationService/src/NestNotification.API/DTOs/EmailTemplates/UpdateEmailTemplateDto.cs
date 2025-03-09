@@ -2,7 +2,7 @@
 
 public record UpdateEmailTemplateDto
 {
-    public string Id { get; set; }
+    public string TemplateId { get; set; }
     public string TemplateName { get; set; }
     public string Subject { get; set; }
     public string Body { get; set; }
@@ -11,7 +11,7 @@ public record UpdateEmailTemplateDto
 
     public UpdateEmailTemplateDto()
     {
-        Id = string.Empty;
+        TemplateId = string.Empty;
         TemplateName = string.Empty;
         Subject = string.Empty;
         Body = string.Empty;

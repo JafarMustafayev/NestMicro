@@ -5,7 +5,8 @@ public class EmailSendingProfile : Profile
     public EmailSendingProfile()
     {
         CreateMap<MailRequest, EmailLog>()
-            .ForMember(dest => dest.IsHtml, opt => opt.MapFrom(src => src.Body.Contains("<html>"))).ReverseMap();
+            .ForMember(dest => dest.IsHtml,
+                opt => opt.MapFrom(src => src.Body.Contains("</html>") || src.Body.Contains("</body>"))).ReverseMap();
 
         CreateMap<SendEmailDto, MailRequest>();
 

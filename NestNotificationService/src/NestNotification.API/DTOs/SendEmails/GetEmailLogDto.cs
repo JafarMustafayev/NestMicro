@@ -1,6 +1,6 @@
 ﻿namespace NestNotification.API.DTOs.SendEmails;
 
-public class GetEmailLog
+public class GetEmailLogDto
 {
     public string ToEmail { get; set; }
     public string Subject { get; set; }
@@ -8,7 +8,7 @@ public class GetEmailLog
     public bool IsHtml { get; set; }
     public DateTime SentAt { get; set; }
 
-    public GetEmailLog()
+    public GetEmailLogDto()
     {
         ToEmail = string.Empty;
         Subject = string.Empty;

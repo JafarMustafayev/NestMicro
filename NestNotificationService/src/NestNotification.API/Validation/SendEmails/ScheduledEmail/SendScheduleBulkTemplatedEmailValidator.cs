@@ -4,10 +4,13 @@ public class SendScheduleBulkTemplatedEmailValidator : AbstractValidator<SendSch
 {
     public SendScheduleBulkTemplatedEmailValidator()
     {
-        RuleFor(x => x.Recipients)
+        RuleForEach(x => x.Recipients)
             .NotEmpty().WithMessage("The 'recipients' field cannot be empty.")
             .NotNull().WithMessage("The 'recipients' field cannot be null.")
-            .Must(x => x.Count > 0).WithMessage("The 'recipients' field must contain at least one recipient.");
+            .EmailAddress().WithMessage("The 'recipients' field must be a valid email address format.");
+
+        RuleFor(x => x.Recipients)
+            .Must(x => x.Count > 0).WithMessage("The 'recipients' field cannot be empty.");
 
         RuleFor(x => x.TemplateId)
             .NotEmpty().WithMessage("The 'templateId' field cannot be empty.")

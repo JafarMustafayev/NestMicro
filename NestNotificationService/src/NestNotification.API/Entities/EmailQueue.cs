@@ -1,6 +1,6 @@
 ﻿namespace NestNotification.API.Entities;
 
-public class EmailQueue : BaseEntityID
+public class EmailQueue : BaseEntityId
 {
     public string ToEmail { get; set; }
     public string Subject { get; set; }

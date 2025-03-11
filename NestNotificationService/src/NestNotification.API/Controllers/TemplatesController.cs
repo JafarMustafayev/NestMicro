@@ -19,37 +19,72 @@
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetEmailTemplateByNameAsync(string templateName)
+        public async Task<IActionResult> GetTemplateByName(string templateName)
         {
             var res = await _emailTemplateService.GetEmailTemplateByNameAsync(templateName);
             return StatusCode(res.StatusCode, res);
         }
 
         [HttpGet("{templateId}")]
-        public async Task<IActionResult> GetEmailTemplateByIdAsync(string templateId)
+        public async Task<IActionResult> GetTemplateById(string templateId)
         {
             var res = await _emailTemplateService.GetEmailTemplateByIdAsync(templateId);
             return StatusCode(res.StatusCode, res);
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddEmailTemplateAsync([FromBody] CreateEmailTemplateDto templateDto)
+        public async Task<IActionResult> CreateTemplate([FromBody] CreateEmailTemplateDto templateDto)
         {
-            var res = await _emailTemplateService.AddEmailTemplateAsync(templateDto);
+            var res = await _emailTemplateService.CreateEmailTemplateAsync(templateDto);
             return StatusCode(res.StatusCode, res);
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateEmailTemplateAsync([FromBody] UpdateEmailTemplateDto templateDto)
+        public async Task<IActionResult> UpdateTemplate([FromBody] UpdateEmailTemplateDto templateDto)
         {
             var res = await _emailTemplateService.UpdateEmailTemplateAsync(templateDto);
             return StatusCode(res.StatusCode, res);
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteEmailTemplateAsync([FromBody] DeleteEmailTemplateDto templateDto)
+        public async Task<IActionResult> DeleteTemplate([FromBody] DeleteEmailTemplateDto templateDto)
         {
             var res = await _emailTemplateService.DeleteEmailTemplateAsync(templateDto);
+            return StatusCode(res.StatusCode, res);
+        }
+
+        [HttpGet("{templateId}")]
+        public async Task<IActionResult> GetTemplateAttributes(string templateId)
+        {
+            var res = await _emailTemplateService.GetTemplateAttributeByIdAsync(templateId);
+            return StatusCode(res.StatusCode, res);
+        }
+
+        [HttpGet("{attributeId}")]
+        public async Task<IActionResult> GetTemplateAttribute(string attributeId)
+        {
+            var res = await _emailTemplateService.GetTemplateAttributeByIdAsync(attributeId);
+            return StatusCode(res.StatusCode, res);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateTemplateAttribute([FromBody] CreateTemplateAttributeDto attributeDto)
+        {
+            var res = await _emailTemplateService.CreateTemplateAttributeAsync(attributeDto);
+            return StatusCode(res.StatusCode, res);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateTemplateAttribute([FromBody] UpdateTemplateAttributeDto attributeDto)
+        {
+            var res = await _emailTemplateService.UpdateTemplateAttributeAsync(attributeDto);
+            return StatusCode(res.StatusCode, res);
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteTemplateAttribute([FromBody] DeleteTemplateAttributeDto attributeDto)
+        {
+            var res = await _emailTemplateService.DeleteTemplateAttributeAsync(attributeDto);
             return StatusCode(res.StatusCode, res);
         }
     }

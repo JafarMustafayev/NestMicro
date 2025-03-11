@@ -8,9 +8,14 @@ public interface IEmailTemplateService
 
     Task<ResponseDto> GetEmailTemplateByNameAsync(string templateName);
 
-    Task<ResponseDto> AddEmailTemplateAsync(CreateEmailTemplateDto templateDto);
+    Task<ResponseDto> CreateEmailTemplateAsync(CreateEmailTemplateDto templateDto);
 
     Task<ResponseDto> UpdateEmailTemplateAsync(UpdateEmailTemplateDto templateDto);
 
     Task<ResponseDto> DeleteEmailTemplateAsync(DeleteEmailTemplateDto templateDto);
+    Task<ResponseDto> CreateTemplateAttributeAsync(CreateTemplateAttributeDto attributeDto);
+    ResponseDto GetTemplateAttributes(string templateId);
+    Task<ResponseDto> GetTemplateAttributeByIdAsync(string attributeId);
+    Task<ResponseDto> UpdateTemplateAttributeAsync(UpdateTemplateAttributeDto attributeDto);
+    Task<ResponseDto> DeleteTemplateAttributeAsync(DeleteTemplateAttributeDto attributeDto);
 }

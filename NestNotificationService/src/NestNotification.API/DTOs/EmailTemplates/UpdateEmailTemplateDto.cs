@@ -8,6 +8,7 @@ public record UpdateEmailTemplateDto
     public string Body { get; set; }
     public bool IsHtml { get; set; }
     public string LastModifiedBy { get; set; }
+    public ICollection<CreateTemplateAttributeDto>? Attributes { get; set; }
 
     public UpdateEmailTemplateDto()
     {
@@ -17,5 +18,6 @@ public record UpdateEmailTemplateDto
         Body = string.Empty;
         IsHtml = false;
         LastModifiedBy = string.Empty;
+        Attributes = null;
     }
 }

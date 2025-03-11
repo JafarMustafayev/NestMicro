@@ -72,7 +72,7 @@ public class EmailService : IEmailService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Email sending failed to {Email}", request.ToEmail);
-            throw ex;
+            throw ;
         }
     }
 
@@ -206,7 +206,7 @@ public class EmailService : IEmailService
     {
         Expression<Func<EmailLog, object>> order = x => x.SentAt;
 
-        var res = _emailLogRepository.GetAll(page, pageSize, false, order).Where(e => e != null).ToList()!;
+        var res = _emailLogRepository.GetAll(page, pageSize, false, order).Where(e => e != null).ToList();
         var map = _mapper.Map<List<GetEmailLogDto>>(res);
         return new()
         {

@@ -14,5 +14,14 @@ public class EmailTemplateProfile : Profile
             .ForMember(dest => dest.DeletedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
 
         CreateMap<EmailTemplate, GetEmailTemplateDto>();
+
+        CreateMap<CreateTemplateAttributeDto, EmailTemplateAttribute>();
+
+        CreateMap<UpdateTemplateAttributeDto, EmailTemplateAttribute>()
+            .ForMember(dest => dest.LastModifiedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
+
+        CreateMap<DeleteTemplateAttributeDto, EmailTemplateAttribute>()
+            .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => true))
+            .ForMember(dest => dest.DeletedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
     }
 }

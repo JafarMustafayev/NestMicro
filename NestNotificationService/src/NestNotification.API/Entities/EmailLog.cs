@@ -1,6 +1,6 @@
 ﻿namespace NestNotification.API.Entities;
 
-public class EmailLog : BaseEntityID
+public class EmailLog : BaseEntityId
 {
     public string ToEmail { get; set; }
     public string Subject { get; set; }

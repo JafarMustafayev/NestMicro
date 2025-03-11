@@ -6,6 +6,8 @@ public class EmailTemplate : BaseEntity
     public string Subject { get; set; }
     public string Body { get; set; }
     public bool IsHtml { get; set; }
+    
+    public ICollection<EmailTemplateAttribute>? Attributes { get; set; } 
 
     public EmailTemplate()
     {
@@ -13,5 +15,6 @@ public class EmailTemplate : BaseEntity
         Subject = string.Empty;
         Body = string.Empty;
         IsHtml = false;
+        Attributes = null;
     }
 }

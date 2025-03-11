@@ -4,7 +4,8 @@ public static class ServicesRegistrator
 {
     public static void AddNotificationServices(this IServiceCollection services)
     {
-        var serverIsAvailable = InternetChecker.IsServerAvailable(Configurations.GetConfiguratinValue<string>("ServerIP")).Result;
+        var serverIsAvailable = InternetChecker
+            .IsServerAvailable(Configurations.GetConfiguratinValue<string>("ServerIP")).Result;
 
         services.ConnectSqlServer(serverIsAvailable);
 
@@ -25,8 +26,6 @@ public static class ServicesRegistrator
     {
         services.AddDbContext<AppDbContext>(options =>
         {
-            var subsection = string.Empty;
-
             options.UseSqlServer(Configurations.GetConfiguratinValue<string>("ConnectionStrings",
                 serverIsAvailable ? "SqlConnectionOnServer" : "SqlConnectionOnPrem"));
         });
@@ -36,8 +35,8 @@ public static class ServicesRegistrator
     {
         services.AddSingleton<IConsulClient, ConsulClient>(p => new ConsulClient(consulConfig =>
         {
-            consulConfig.Address = new Uri(Configurations.GetConfiguratinValue<string>
-                ("Consul", "ConsulServer",
+            consulConfig.Address = new Uri(Configurations.GetConfiguratinValue<string>("Consul",
+                "ConsulServer",
                 serverIsAvailable ? "ConsulServerOnServer" : "ConsulServerOnPrem")); //Consul server address
         }));
     }
@@ -54,6 +53,7 @@ public static class ServicesRegistrator
         services.AddScoped<IEmailLogRepository, EmailLogRepository>();
         services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
         services.AddScoped<IEmailQueueRepository, EmailQueueRepository>();
+        services.AddScoped<IEmailTemplateAttributeRepository, EmailTemplateAttributeRepository>();
     }
 
     private static void AddServices(this IServiceCollection services)
@@ -70,13 +70,14 @@ public static class ServicesRegistrator
     {
         var section = "Consul";
 
-        var serverIsAvailable = InternetChecker.IsServerAvailable(Configurations.GetConfiguratinValue<string>("ServerIP")).Result;
+        var serverIsAvailable = InternetChecker
+            .IsServerAvailable(Configurations.GetConfiguratinValue<string>("ServerIP")).Result;
 
         var route = Configurations.GetConfiguratinValue<string>(section, "ConsulClientHealthCheck", "HealthCheckRoute");
 
         var consulClientHealthCheck =
             $"{Configurations.GetConfiguratinValue<string>(section, "ConsulClientHealthCheck",
-            (serverIsAvailable ? "HealthCheckAddressOnServer" : "HealthCheckAddressOnPrem"))}{route}";
+                (serverIsAvailable ? "HealthCheckAddressOnServer" : "HealthCheckAddressOnPrem"))}{route}";
 
         var consulClient = app.ApplicationServices.GetRequiredService<IConsulClient>();
         var registration = new AgentServiceRegistration()

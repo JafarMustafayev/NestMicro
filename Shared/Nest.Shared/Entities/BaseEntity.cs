@@ -1,16 +1,16 @@
 ﻿namespace Nest.Shared.Entities;
 
-public class BaseEntityID
+public class BaseEntityId
 {
     public string Id { get; set; }
 
-    public BaseEntityID()
+    public BaseEntityId()
     {
         Id = Guid.NewGuid().ToString();
     }
 }
 
-public class BaseEntity : BaseEntityID
+public class BaseEntity : BaseEntityId
 {
     public string CreatedBy { get; set; }
 

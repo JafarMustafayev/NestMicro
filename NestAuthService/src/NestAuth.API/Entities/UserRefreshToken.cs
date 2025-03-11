@@ -1,6 +1,6 @@
 ﻿namespace NestAuth.API.Entities;
 
-public class UserRefreshToken : BaseEntityID
+public class UserRefreshToken : BaseEntityId
 {
     public string UserId { get; set; }
 

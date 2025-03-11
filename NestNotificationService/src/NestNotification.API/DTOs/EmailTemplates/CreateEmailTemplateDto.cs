@@ -7,6 +7,7 @@ public class CreateEmailTemplateDto
     public string Body { get; set; }
     public bool IsHtml { get; set; }
     public string CreatedBy { get; set; }
+    public ICollection<CreateTemplateAttributeDto>? Attributes { get; set; }
 
     public CreateEmailTemplateDto()
     {
@@ -15,5 +16,6 @@ public class CreateEmailTemplateDto
         Body = string.Empty;
         IsHtml = false;
         CreatedBy = string.Empty;
+        Attributes = null;
     }
 }

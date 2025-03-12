@@ -2,9 +2,9 @@
 
 public enum EmailStatus
 {
-    Success,
     Pending,
+    Success,
     Failed,
-    Retried,
+    Cancelled,
     Unknown,
 }

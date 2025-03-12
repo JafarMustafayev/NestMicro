@@ -7,6 +7,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddNotificationServices();
 
+builder.Services.AddHostedService<EmailBackgroundService>();
+
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddSwaggerGen();
@@ -33,6 +35,6 @@ app.MapControllers();
 
 app.UseCustomExceptionHandler();
 
-await app.RegisterWithConsul(app.Lifetime);
+//await app.RegisterWithConsul(app.Lifetime);
 
 app.Run();

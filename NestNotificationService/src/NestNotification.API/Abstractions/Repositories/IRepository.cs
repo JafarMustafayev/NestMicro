@@ -1,6 +1,6 @@
 ﻿namespace NestNotification.API.Abstractions.Repositories;
 
-public interface IRepository<T> where T : BaseEntityID, new()
+public interface IRepository<T> where T : BaseEntityId, new()
 {
     DbSet<T> Table { get; }
 
@@ -9,7 +9,8 @@ public interface IRepository<T> where T : BaseEntityID, new()
         Expression<Func<T, object>>? orderBy = null,
         bool isDesingOrder = false,
         List<Expression<Func<T, object>>>? includes = null,
-        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenIncludes)>? thenIncludes = null);
+        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenIncludes)>? thenIncludes =
+            null);
 
     public IQueryable<T?> GetAll(
         int page = 1,
@@ -18,7 +19,8 @@ public interface IRepository<T> where T : BaseEntityID, new()
         Expression<Func<T, object>>? orderBy = null,
         bool isDesingOrder = false,
         List<Expression<Func<T, object>>>? includes = null,
-        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenIncludes)>? thenIncludes = null);
+        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenIncludes)>? thenIncludes =
+            null);
 
     public (IQueryable<T?> Items, int Count) GetAllByExpression(
         int page,
@@ -28,7 +30,8 @@ public interface IRepository<T> where T : BaseEntityID, new()
         Expression<Func<T, object>>? orderBy = null,
         bool isDesingOrder = false,
         List<Expression<Func<T, object>>>? includes = null,
-        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenIncludes)>? thenIncludes = null);
+        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenIncludes)>? thenIncludes =
+            null);
 
     public (IQueryable<T?> Items, int Count) GetAllByExpression(
         Expression<Func<T, bool>> expression,
@@ -36,19 +39,22 @@ public interface IRepository<T> where T : BaseEntityID, new()
         Expression<Func<T, object>>? orderBy = null,
         bool isDesingOrder = false,
         List<Expression<Func<T, object>>>? includes = null,
-        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenIncludes)>? thenIncludes = null);
+        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenIncludes)>? thenIncludes =
+            null);
 
     public Task<T?> GetByIdAsync(
         string id,
         bool isTracking = false,
         List<Expression<Func<T, object>>>? includes = null,
-        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenincludes)>? thenincludes = null);
+        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenincludes)>? thenincludes =
+            null);
 
     public Task<T?> GetByExpressionAsync(
         Expression<Func<T, bool>> expression,
         bool isTracking = false,
         List<Expression<Func<T, object>>>? includes = null,
-        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenincludes)>? thenincludes = null);
+        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenincludes)>? thenincludes =
+            null);
 
     public Task<bool> AnyAsync(Expression<Func<T, bool>> expression);
 

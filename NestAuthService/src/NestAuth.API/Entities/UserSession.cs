@@ -1,6 +1,6 @@
 ﻿namespace NestAuth.API.Entities;
 
-public class UserSession : BaseEntityID
+public class UserSession : BaseEntityId
 {
     public string UserId { get; set; }
     public string DeviceInfo { get; set; }

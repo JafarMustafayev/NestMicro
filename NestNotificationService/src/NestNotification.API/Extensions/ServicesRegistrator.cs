@@ -4,27 +4,28 @@ public static class ServicesRegistrator
 {
     public static void AddNotificationServices(this IServiceCollection services)
     {
-        var serverIsAvailable = InternetChecker.IsServerAvailable(Configurations.GetConfiguratinValue<string>("ServerIP")).Result;
+        var serverIsAvailable = InternetChecker
+            .IsServerAvailable(Configurations.GetConfiguratinValue<string>("ServerIP")).Result;
 
         services.ConnectSqlServer(serverIsAvailable);
 
         services.AddConsul(serverIsAvailable);
 
-        //services.AddFluent();
+        services.AddFluent();
 
         services.AddRepository();
 
         services.AddServices();
 
         services.AddMassTransit();
+
+        services.AddAutoMapper(typeof(GetEmailTemplateDto).Assembly);
     }
 
     private static void ConnectSqlServer(this IServiceCollection services, bool serverIsAvailable)
     {
         services.AddDbContext<AppDbContext>(options =>
         {
-            var subsection = string.Empty;
-
             options.UseSqlServer(Configurations.GetConfiguratinValue<string>("ConnectionStrings",
                 serverIsAvailable ? "SqlConnectionOnServer" : "SqlConnectionOnPrem"));
         });
@@ -34,29 +35,31 @@ public static class ServicesRegistrator
     {
         services.AddSingleton<IConsulClient, ConsulClient>(p => new ConsulClient(consulConfig =>
         {
-            consulConfig.Address = new Uri(Configurations.GetConfiguratinValue<string>
-                ("Consul", "ConsulServer",
+            consulConfig.Address = new Uri(Configurations.GetConfiguratinValue<string>("Consul",
+                "ConsulServer",
                 serverIsAvailable ? "ConsulServerOnServer" : "ConsulServerOnPrem")); //Consul server address
         }));
     }
 
-    //private static void AddFluent(this IServiceCollection services)
-    //{
-    //    services.AddFluentValidationAutoValidation();
-    //    services.AddFluentValidationClientsideAdapters();
-    //    services.AddValidatorsFromAssembly(typeof(RegisterRequestValidator).Assembly);
-    //}
+    private static void AddFluent(this IServiceCollection services)
+    {
+        services.AddFluentValidationAutoValidation();
+        services.AddFluentValidationClientsideAdapters();
+        services.AddValidatorsFromAssembly(typeof(CreateEmailTemplateValidator).Assembly);
+    }
 
     private static void AddRepository(this IServiceCollection services)
     {
         services.AddScoped<IEmailLogRepository, EmailLogRepository>();
         services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
-        services.AddScoped<IFailedEmailRepository, FailedEmailRepository>();
+        services.AddScoped<IEmailQueueRepository, EmailQueueRepository>();
+        services.AddScoped<IEmailTemplateAttributeRepository, EmailTemplateAttributeRepository>();
     }
 
     private static void AddServices(this IServiceCollection services)
     {
-        services.AddScoped<IMailService, MailService>();
+        services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IEmailTemplateService, EmailTemplateService>();
     }
 
     private static void AddMassTransit(this IServiceCollection services)
@@ -67,13 +70,14 @@ public static class ServicesRegistrator
     {
         var section = "Consul";
 
-        var serverIsAvailable = InternetChecker.IsServerAvailable(Configurations.GetConfiguratinValue<string>("ServerIP")).Result;
+        var serverIsAvailable = InternetChecker
+            .IsServerAvailable(Configurations.GetConfiguratinValue<string>("ServerIP")).Result;
 
         var route = Configurations.GetConfiguratinValue<string>(section, "ConsulClientHealthCheck", "HealthCheckRoute");
 
         var consulClientHealthCheck =
             $"{Configurations.GetConfiguratinValue<string>(section, "ConsulClientHealthCheck",
-            (serverIsAvailable ? "HealthCheckAddressOnServer" : "HealthCheckAddressOnPrem"))}{route}";
+                (serverIsAvailable ? "HealthCheckAddressOnServer" : "HealthCheckAddressOnPrem"))}{route}";
 
         var consulClient = app.ApplicationServices.GetRequiredService<IConsulClient>();
         var registration = new AgentServiceRegistration()
@@ -105,7 +109,7 @@ public static class ServicesRegistrator
         }
         catch (Exception ex)
         {
-            Console.WriteLine($" -------\n\nError registering with Consul: {ex.Message}\n\n -------");
+            Console.WriteLine($"Error registering with Consul: {ex.Message}");
         }
     }
 }

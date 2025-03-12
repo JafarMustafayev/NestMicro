@@ -49,7 +49,7 @@ public static class Configurations
             str = configurationManager.GetSection(section);
             value = str.GetValue<T>(subSection);
 
-            if (str != null || value != null)
+            if (str != null && value != null)
             { return value; }
             else
             { throw new Exception($"'{section}' or '{subSection}' is not found "); }

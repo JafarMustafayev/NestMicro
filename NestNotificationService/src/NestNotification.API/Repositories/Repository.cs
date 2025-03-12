@@ -1,6 +1,6 @@
 ﻿namespace NestNotification.API.Repositories;
 
-public class Repository<T> : IRepository<T> where T : BaseEntityID, new()
+public class Repository<T> : IRepository<T> where T : BaseEntityId, new()
 
 {
     private readonly AppDbContext _context;
@@ -17,9 +17,10 @@ public class Repository<T> : IRepository<T> where T : BaseEntityID, new()
         Expression<Func<T, object>>? orderBy = null,
         bool isDesingOrder = false,
         List<Expression<Func<T, object>>>? includes = null,
-        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenIncludes)>? thenIncludes = null)
+        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenIncludes)>? thenIncludes =
+            null)
     {
-        var query = isTracking ? Table.AsQueryable() : Table.AsNoTracking().AsNoTracking();
+        var query = isTracking ? Table.AsQueryable() : Table.AsQueryable().AsNoTracking();
 
         if (includes != null)
         {
@@ -28,7 +29,8 @@ public class Repository<T> : IRepository<T> where T : BaseEntityID, new()
 
         if (thenIncludes != null)
         {
-            query = thenIncludes.Aggregate(query, (current, include) => current.Include(include.includes).ThenInclude(include.thenIncludes));
+            query = thenIncludes.Aggregate(query,
+                (current, include) => current.Include(include.includes).ThenInclude(include.thenIncludes));
         }
 
         if (orderBy != null)
@@ -46,9 +48,10 @@ public class Repository<T> : IRepository<T> where T : BaseEntityID, new()
         Expression<Func<T, object>>? orderBy = null,
         bool isDesingOrder = false,
         List<Expression<Func<T, object>>>? includes = null,
-        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenIncludes)>? thenIncludes = null)
+        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenIncludes)>? thenIncludes =
+            null)
     {
-        var query = isTracking ? Table.AsQueryable() : Table.AsNoTracking().AsNoTracking();
+        var query = isTracking ? Table.AsQueryable() : Table.AsQueryable().AsNoTracking();
 
         if (includes != null)
         {
@@ -57,7 +60,8 @@ public class Repository<T> : IRepository<T> where T : BaseEntityID, new()
 
         if (thenIncludes != null)
         {
-            query = thenIncludes.Aggregate(query, (current, include) => current.Include(include.includes).ThenInclude(include.thenIncludes));
+            query = thenIncludes.Aggregate(query,
+                (current, include) => current.Include(include.includes).ThenInclude(include.thenIncludes));
         }
 
         if (orderBy != null)
@@ -78,9 +82,10 @@ public class Repository<T> : IRepository<T> where T : BaseEntityID, new()
         Expression<Func<T, object>>? orderBy = null,
         bool isDesingOrder = false,
         List<Expression<Func<T, object>>>? includes = null,
-        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenIncludes)>? thenIncludes = null)
+        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenIncludes)>? thenIncludes =
+            null)
     {
-        var query = isTracking ? Table.AsQueryable() : Table.AsNoTracking().AsNoTracking();
+        var query = isTracking ? Table.AsQueryable() : Table.AsQueryable().AsNoTracking();
 
         if (includes != null)
         {
@@ -89,7 +94,8 @@ public class Repository<T> : IRepository<T> where T : BaseEntityID, new()
 
         if (thenIncludes != null)
         {
-            query = thenIncludes.Aggregate(query, (current, include) => current.Include(include.includes).ThenInclude(include.thenIncludes));
+            query = thenIncludes.Aggregate(query,
+                (current, include) => current.Include(include.includes).ThenInclude(include.thenIncludes));
         }
 
         if (orderBy != null)
@@ -114,9 +120,10 @@ public class Repository<T> : IRepository<T> where T : BaseEntityID, new()
         Expression<Func<T, object>>? orderBy = null,
         bool isDesingOrder = false,
         List<Expression<Func<T, object>>>? includes = null,
-        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenIncludes)>? thenIncludes = null)
+        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenIncludes)>? thenIncludes =
+            null)
     {
-        var query = isTracking ? Table.AsQueryable() : Table.AsNoTracking().AsNoTracking();
+        var query = isTracking ? Table.AsQueryable() : Table.AsQueryable().AsNoTracking();
 
         if (includes != null)
         {
@@ -125,7 +132,8 @@ public class Repository<T> : IRepository<T> where T : BaseEntityID, new()
 
         if (thenIncludes != null)
         {
-            query = thenIncludes.Aggregate(query, (current, include) => current.Include(include.includes).ThenInclude(include.thenIncludes));
+            query = thenIncludes.Aggregate(query,
+                (current, include) => current.Include(include.includes).ThenInclude(include.thenIncludes));
         }
 
         if (orderBy != null)
@@ -143,9 +151,10 @@ public class Repository<T> : IRepository<T> where T : BaseEntityID, new()
         string id,
         bool isTracking = false,
         List<Expression<Func<T, object>>>? includes = null,
-        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenincludes)>? thenincludes = null)
+        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenincludes)>? thenincludes =
+            null)
     {
-        var query = isTracking ? Table.AsQueryable() : Table.AsNoTracking().AsNoTracking();
+        var query = isTracking ? Table.AsQueryable() : Table.AsQueryable().AsNoTracking();
 
         if (includes != null)
         {
@@ -154,19 +163,21 @@ public class Repository<T> : IRepository<T> where T : BaseEntityID, new()
 
         if (thenincludes != null)
         {
-            query = thenincludes.Aggregate(query, (current, include) => current.Include(include.includes).ThenInclude(include.thenincludes));
+            query = thenincludes.Aggregate(query,
+                (current, include) => current.Include(include.includes).ThenInclude(include.thenincludes));
         }
 
         return await query.FirstOrDefaultAsync(x => x.Id == id);
     }
 
     public async Task<T?> GetByExpressionAsync(
-       Expression<Func<T, bool>> expression,
-       bool isTracking = false,
-       List<Expression<Func<T, object>>>? includes = null,
-       List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenincludes)>? thenincludes = null)
+        Expression<Func<T, bool>> expression,
+        bool isTracking = false,
+        List<Expression<Func<T, object>>>? includes = null,
+        List<(Expression<Func<T, object>> includes, Expression<Func<object, object>> thenincludes)>? thenincludes =
+            null)
     {
-        var query = isTracking ? Table.AsQueryable() : Table.AsNoTracking().AsNoTracking();
+        var query = isTracking ? Table.AsQueryable() : Table.AsQueryable().AsNoTracking();
 
         if (includes != null)
         {
@@ -175,7 +186,8 @@ public class Repository<T> : IRepository<T> where T : BaseEntityID, new()
 
         if (thenincludes != null)
         {
-            query = thenincludes.Aggregate(query, (current, include) => current.Include(include.includes).ThenInclude(include.thenincludes));
+            query = thenincludes.Aggregate(query,
+                (current, include) => current.Include(include.includes).ThenInclude(include.thenincludes));
         }
 
         return await query.FirstOrDefaultAsync(expression);

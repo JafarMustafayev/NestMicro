@@ -12,7 +12,7 @@
         }
 
         [HttpGet("{userId}")]
-        public async Task<IActionResult> ActiveSessions(string userId)
+        public IActionResult ActiveSessions(string userId)
         {
             var res = _userSessionService.GetActiveSessionsByUser(userId);
             return StatusCode(res.StatusCode, res);

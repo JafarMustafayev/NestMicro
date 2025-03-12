@@ -9,4 +9,12 @@ public record RegisterRequest
     public string Password { get; set; }
 
     public string ConfirmPassword { get; set; }
+
+    public RegisterRequest()
+    {
+        UserName = string.Empty;
+        Email = string.Empty;
+        Password = string.Empty;
+        ConfirmPassword = string.Empty;
+    }
 }

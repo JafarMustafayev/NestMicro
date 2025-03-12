@@ -9,4 +9,12 @@ public class ChangePasswordRequest
     public string Password { get; set; }
 
     public string ConfirmPassword { get; set; }
+
+    public ChangePasswordRequest()
+    {
+        UserId = string.Empty;
+        CurrentPassword = string.Empty;
+        Password = string.Empty;
+        ConfirmPassword = string.Empty;
+    }
 }

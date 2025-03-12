@@ -9,4 +9,12 @@ public class ResetPasswordRequest
     public string NewPassword { get; set; }
 
     public string ConfirmPassword { get; set; }
+
+    public ResetPasswordRequest()
+    {
+        Email = string.Empty;
+        Token = string.Empty;
+        NewPassword = string.Empty;
+        ConfirmPassword = string.Empty;
+    }
 }

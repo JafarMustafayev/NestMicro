@@ -178,7 +178,7 @@ public class AuthService : IAuthService
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
         var resetUrl = Configurations.GetConfiguratinValue<string>("ClientUrl");
-        resetUrl = string.Concat(resetUrl, $"/auth/resetpassword?token={token.Encode()}&email={user.Email.Encode()}");
+        resetUrl = string.Concat(resetUrl, $"/auth/resetpassword?token={token.Encode()}&email={user?.Email?.Encode()}");
 
         // TODO:send email
 

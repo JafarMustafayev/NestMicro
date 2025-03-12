@@ -21,5 +21,6 @@ public class UserSession : BaseEntityId
         IsRevoked = false;
         CreatedByIp = string.Empty;
         RevokedByIp = string.Empty;
+        User = null!;
     }
 }

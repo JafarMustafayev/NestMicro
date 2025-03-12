@@ -12,34 +12,30 @@ public class UserRefreshToken : BaseEntityId
 
     public DateTime Expires { get; set; }
 
-    public bool IsUsed { get; set; } = false;
+    public bool IsUsed { get; set; }
 
-    public bool IsRevoked { get; set; } = false;
+    public bool IsRevoked { get; set; }
 
     public string CreatedByIp { get; set; }
 
     public string? RevokedByIp { get; set; }
 
-    //public string? ReplacedByTokenId { get; set; }
-
     public virtual AppUser User { get; set; }
 
     public virtual UserSession Session { get; set; }
-
-    //public virtual UserRefreshToken? ReplacedByToken { get; set; }
 
     public UserRefreshToken()
     {
         UserId = string.Empty;
         SessionId = string.Empty;
-        CreatedAt = DateTime.UtcNow;
         Token = $"{Guid.NewGuid()}-{Guid.NewGuid()}";
+        CreatedAt = DateTime.UtcNow;
         Expires = DateTime.UtcNow;
         IsUsed = false;
         IsRevoked = false;
-
-        //ReplacedByTokenId = string.Empty;
         CreatedByIp = string.Empty;
         RevokedByIp = string.Empty;
+        User = null!;
+        Session = null!;
     }
 }

@@ -26,12 +26,14 @@ public class EmailService : IEmailService
 
     public async Task<string> EmailSender(MailRequest request)
     {
+        var enableSSl = Configurations.GetConfiguratinValue<bool>("MailSettings", "EnableSSL");
+        var timeout = Configurations.GetConfiguratinValue<int>("MailSettings", "SMTPTimeout");
         try
         {
             var smtpClient = new SmtpClient()
             {
-                EnableSsl = true,
-                Timeout = 60000,
+                EnableSsl = enableSSl,
+                Timeout = timeout,
                 Host = Configurations.GetConfiguratinValue<string>("MailSettings", "Host"),
                 Port = Configurations.GetConfiguratinValue<int>("MailSettings", "Port"),
                 Credentials = new NetworkCredential(
@@ -569,7 +571,9 @@ public class EmailService : IEmailService
                 }
 
                 Console.WriteLine(DateTime.Now.ToLongTimeString());
-                await Task.Delay(5000, cancellationToken);
+                
+                var repetitionInterval = Configurations.GetConfiguratinValue<int>("MailSettings","RepetitionIntervalSeconds");
+                await Task.Delay(repetitionInterval, cancellationToken);
             }
             catch (Exception ex)
             {

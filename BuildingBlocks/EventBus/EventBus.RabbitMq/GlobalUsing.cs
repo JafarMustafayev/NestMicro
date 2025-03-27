@@ -1,7 +1,6 @@
 global using RabbitMQ.Client;
 global using EventBus.Abstractions.Abstractions;
 global using EventBus.RabbitMq.Abstractions;
-global using System.Net.Sockets;
 global using RabbitMQ.Client.Events;
 global using System.Text;
 global using System.Text.Json;
@@ -13,4 +12,6 @@ global using RabbitMQ.Client;
 global using EventBus.RabbitMq.Connections;
 global using EventBus.RabbitMq.Subscriptions;
 global using EventBus.RabbitMq.Extensions;
-global using EventBus.RabbitMq;
+global using Microsoft.AspNetCore.Mvc;
+global using RabbitMQ.Client.Exceptions;
+global using System.Text.Json.Serialization;

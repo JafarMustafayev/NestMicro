@@ -1,7 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
-
 namespace EventBus.RabbitMq.Controllers;
-
 
 [Route("api/[controller]")]
 [ApiController]
@@ -14,10 +11,16 @@ public class TestController : ControllerBase
         _eventBus = eventBus;
     }
 
-    [HttpGet]
-    public IActionResult SendEvent()
+    [HttpGet("{message}/{serialNumber}/{version}")]
+    public async Task<IActionResult> SendTestEvent(string message, string serialNumber, int version)
     {
-        _eventBus.PublishAsync(new TestEvent { Message = "Hello World" });
-        return Ok();
+        var @event = new TestEvent()
+        {
+            SerialNumber = serialNumber,
+            Version = version,
+            Message = message,
+        };
+        await _eventBus.PublishAsync(@event);
+        return Ok("Event send");
     }
 }

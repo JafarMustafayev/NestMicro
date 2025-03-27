@@ -1,15 +1,15 @@
 namespace EventBus.RabbitMq.Connections;
 
-public class RabbitMQPersistentConnection : IRabbitMQPersistentConnection
+public class RabbitMqPersistentConnection : IRabbitMqPersistentConnection
 {
     private readonly IConnectionFactory _connectionFactory;
-    private readonly ILogger<RabbitMQPersistentConnection> _logger;
+    private readonly ILogger<RabbitMqPersistentConnection> _logger;
     private IConnection _connection;
     private bool _disposed;
 
-    public RabbitMQPersistentConnection(
+    public RabbitMqPersistentConnection(
         IConnectionFactory connectionFactory,
-        ILogger<RabbitMQPersistentConnection> logger)
+        ILogger<RabbitMqPersistentConnection> logger)
     {
         _connectionFactory = connectionFactory;
         _logger = logger;
@@ -19,12 +19,12 @@ public class RabbitMQPersistentConnection : IRabbitMQPersistentConnection
 
     public IModel CreateModel()
     {
-        if (!IsConnected)
+        if (IsConnected)
         {
-            throw new InvalidOperationException("No RabbitMQ connections available");
+            return _connection.CreateModel();
         }
 
-        return _connection.CreateModel();
+        throw new InvalidOperationException("RabbitMQ is not connected");
     }
 
     public bool TryConnect()
@@ -32,19 +32,20 @@ public class RabbitMQPersistentConnection : IRabbitMQPersistentConnection
         try
         {
             _connection = _connectionFactory.CreateConnection();
-            _connection.ConnectionShutdown += (sender, e) =>
+            _connection.ConnectionShutdown += (s, e) =>
             {
                 if (_disposed) return;
-                _logger.LogWarning("RabbitMQ connection shutdown. Trying to reconnect...");
+                _logger.LogWarning("RabbitMQ connection lost. Trying to reconnect...");
                 TryConnect();
             };
-            _logger.LogInformation("RabbitMQ connection established");
+
+            _logger.LogInformation("RabbitMQ connection successfully established");
             return true;
         }
-        catch (SocketException ex)
+        catch (BrokerUnreachableException)
         {
-            _logger.LogError(ex, "RabbitMQ connection failed");
-            return false;
+            Thread.Sleep(2000);
+            return TryConnect();
         }
     }
 

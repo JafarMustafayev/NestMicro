@@ -4,28 +4,46 @@ public static class DependencyInjection
 {
     public static void AddRabbitMqEventBus(this IServiceCollection services)
     {
-        services.AddTransient<IIntegrationEventHandler<TestEvent>, TestEventHandler>();
+        services.ConfigureRabbitMq();
+        services.AddSingletonServices();
+        services.AddTransientServices();
+    }
 
-        services.AddSingleton<IRabbitMQPersistentConnection>(sp =>
+    private static void ConfigureRabbitMq(this IServiceCollection services)
+    {
+        services.AddSingleton<IRabbitMqPersistentConnection>(sp =>
         {
             var factory = new ConnectionFactory()
             {
                 HostName = "192.168.1.86",
                 UserName = "guest",
                 Password = "guest",
-                Port = 5672,
                 DispatchConsumersAsync = true,
-                AutomaticRecoveryEnabled = true,
-                TopologyRecoveryEnabled = true, // Əhəmiyyətli!
-                RequestedHeartbeat = TimeSpan.FromSeconds(60)
+                AutomaticRecoveryEnabled = true
             };
 
-            Console.WriteLine($"Creating a new RabbitMQ connection: {factory.HostName}");
-
-            return new RabbitMQPersistentConnection(factory,
-                sp.GetRequiredService<ILogger<RabbitMQPersistentConnection>>());
+            return new RabbitMqPersistentConnection(
+                factory,
+                sp.GetRequiredService<ILogger<RabbitMqPersistentConnection>>()
+            );
         });
+    }
+
+    private static void AddSingletonServices(this IServiceCollection services)
+    {
         services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
-        services.AddSingleton<IEventBus, EventBusRabbitMQ>();
+        services.AddSingleton<IEventBus, EventBusRabbitMq>();
+    }
+
+    private static void AddTransientServices(this IServiceCollection services)
+    {
+        services.AddTransient<TestEventHandler>();
+        services.AddTransient<IIntegrationEventHandler<TestEvent>, TestEventHandler>();
+    }
+
+    public static void UseRabbitMqEventBus(this IApplicationBuilder app)
+    {
+        var eventBus = app.ApplicationServices.GetRequiredService<IEventBus>();
+        eventBus.Subscribe<TestEvent, TestEventHandler>(); // TestEvent üçün abunəlik
     }
 }

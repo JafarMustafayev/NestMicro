@@ -1,28 +1,22 @@
 namespace EventBus.RabbitMq;
 
-public class EventBusRabbitMQ : IEventBus, IDisposable
+public class EventBusRabbitMq : IEventBus, IDisposable
 {
-    private readonly IRabbitMQPersistentConnection _persistentConnection;
+    private readonly IRabbitMqPersistentConnection _persistentConnection;
     private readonly IEventBusSubscriptionsManager _subsManager;
-    private readonly ILogger<EventBusRabbitMQ> _logger;
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private IModel _consumerChannel;
     private const string ExchangeName = "event_bus";
-    // private readonly IEventLogService _eventLogService;
 
-    public EventBusRabbitMQ(
-            IRabbitMQPersistentConnection persistentConnection,
-            IEventBusSubscriptionsManager subsManager,
-            ILogger<EventBusRabbitMQ> logger,
-            IServiceScopeFactory serviceScopeFactory)
-        //IEventLogService eventLogService,
+    public EventBusRabbitMq(
+        IRabbitMqPersistentConnection persistentConnection,
+        IEventBusSubscriptionsManager subsManager,
+        IServiceScopeFactory serviceScopeFactory)
     {
         _persistentConnection = persistentConnection;
         _subsManager = subsManager;
-        _logger = logger;
         _serviceScopeFactory = serviceScopeFactory;
         InitializeRabbitMQ();
-        // _eventLogService = eventLogService;
     }
 
     private void InitializeRabbitMQ()
@@ -31,17 +25,15 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
         _subsManager.OnEventRemoved += OnEventRemoved;
     }
 
-    public async Task PublishAsync(IntegrationEvent @event)
+    public Task PublishAsync(IntegrationEvent @event)
     {
-        //await _eventLogService.SaveEventAsync(@event);
-
         if (!_persistentConnection.IsConnected)
         {
             _persistentConnection.TryConnect();
         }
 
         var eventName = @event.GetType().Name;
-        var body = JsonSerializer.SerializeToUtf8Bytes(@event);
+        var body = JsonSerializer.SerializeToUtf8Bytes(@event, @event.GetType());
 
         using var channel = _persistentConnection.CreateModel();
         var properties = channel.CreateBasicProperties();
@@ -54,20 +46,24 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
             basicProperties: properties,
             body: body
         );
-        //await _eventLogService.MarkEventAsPublishedAsync(@event.Id);
+
+        return Task.CompletedTask;
     }
 
     public void Subscribe<T, TH>() where T : IntegrationEvent where TH : IIntegrationEventHandler<T>
     {
         var eventName = typeof(T).Name;
         _subsManager.AddSubscription<T, TH>();
+
         if (!_persistentConnection.IsConnected)
         {
             _persistentConnection.TryConnect();
         }
 
-        using var channel = _persistentConnection.CreateModel();
+        // Kanalı USING-dən çıxarın! 
+        var channel = _persistentConnection.CreateModel();
         var queueName = GetQueueName(eventName);
+
         channel.QueueDeclare(
             queue: queueName,
             durable: true,
@@ -75,10 +71,25 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
             autoDelete: false,
             arguments: null
         );
+
         channel.QueueBind(
             queue: queueName,
             exchange: ExchangeName,
             routingKey: eventName
+        );
+
+        var consumer = new AsyncEventingBasicConsumer(channel);
+        consumer.Received += async (model, ea) =>
+        {
+            var message = Encoding.UTF8.GetString(ea.Body.Span);
+            await ProcessEvent(ea.RoutingKey, message);
+            channel.BasicAck(ea.DeliveryTag, multiple: false);
+        };
+
+        channel.BasicConsume(
+            queue: queueName,
+            autoAck: false,
+            consumer: consumer
         );
     }
 
@@ -101,35 +112,6 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
             durable: true,
             autoDelete: false
         );
-        var queueName = GetQueueName(""); // "event_bus_exchange__queue"
-        channel.QueueDeclare(
-            queue: queueName,
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null
-        );
-        // Queue ilə Exchange-i bind edin
-        channel.QueueBind(
-            queue: queueName,
-            exchange: ExchangeName,
-            routingKey: "" // Bütün eventlər üçün
-        );
-        var consumer = new AsyncEventingBasicConsumer(channel);
-        consumer.Received += async (model, ea) =>
-        {
-            var eventName = ea.RoutingKey;
-            var message = Encoding.UTF8.GetString(ea.Body.Span);
-
-            await ProcessEvent(eventName, message);
-
-            channel.BasicAck(ea.DeliveryTag, multiple: false);
-        };
-        channel.BasicConsume(
-            queue: queueName,
-            autoAck: false,
-            consumer: consumer
-        );
         return channel;
     }
 
@@ -137,9 +119,11 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
     {
         using var scope = _serviceScopeFactory.CreateScope();
 
-        if (!_subsManager.HasSubscriptionsForEvent(eventName)) return;
+        if (!_subsManager.HasSubscriptionsForEvent(eventName))
+            return;
 
         var eventType = _subsManager.GetEventTypeByName(eventName);
+
         var @event = JsonSerializer.Deserialize(message, eventType) as IntegrationEvent;
         var handlers = _subsManager.GetHandlersForEvent(eventName);
 
@@ -150,8 +134,6 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
             var concreteType = typeof(IIntegrationEventHandler<>).MakeGenericType(eventType);
             await (Task)concreteType.GetMethod("Handle").Invoke(handler, new object[] { @event });
-
-            //await _eventLogService.MarkEventAsProcessedAsync(@event.Id);
         }
     }
 
@@ -166,7 +148,8 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
         channel.QueueUnbind(
             queue: GetQueueName(eventName),
             exchange: ExchangeName,
-            routingKey: eventName);
+            routingKey: eventName
+        );
     }
 
     private static string GetQueueName(string eventName) => $"{ExchangeName}_{eventName}_queue";

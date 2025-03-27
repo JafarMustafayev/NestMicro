@@ -1,6 +1,6 @@
 namespace EventBus.RabbitMq.Abstractions;
 
-public interface IRabbitMQPersistentConnection : IDisposable
+public interface IRabbitMqPersistentConnection : IDisposable
 {
     bool IsConnected { get; }
     IModel CreateModel();

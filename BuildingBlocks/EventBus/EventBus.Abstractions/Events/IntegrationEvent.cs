@@ -1,6 +1,6 @@
 namespace EventBus.Abstractions.Events;
 
-public class IntegrationEvent
+public abstract class IntegrationEvent
 {
     public string Id { get; }
     public DateTime CreatedAt { get; }

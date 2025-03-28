@@ -7,13 +7,15 @@ public class AuthService : IAuthService
     private readonly SignInManager<AppUser> _signInManager;
     private readonly ITokenService _tokenService;
     private readonly IUserSessionService _userSessionService;
+    private readonly IEventBus _eventBus;
 
     public AuthService(
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager,
         RoleManager<AppRole> roleManager,
         ITokenService tokenService,
-        IUserSessionService userSessionService)
+        IUserSessionService userSessionService,
+        IEventBus eventBus)
 
     {
         _userManager = userManager;
@@ -21,6 +23,7 @@ public class AuthService : IAuthService
         _roleManager = roleManager;
         _tokenService = tokenService;
         _userSessionService = userSessionService;
+        _eventBus = eventBus;
     }
 
     public async Task<ResponseDto> RegisterAsync(RegisterRequest request)
@@ -55,16 +58,24 @@ public class AuthService : IAuthService
             {
                 errors += item + Environment.NewLine;
             }
+
             throw new OperationFailedException(errors);
         }
 
-        //await _userManager.AddToRoleAsync(user, Roles.Customer);
+        await _userManager.AddToRoleAsync(user, Roles.Customer);
 
         var confirmedEmailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         string confirmeUrl = Configurations.GetConfiguratinValue<string>("ClientUrl");
-        confirmeUrl = string.Concat(confirmeUrl, $"/auth/verifyemail?token={confirmedEmailToken.Encode()}&userId={user.Id.Encode()}&email={user.Email?.Encode()}");
+        confirmeUrl = string.Concat(confirmeUrl,
+            $"/auth/verifyemail?token={confirmedEmailToken.Encode()}&userId={user.Id.Encode()}&email={user.Email?.Encode()}");
 
-        // TODO: send email
+        UserRegisteredEvent @event = new()
+        {
+            Email = user.Email,
+            ConfirmedUrl = confirmeUrl,
+            UserName = user.UserName,
+        };
+        await _eventBus.PublishAsync(@event);
 
         return new()
         {
@@ -102,6 +113,7 @@ public class AuthService : IAuthService
         await _userManager.UpdateSecurityStampAsync(user);
 
         user.UserStatus = UserStatus.Active;
+        await _userManager.UpdateAsync(user);
 
         return new()
         {
@@ -218,6 +230,7 @@ public class AuthService : IAuthService
             {
                 errors += item + Environment.NewLine;
             }
+
             throw new OperationFailedException(errors);
         }
 
@@ -285,6 +298,7 @@ public class AuthService : IAuthService
         {
             throw new AuthenticationException("User not found");
         }
+
         var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.Password);
         if (!result.Succeeded)
         {
@@ -293,8 +307,10 @@ public class AuthService : IAuthService
             {
                 errors += item + Environment.NewLine;
             }
+
             throw new OperationFailedException(errors);
         }
+
         await _userManager.UpdateSecurityStampAsync(user);
 
         return new()
@@ -314,6 +330,7 @@ public class AuthService : IAuthService
         {
             throw new AuthenticationException("User not found");
         }
+
         user.UserStatus = UserStatus.Banned;
         await _userManager.UpdateAsync(user);
         return new()
@@ -333,6 +350,7 @@ public class AuthService : IAuthService
         {
             throw new AuthenticationException("User not found");
         }
+
         user.UserStatus = UserStatus.Active;
         await _userManager.UpdateAsync(user);
         return new()
@@ -352,6 +370,7 @@ public class AuthService : IAuthService
         {
             throw new AuthenticationException("User not found");
         }
+
         await _signInManager.SignOutAsync();
 
         var sessionId = await _tokenService.GetSessionId(request.UserId, request.RefreshToken);

@@ -17,9 +17,11 @@ public static class ServicesRegistrator
 
         services.AddServices();
 
-        services.AddMassTransit();
+        services.AddEventsHandlers();
 
         services.AddAutoMapper(typeof(GetEmailTemplateDto).Assembly);
+
+        services.ConfigureRabbitMq(serverIsAvailable);
     }
 
     private static void ConnectSqlServer(this IServiceCollection services, bool serverIsAvailable)
@@ -58,12 +60,39 @@ public static class ServicesRegistrator
 
     private static void AddServices(this IServiceCollection services)
     {
+        services.AddSingleton<IEventBus, EventBusRabbitMq>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+        services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
+        services.AddSingleton<IEventBus, EventBusRabbitMq>();
     }
 
-    private static void AddMassTransit(this IServiceCollection services)
+    private static void ConfigureRabbitMq(this IServiceCollection services, bool serverIsAvailable)
     {
+        services.AddSingleton<IRabbitMqPersistentConnection>(sp =>
+        {
+            var subSection = (serverIsAvailable ? "DockerHostOnServer" : "DockerHostOnPrem");
+
+            var factory = new ConnectionFactory()
+            {
+                HostName = Configurations.GetConfiguratinValue<string>("RabbitMq", subSection, "HostName"),
+                UserName = Configurations.GetConfiguratinValue<string>("RabbitMq", subSection, "UserName"),
+                Password = Configurations.GetConfiguratinValue<string>("RabbitMq", subSection, "Password"),
+                DispatchConsumersAsync = true,
+                AutomaticRecoveryEnabled = true
+            };
+
+            return new RabbitMqPersistentConnection(
+                factory,
+                sp.GetRequiredService<ILogger<RabbitMqPersistentConnection>>()
+            );
+        });
+    }
+
+    private static void AddEventsHandlers(this IServiceCollection services)
+    {
+        services.AddTransient<UserRegisteredIntegrationEventHandler>();
+        services.AddTransient<IIntegrationEventHandler<UserRegisteredEvent>, UserRegisteredIntegrationEventHandler>();
     }
 
     public static async Task RegisterWithConsul(this IApplicationBuilder app, IHostApplicationLifetime lifetime)
@@ -111,5 +140,11 @@ public static class ServicesRegistrator
         {
             Console.WriteLine($"Error registering with Consul: {ex.Message}");
         }
+    }
+
+    public static void UseRabbitMqEventBus(this IApplicationBuilder app)
+    {
+        var eventBus = app.ApplicationServices.GetRequiredService<IEventBus>();
+        eventBus.Subscribe<UserRegisteredEvent, UserRegisteredIntegrationEventHandler>();
     }
 }

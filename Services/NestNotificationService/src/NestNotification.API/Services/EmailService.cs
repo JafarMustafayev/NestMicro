@@ -74,7 +74,7 @@ public class EmailService : IEmailService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Email sending failed to {Email}", request.ToEmail);
-            throw ;
+            throw;
         }
     }
 
@@ -571,8 +571,12 @@ public class EmailService : IEmailService
                 }
 
                 Console.WriteLine(DateTime.Now.ToLongTimeString());
-                
-                var repetitionInterval = Configurations.GetConfiguratinValue<int>("MailSettings","RepetitionIntervalSeconds");
+
+                var repetitionInterval =
+                    Configurations.GetConfiguratinValue<int>("RetryPolicy", "RepetitionIntervalTimeSpan");
+
+                //int repetitionIntervalSeconds = int.Parse(repetitionInterval);
+
                 await Task.Delay(repetitionInterval, cancellationToken);
             }
             catch (Exception ex)
@@ -606,7 +610,10 @@ public class EmailService : IEmailService
             email.ErrorMessage = ex.Message;
 
             // Maksimum cəhd sayını aşıbsa, uğursuz olaraq işarələ
-            if (email.RetryCount >= 3)
+
+            var retryCount = Configurations.GetConfiguratinValue<int>("RetryPolicy", "RetryCount");
+
+            if (email.RetryCount >= retryCount)
             {
                 email.Status = EmailStatus.Failed;
             }

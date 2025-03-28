@@ -4,11 +4,14 @@ public static class ServicesRegistrator
 {
     public static void AddAuthServices(this IServiceCollection services)
     {
-        var serverIsAvailable = InternetChecker.IsServerAvailable(Configurations.GetConfiguratinValue<string>("ServerIP")).Result;
+        var serverIsAvailable = InternetChecker
+            .IsServerAvailable(Configurations.GetConfiguratinValue<string>("ServerIP")).Result;
 
         services.ConnectSqlServer(serverIsAvailable);
 
         services.AddIdentity();
+
+        services.ConfigureRabbitMq(serverIsAvailable);
 
         services.AddConsul(serverIsAvailable);
 
@@ -18,7 +21,7 @@ public static class ServicesRegistrator
 
         services.AddServices();
 
-        services.AddMassTransit();
+        services.AddEventsHandlers();
     }
 
     private static void ConnectSqlServer(this IServiceCollection services, bool serverIsAvailable)
@@ -35,26 +38,53 @@ public static class ServicesRegistrator
     private static void AddIdentity(this IServiceCollection services)
     {
         services.AddIdentity<AppUser, AppRole>(options =>
-        {
-            options.Password.RequireDigit = false;
-            options.Password.RequireLowercase = false;
-            options.Password.RequireUppercase = false;
-            options.Password.RequireNonAlphanumeric = false;
-            options.Password.RequiredLength = 8;
-            options.User.RequireUniqueEmail = true;
-            options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._";
-            options.SignIn.RequireConfirmedEmail = true;
-        })
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 8;
+                options.User.RequireUniqueEmail = true;
+                options.User.AllowedUserNameCharacters =
+                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._";
+                options.SignIn.RequireConfirmedEmail = true;
+            })
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
+    }
+
+    private static void ConfigureRabbitMq(this IServiceCollection services, bool serverIsAvailable)
+    {
+        services.AddSingleton<IRabbitMqPersistentConnection>(sp =>
+        {
+            var subSection = (serverIsAvailable ? "DockerHostOnServer" : "DockerHostOnPrem");
+
+            var factory = new ConnectionFactory()
+            {
+                HostName = Configurations.GetConfiguratinValue<string>("RabbitMq", subSection, "HostName"),
+                UserName = Configurations.GetConfiguratinValue<string>("RabbitMq", subSection, "UserName"),
+                Password = Configurations.GetConfiguratinValue<string>("RabbitMq", subSection, "Password"),
+                DispatchConsumersAsync = true,
+                AutomaticRecoveryEnabled = true
+            };
+
+            return new RabbitMqPersistentConnection(
+                factory,
+                sp.GetRequiredService<ILogger<RabbitMqPersistentConnection>>()
+            );
+        });
+    }
+
+    private static void AddEventsHandlers(this IServiceCollection services)
+    {
     }
 
     private static void AddConsul(this IServiceCollection services, bool serverIsAvailable)
     {
         services.AddSingleton<IConsulClient, ConsulClient>(p => new ConsulClient(consulConfig =>
         {
-            consulConfig.Address = new Uri(Configurations.GetConfiguratinValue<string>
-                ("Consul", "ConsulServer",
+            consulConfig.Address = new Uri(Configurations.GetConfiguratinValue<string>("Consul",
+                "ConsulServer",
                 (serverIsAvailable ? "ConsulServerOnServer" : "ConsulServerOnPrem"))); //Consul server address
         }));
     }
@@ -78,23 +108,22 @@ public static class ServicesRegistrator
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IUserSessionService, UserSessionService>();
         services.AddScoped<IUserDeviceInfoService, UserDeviceInfoService>();
-    }
-
-    private static void AddMassTransit(this IServiceCollection services)
-    {
+        services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
+        services.AddSingleton<IEventBus, EventBusRabbitMq>();
     }
 
     public static async Task RegisterWithConsul(this IApplicationBuilder app, IHostApplicationLifetime lifetime)
     {
         var section = "Consul";
 
-        var serverIsAvailable = InternetChecker.IsServerAvailable(Configurations.GetConfiguratinValue<string>("ServerIP")).Result;
+        var serverIsAvailable = InternetChecker
+            .IsServerAvailable(Configurations.GetConfiguratinValue<string>("ServerIP")).Result;
 
         var route = Configurations.GetConfiguratinValue<string>(section, "ConsulClientHealthCheck", "HealthCheckRoute");
 
         var consulClientHealthCheck =
             $"{Configurations.GetConfiguratinValue<string>(section, "ConsulClientHealthCheck",
-            (serverIsAvailable ? "HealthCheckAddressOnServer" : "HealthCheckAddressOnPrem"))}{route}";
+                (serverIsAvailable ? "HealthCheckAddressOnServer" : "HealthCheckAddressOnPrem"))}{route}";
 
         var consulClient = app.ApplicationServices.GetRequiredService<IConsulClient>();
         var registration = new AgentServiceRegistration()

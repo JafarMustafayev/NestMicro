@@ -4,9 +4,9 @@ public static class DependencyInjection
 {
     public static void AddRabbitMqEventBus(this IServiceCollection services)
     {
-        services.ConfigureRabbitMq();
-        services.AddSingletonServices();
-        services.AddTransientServices();
+        //services.ConfigureRabbitMq();
+        //services.AddSingletonServices();
+        //services.AddTransientServices();
     }
 
     private static void ConfigureRabbitMq(this IServiceCollection services)
@@ -37,13 +37,9 @@ public static class DependencyInjection
 
     private static void AddTransientServices(this IServiceCollection services)
     {
-        services.AddTransient<TestEventHandler>();
-        services.AddTransient<IIntegrationEventHandler<TestEvent>, TestEventHandler>();
     }
 
     public static void UseRabbitMqEventBus(this IApplicationBuilder app)
     {
-        var eventBus = app.ApplicationServices.GetRequiredService<IEventBus>();
-        eventBus.Subscribe<TestEvent, TestEventHandler>(); // TestEvent üçün abunəlik
     }
 }

@@ -26,14 +26,12 @@ public class EmailService : IEmailService
 
     public async Task<string> EmailSender(MailRequest request)
     {
-        var enableSSl = Configurations.GetConfiguratinValue<bool>("MailSettings", "EnableSSL");
-        var timeout = Configurations.GetConfiguratinValue<int>("MailSettings", "SMTPTimeout");
         try
         {
             var smtpClient = new SmtpClient()
             {
-                EnableSsl = enableSSl,
-                Timeout = timeout,
+                EnableSsl = Configurations.GetConfiguratinValue<bool>("MailSettings", "EnableSSL"),
+                Timeout = Configurations.GetConfiguratinValue<int>("MailSettings", "SMTPTimeout"),
                 Host = Configurations.GetConfiguratinValue<string>("MailSettings", "Host"),
                 Port = Configurations.GetConfiguratinValue<int>("MailSettings", "Port"),
                 Credentials = new NetworkCredential(
@@ -114,7 +112,7 @@ public class EmailService : IEmailService
 
         foreach (var param in emailDto.Placeholders)
         {
-            body = body.Replace($"{{{param.Key}}}", param.Value);
+            body = body.Replace(string.Concat("{{", param.Key, "}}"), param.Value);
         }
 
         var map = _mapper.Map<EmailQueue>(emailDto);

@@ -5,16 +5,25 @@
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly IEventBus _eventBus;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, IEventBus eventBus)
         {
             _authService = authService;
+            _eventBus = eventBus;
         }
 
         [HttpGet]
-        public IActionResult test()
+        public async Task<IActionResult> Test()
         {
-            return Ok(new[] { "value1", "value2" });
+            UserRegisteredIntegrationEvent @enent = new()
+            {
+                UserName = "JafarMustafayev",
+                Email = "mhbcefer@gmail.com",
+                ConfirmedUrl = "https://github.com/JafarMustafayev/NestMicro",
+            };
+            await _eventBus.PublishAsync(@enent);
+            return Ok();
         }
 
         [HttpPost]

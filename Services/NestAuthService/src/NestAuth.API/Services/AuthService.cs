@@ -65,28 +65,25 @@ public class AuthService : IAuthService
         await _userManager.AddToRoleAsync(user, Roles.Customer);
 
         var confirmedEmailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        string confirmeUrl = Configurations.GetConfiguratinValue<string>("ClientUrl");
-        confirmeUrl = string.Concat(confirmeUrl,
+        string confirmedUrl = Configurations.GetConfiguratinValue<string>("ClientUrl");
+        confirmedUrl = string.Concat(confirmedUrl,
             $"/auth/verifyemail?token={confirmedEmailToken.Encode()}&userId={user.Id.Encode()}&email={user.Email?.Encode()}");
 
-        UserRegisteredEvent @event = new()
+        UserRegisteredIntegrationEvent @event = new()
         {
-            Email = user.Email,
-            ConfirmedUrl = confirmeUrl,
-            UserName = user.UserName,
+            Email = user?.Email ?? string.Empty,
+            ConfirmedUrl = confirmedUrl,
+            UserName = user?.UserName ?? string.Empty,
         };
         await _eventBus.PublishAsync(@event);
 
         return new()
         {
-            Errors = null,
             IsSuccess = true,
             Message = "User registered successfully",
             StatusCode = StatusCodes.Status200OK,
-            Data = new
-            {
-                emailVerifyUrl = confirmeUrl,
-            }
+            Data = null,
+            Errors = null
         };
     }
 
@@ -114,6 +111,16 @@ public class AuthService : IAuthService
 
         user.UserStatus = UserStatus.Active;
         await _userManager.UpdateAsync(user);
+
+        UserEmailConfirmedIntegrationEvent @enent = new()
+        {
+            UserId = user.Id,
+            UserName = user?.UserName ?? string.Empty,
+            Email = user?.Email ?? string.Empty,
+            ClientUrl = Configurations.GetConfiguratinValue<string>("ClientUrl"),
+        };
+
+        await _eventBus.PublishAsync(@enent);
 
         return new()
         {
@@ -189,21 +196,25 @@ public class AuthService : IAuthService
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
-        var resetUrl = Configurations.GetConfiguratinValue<string>("ClientUrl");
-        resetUrl = string.Concat(resetUrl, $"/auth/resetpassword?token={token.Encode()}&email={user?.Email?.Encode()}");
+        var clientUrl = Configurations.GetConfiguratinValue<string>("ClientUrl");
+        var resetUrl = string.Concat(clientUrl,
+            $"/auth/resetpassword?token={token.Encode()}&email={user?.Email?.Encode()}");
 
-        // TODO:send email
+        UserPasswordResetRequestedIntegrationEvent @event = new()
+        {
+            Email = user?.Email ?? string.Empty,
+            ResetUrl = resetUrl,
+            UserName = user?.UserName ?? string.Empty,
+        };
+        await _eventBus.PublishAsync(@event);
 
         return new()
         {
             IsSuccess = true,
             Message = "Password reset link sent to your email",
-            Errors = null,
             StatusCode = StatusCodes.Status200OK,
-            Data = new
-            {
-                resetUrl = resetUrl,
-            }
+            Errors = null,
+            Data = null
         };
     }
 

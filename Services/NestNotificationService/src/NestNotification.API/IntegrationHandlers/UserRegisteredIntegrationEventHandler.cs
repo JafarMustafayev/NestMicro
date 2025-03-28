@@ -1,6 +1,6 @@
 namespace NestNotification.API.IntegrationHandlers;
 
-public class UserRegisteredIntegrationEventHandler : IIntegrationEventHandler<UserRegisteredEvent>
+public class UserRegisteredIntegrationEventHandler : IIntegrationEventHandler<UserRegisteredIntegrationEvent>
 {
     private readonly IEmailService _emailService;
     private readonly IEmailTemplateRepository _emailTemplateRepository;
@@ -15,7 +15,7 @@ public class UserRegisteredIntegrationEventHandler : IIntegrationEventHandler<Us
         _logger = logger;
     }
 
-    public async Task Handle(UserRegisteredEvent @event)
+    public async Task Handle(UserRegisteredIntegrationEvent @event)
     {
         var template =
             await _emailTemplateRepository.GetByExpressionAsync(x =>
@@ -33,7 +33,8 @@ public class UserRegisteredIntegrationEventHandler : IIntegrationEventHandler<Us
             ToEmail = @event.Email,
             Placeholders = new()
             {
-                { "{$ConfirmedUrl}", @event.ConfirmedUrl }
+                { "$UserName", @event.UserName },
+                { "$ConfirmedUrl", @event.ConfirmedUrl }
             }
         });
     }

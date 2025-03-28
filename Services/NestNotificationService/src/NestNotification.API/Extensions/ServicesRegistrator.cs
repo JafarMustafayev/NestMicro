@@ -60,11 +60,16 @@ public static class ServicesRegistrator
 
     private static void AddServices(this IServiceCollection services)
     {
-        services.AddSingleton<IEventBus, EventBusRabbitMq>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IEmailTemplateService, EmailTemplateService>();
         services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
-        services.AddSingleton<IEventBus, EventBusRabbitMq>();
+        services.AddSingleton<IEventBus>(sp =>
+            new EventBusRabbitMq(
+                sp.GetRequiredService<IRabbitMqPersistentConnection>(),
+                sp.GetRequiredService<IEventBusSubscriptionsManager>(),
+                sp.GetRequiredService<IServiceScopeFactory>(),
+                "notification"
+            ));
     }
 
     private static void ConfigureRabbitMq(this IServiceCollection services, bool serverIsAvailable)
@@ -92,7 +97,20 @@ public static class ServicesRegistrator
     private static void AddEventsHandlers(this IServiceCollection services)
     {
         services.AddTransient<UserRegisteredIntegrationEventHandler>();
-        services.AddTransient<IIntegrationEventHandler<UserRegisteredEvent>, UserRegisteredIntegrationEventHandler>();
+        services.AddTransient<UserEmailConfirmedIntegrationEventHandler>();
+        services.AddTransient<UserPasswordResetRequestedIntegrationEventHandler>();
+
+        services.AddTransient<IIntegrationEventHandler<UserRegisteredIntegrationEvent>, UserRegisteredIntegrationEventHandler>();
+        services.AddTransient<IIntegrationEventHandler<UserEmailConfirmedIntegrationEvent>, UserEmailConfirmedIntegrationEventHandler>();
+        services.AddTransient<IIntegrationEventHandler<UserPasswordResetRequestedIntegrationEvent>, UserPasswordResetRequestedIntegrationEventHandler>();
+    }
+
+    public static void UseRabbitMqEventBus(this IApplicationBuilder app)
+    {
+        var eventBus = app.ApplicationServices.GetRequiredService<IEventBus>();
+        eventBus.Subscribe<UserRegisteredIntegrationEvent, UserRegisteredIntegrationEventHandler>();
+        eventBus.Subscribe<UserEmailConfirmedIntegrationEvent, UserEmailConfirmedIntegrationEventHandler>();
+        eventBus.Subscribe<UserPasswordResetRequestedIntegrationEvent, UserPasswordResetRequestedIntegrationEventHandler>();
     }
 
     public static async Task RegisterWithConsul(this IApplicationBuilder app, IHostApplicationLifetime lifetime)
@@ -131,20 +149,11 @@ public static class ServicesRegistrator
             await consulClient.Agent.ServiceDeregister(registration.ID);
             await consulClient.Agent.ServiceRegister(registration);
 
-            lifetime.ApplicationStopping.Register(async () =>
-            {
-                await consulClient.Agent.ServiceDeregister(registration.ID);
-            });
+            lifetime.ApplicationStopping.Register(async () => { await consulClient.Agent.ServiceDeregister(registration.ID); });
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error registering with Consul: {ex.Message}");
         }
-    }
-
-    public static void UseRabbitMqEventBus(this IApplicationBuilder app)
-    {
-        var eventBus = app.ApplicationServices.GetRequiredService<IEventBus>();
-        eventBus.Subscribe<UserRegisteredEvent, UserRegisteredIntegrationEventHandler>();
     }
 }

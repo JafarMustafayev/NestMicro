@@ -7,16 +7,19 @@ public class EventBusRabbitMq : IEventBus, IDisposable
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private IModel _consumerChannel;
     private const string ExchangeName = "event_bus";
+    private readonly string _queueSuffix;
 
     public EventBusRabbitMq(
         IRabbitMqPersistentConnection persistentConnection,
         IEventBusSubscriptionsManager subsManager,
-        IServiceScopeFactory serviceScopeFactory)
+        IServiceScopeFactory serviceScopeFactory,
+        string queueSuffix = "")
     {
         _persistentConnection = persistentConnection;
         _subsManager = subsManager;
         _serviceScopeFactory = serviceScopeFactory;
         InitializeRabbitMQ();
+        _queueSuffix = queueSuffix;
     }
 
     private void InitializeRabbitMQ()
@@ -127,14 +130,18 @@ public class EventBusRabbitMq : IEventBus, IDisposable
         var @event = JsonSerializer.Deserialize(message, eventType) as IntegrationEvent;
         var handlers = _subsManager.GetHandlersForEvent(eventName);
 
-        foreach (var handlerType in handlers)
+        var processingTasks = handlers.Select(async handlerType =>
         {
             var handler = scope.ServiceProvider.GetService(handlerType);
-            if (handler == null) continue;
+            if (handler == null) return;
 
             var concreteType = typeof(IIntegrationEventHandler<>).MakeGenericType(eventType);
-            await (Task)concreteType.GetMethod("Handle").Invoke(handler, new object[] { @event });
-        }
+            var handleMethod = concreteType.GetMethod("Handle");
+
+            await (Task)handleMethod.Invoke(handler, new object[] { @event });
+        }).ToList();
+
+        await Task.WhenAll(processingTasks);
     }
 
     private void OnEventRemoved(object sender, string eventName)
@@ -152,7 +159,7 @@ public class EventBusRabbitMq : IEventBus, IDisposable
         );
     }
 
-    private static string GetQueueName(string eventName) => $"{ExchangeName}_{eventName}_queue";
+    private string GetQueueName(string eventName) => $"{ExchangeName}_{eventName}_queue_{_queueSuffix}";
 
     public void Dispose()
     {

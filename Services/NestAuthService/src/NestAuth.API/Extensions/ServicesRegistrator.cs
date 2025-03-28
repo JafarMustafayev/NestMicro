@@ -109,7 +109,13 @@ public static class ServicesRegistrator
         services.AddScoped<IUserSessionService, UserSessionService>();
         services.AddScoped<IUserDeviceInfoService, UserDeviceInfoService>();
         services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
-        services.AddSingleton<IEventBus, EventBusRabbitMq>();
+        services.AddSingleton<IEventBus>(sp =>
+            new EventBusRabbitMq(
+                sp.GetRequiredService<IRabbitMqPersistentConnection>(),
+                sp.GetRequiredService<IEventBusSubscriptionsManager>(),
+                sp.GetRequiredService<IServiceScopeFactory>(),
+                "Auth" // Suffix əl ilə ötürülür
+            ));
     }
 
     public static async Task RegisterWithConsul(this IApplicationBuilder app, IHostApplicationLifetime lifetime)

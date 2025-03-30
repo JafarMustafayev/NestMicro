@@ -5,14 +5,14 @@ name: .NET CI
 
 on:
   push:
-    branches: [ "master", "develop", "feature/*" ]
+    branches: [ "*" ]
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
       - 'DockerFiles/**'
   
   pull_request:
-    branches: [ "master", "develop" ]
+    branches: [ "*" ]
     paths-ignore:
       - '**/*.md'
       - 'docs/**'

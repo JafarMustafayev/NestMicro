@@ -76,7 +76,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventBus.RabbitMq", "Buildi
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DockerFiles", "DockerFiles", "{66217A3B-F4B8-4B4A-AC5E-BCAF4B7D2BCD}"
 	ProjectSection(SolutionItems) = preProject
-		DockerFiles\DockerFile = DockerFiles\DockerFile
+		DockerFiles\AuthService.Dockerfile = DockerFiles\AuthService.Dockerfile
+		DockerFiles\NotificationService.Dockerfile = DockerFiles\NotificationService.Dockerfile
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Consul", "Consul", "{2CA3E659-8C4E-42A3-844D-94C9484589D1}"

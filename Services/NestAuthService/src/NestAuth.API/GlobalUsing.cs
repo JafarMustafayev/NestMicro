@@ -40,3 +40,4 @@ global using EventBus.RabbitMq.Subscriptions;
 global using RabbitMQ.Client;
 global using IP2LocationIOComponent;
 global using Newtonsoft.Json;
+global using StackExchange.Redis;

@@ -75,6 +75,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventBus.RabbitMq", "BuildingBlocks\EventBus\EventBus.RabbitMq\EventBus.RabbitMq.csproj", "{C1E5B7A4-7B97-4070-BCF8-014AD0A51A03}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DockerFiles", "DockerFiles", "{66217A3B-F4B8-4B4A-AC5E-BCAF4B7D2BCD}"
+	ProjectSection(SolutionItems) = preProject
+		DockerFiles\DockerFile = DockerFiles\DockerFile
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Consul", "Consul", "{2CA3E659-8C4E-42A3-844D-94C9484589D1}"
 	ProjectSection(SolutionItems) = preProject

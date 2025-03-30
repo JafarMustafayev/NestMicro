@@ -5,25 +5,28 @@
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        private readonly IEventBus _eventBus;
+        private readonly IUserSessionRepository _userSessionService;
+        private readonly ICacheService _cacheService;
 
-        public AuthController(IAuthService authService, IEventBus eventBus)
+        public AuthController(IAuthService authService, IUserSessionRepository userSessionService, ICacheService cacheService)
         {
             _authService = authService;
-            _eventBus = eventBus;
+            _userSessionService = userSessionService;
+            _cacheService = cacheService;
         }
 
         [HttpGet]
         public async Task<IActionResult> Test()
         {
-            UserRegisteredIntegrationEvent @enent = new()
+            var datas = await _cacheService.GetAllDatasAsync<UserSession>();
+            if (!datas.Any())
             {
-                UserName = "JafarMustafayev",
-                Email = "mhbcefer@gmail.com",
-                ConfirmedUrl = "https://github.com/JafarMustafayev/NestMicro",
-            };
-            await _eventBus.PublishAsync(@enent);
-            return Ok();
+                datas = _userSessionService.GetAll(true);
+                var isSuccesfulAsync = await _cacheService.SetAsync("", datas, TimeSpan.FromMinutes(1));
+                return isSuccesfulAsync ? Ok(datas) : BadRequest();
+            }
+
+            return Ok(datas);
         }
 
         [HttpPost]

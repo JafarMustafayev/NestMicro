@@ -13,9 +13,11 @@ public static class ServicesRegistrator
 
         services.ConfigureRabbitMq(serverIsAvailable);
 
-        services.AddConsul(serverIsAvailable);
+        //services.AddConsul(serverIsAvailable);
 
         services.AddFluent();
+
+        services.AddRedis(serverIsAvailable);
 
         services.AddRepository();
 
@@ -96,6 +98,21 @@ public static class ServicesRegistrator
         services.AddValidatorsFromAssembly(typeof(RegisterRequestValidator).Assembly);
     }
 
+    private static void AddRedis(this IServiceCollection services, bool serverIsAvailable)
+    {
+        services.AddSingleton<IConnectionMultiplexer>(
+            ConnectionMultiplexer.Connect(
+                Configurations.GetConfiguratinValue<string>("RedisServer", (serverIsAvailable ? "RedisOnServer" : "RedisOnPrem"))
+            )
+        );
+
+        // services.AddStackExchangeRedisCache(opt =>
+        // {
+        //     opt.Configuration = Configurations.GetConfiguratinValue<string>("RedisServer", (serverIsAvailable ? "RedisServerOnServer" : "RedisServerOnPrem"));
+        //     opt.InstanceName = Configurations.GetConfiguratinValue<string>("RedisServer", "RedisInstanceName");
+        // });
+    }
+
     private static void AddRepository(this IServiceCollection services)
     {
         services.AddScoped<ITokenRepository, TokenRepository>();
@@ -116,6 +133,7 @@ public static class ServicesRegistrator
                 sp.GetRequiredService<IServiceScopeFactory>(),
                 "Auth" // Suffix əl ilə ötürülür
             ));
+        services.AddSingleton<ICacheService, CacheService>();
     }
 
     public static async Task RegisterWithConsul(this IApplicationBuilder app, IHostApplicationLifetime lifetime)
@@ -154,10 +172,7 @@ public static class ServicesRegistrator
             await consulClient.Agent.ServiceDeregister(registration.ID);
             await consulClient.Agent.ServiceRegister(registration);
 
-            lifetime.ApplicationStopping.Register(async () =>
-            {
-                await consulClient.Agent.ServiceDeregister(registration.ID);
-            });
+            lifetime.ApplicationStopping.Register(async () => { await consulClient.Agent.ServiceDeregister(registration.ID); });
         }
         catch (Exception ex)
         {

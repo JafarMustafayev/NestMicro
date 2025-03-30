@@ -73,8 +73,8 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
-        context: .
-        file: ./Dockerfiles/Dockerfile
+        context: .  
+        file: ./DockerFiles/Dockerfile
         push: true
         tags: |
           ${{ secrets.DOCKER_REGISTRY }}/microshop:${{ env.BRANCH_NAME }}

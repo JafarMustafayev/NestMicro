@@ -1,27 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployments", "Deployments", "{045971F9-DB97-4369-B61D-8FD8BB795BEB}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{F004A23E-1456-4417-8F9B-9A63D5AE6497}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{83A7A439-921F-40DC-BA58-9469311388D6}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Consul", "Consul", "{134F5908-CDD0-45A1-BBC0-D9B8C4953F33}"
-	ProjectSection(SolutionItems) = preProject
-		Deployments\DockerFiles\Consul\docker-compose.yml = Deployments\DockerFiles\Consul\docker-compose.yml
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DockerFiles", "DockerFiles", "{228B6986-1611-46C2-A783-9270FD5DE472}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Redis", "Redis", "{E128A739-B264-46EA-8787-F500C634A621}"
-	ProjectSection(SolutionItems) = preProject
-		Deployments\DockerFiles\Redis\docker-compose.yml = Deployments\DockerFiles\Redis\docker-compose.yml
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RabbitMQ", "RabbitMQ", "{B9CC5ED8-AEFB-40C4-9DE2-4FE72CB9FB39}"
-	ProjectSection(SolutionItems) = preProject
-		Deployments\DockerFiles\RabbitMQ\docker-compose.yml = Deployments\DockerFiles\RabbitMQ\docker-compose.yml
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nest.Shared", "Shared\Nest.Shared\Nest.Shared.csproj", "{B1555929-58A3-4176-B150-B9F644CC10AF}"
 EndProject
@@ -93,16 +74,29 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventBus.Abstractions", "Bu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventBus.RabbitMq", "BuildingBlocks\EventBus\EventBus.RabbitMq\EventBus.RabbitMq.csproj", "{C1E5B7A4-7B97-4070-BCF8-014AD0A51A03}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DockerFiles", "DockerFiles", "{66217A3B-F4B8-4B4A-AC5E-BCAF4B7D2BCD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Consul", "Consul", "{2CA3E659-8C4E-42A3-844D-94C9484589D1}"
+	ProjectSection(SolutionItems) = preProject
+		DockerFiles\Consul\docker-compose.yml = DockerFiles\Consul\docker-compose.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RabbitMQ", "RabbitMQ", "{D63475CE-4746-430D-8D77-7912A7171B28}"
+	ProjectSection(SolutionItems) = preProject
+		DockerFiles\RabbitMQ\docker-compose.yml = DockerFiles\RabbitMQ\docker-compose.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Redis", "Redis", "{27828C6B-30AE-4215-8055-626AB29E0B03}"
+	ProjectSection(SolutionItems) = preProject
+		DockerFiles\Redis\docker-compose.yml = DockerFiles\Redis\docker-compose.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{228B6986-1611-46C2-A783-9270FD5DE472} = {045971F9-DB97-4369-B61D-8FD8BB795BEB}
-		{134F5908-CDD0-45A1-BBC0-D9B8C4953F33} = {228B6986-1611-46C2-A783-9270FD5DE472}
-		{E128A739-B264-46EA-8787-F500C634A621} = {228B6986-1611-46C2-A783-9270FD5DE472}
-		{B9CC5ED8-AEFB-40C4-9DE2-4FE72CB9FB39} = {228B6986-1611-46C2-A783-9270FD5DE472}
 		{B1555929-58A3-4176-B150-B9F644CC10AF} = {83A7A439-921F-40DC-BA58-9469311388D6}
 		{C80255CF-5C3C-4FCF-BEBE-891894F2AD6A} = {F004A23E-1456-4417-8F9B-9A63D5AE6497}
 		{ED6910A5-BD9A-4A92-9829-6D705CA2F67E} = {C80255CF-5C3C-4FCF-BEBE-891894F2AD6A}
@@ -137,6 +131,9 @@ Global
 		{78CAACB8-B880-44EE-92CC-92F47443B2B0} = {F02AFC80-123A-41B1-A0CA-012CD974F3AC}
 		{B01593BB-EF4D-4B14-BA59-92CE1B99E106} = {78CAACB8-B880-44EE-92CC-92F47443B2B0}
 		{C1E5B7A4-7B97-4070-BCF8-014AD0A51A03} = {78CAACB8-B880-44EE-92CC-92F47443B2B0}
+		{2CA3E659-8C4E-42A3-844D-94C9484589D1} = {66217A3B-F4B8-4B4A-AC5E-BCAF4B7D2BCD}
+		{D63475CE-4746-430D-8D77-7912A7171B28} = {66217A3B-F4B8-4B4A-AC5E-BCAF4B7D2BCD}
+		{27828C6B-30AE-4215-8055-626AB29E0B03} = {66217A3B-F4B8-4B4A-AC5E-BCAF4B7D2BCD}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{B1555929-58A3-4176-B150-B9F644CC10AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

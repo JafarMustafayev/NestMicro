@@ -129,13 +129,14 @@ NestMicro/
 │       ├── Exceptions/
 │       ├── Utils/
 │ 
-└── Deployments/
+└── Dockerfiles/
    ├── Consul/
    │   └── docker-compose.yml
    ├── RabbitMq
    │   └── docker-compose.yml
    ├── Redis
    │   └── docker-compose.yml
+   ├──Dockerfile
 ```
 
 ## Development Guidelines

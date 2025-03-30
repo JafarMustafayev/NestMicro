@@ -9,12 +9,14 @@ on:
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
+      - 'DockerFiles/**'
   
   pull_request:
     branches: [ "main", "develop" ]
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
+      - 'DockerFiles/**'
 
 jobs:
   build-and-test:

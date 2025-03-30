@@ -35,11 +35,14 @@ public class UserSessionService : IUserSessionService
             {
                 Id = d.Id,
                 UserId = d.UserId,
-                Device = d.DeviceInfo,
+                DeviceInfo = d.DeviceInfo,
+                LocationInfo = d.LocationInfo,
                 CreatedAt = d.CreatedAt,
                 IsRevoked = d.IsRevoked,
                 ExpiresAt = d.ExpiresAt
             });
+
+            //todo: add auto mapping 
         }
 
         return new()
@@ -70,7 +73,7 @@ public class UserSessionService : IUserSessionService
             {
                 Id = res.Id,
                 UserId = res.UserId,
-                Device = res.DeviceInfo,
+                DeviceInfo = res.DeviceInfo,
                 CreatedAt = res.CreatedAt,
                 IsRevoked = res.IsRevoked,
                 ExpiresAt = res.ExpiresAt
@@ -84,24 +87,59 @@ public class UserSessionService : IUserSessionService
     //    throw new NotImplementedException();
     //}
 
-    public async Task<string> CreateSessionAsync(string userId)
+    public async Task<(string sessionId, NewUserLoginDetectedIntegrationEvent @event)> CreateSessionAsync(AppUser user)
     {
+        var deviceInfo = _userDeviceInfoService.GetUserDeviceInfo();
+        var locationInfo = await _userDeviceInfoService.GetUserLocationInfo();
+
         UserSession session = new()
         {
-            UserId = userId,
+            UserId = user.Id,
+            CreatedByIp = _userDeviceInfoService.GetClientIp(),
             DeviceInfo = new
             {
-                DeviceType = _userDeviceInfoService.GetDeviceType(),
-                Browser = _userDeviceInfoService.GetBrowser(),
-                Os = _userDeviceInfoService.GetOs(),
-                DeviceName = _userDeviceInfoService.GetDeviceName(),
+                DeviceType = deviceInfo.DeviceType,
+                Browser = deviceInfo.Browser,
+                Os = deviceInfo.OperatingSystem,
+                DeviceName = deviceInfo.DeviceName,
             }.ToString(),
-            CreatedByIp = _userDeviceInfoService.GetClientIp()
+            LocationInfo = new
+            {
+                CountryName = locationInfo.CountryName,
+                RegionName = locationInfo.RegionName,
+                CityName = locationInfo.CityName,
+                Latitude = locationInfo.Latitude,
+                Longitude = locationInfo.Longitude,
+                TimeZone = locationInfo.TimeZone,
+            }.ToString(),
+            //todo: add auto mapping 
+        };
+
+        var timeZoneOffset = locationInfo.TimeZone != null ? locationInfo.TimeZone : "+ 00:00";
+        string parsableOffset = timeZoneOffset.StartsWith("+") ? timeZoneOffset.Substring(1) : timeZoneOffset;
+        var offset = TimeSpan.Parse(parsableOffset);
+
+        var localTime = DateTime.UtcNow + offset;
+
+        NewUserLoginDetectedIntegrationEvent @event = new()
+        {
+            Email = user?.Email ?? string.Empty,
+            UserName = user?.UserName ?? string.Empty,
+            IpAddress = _userDeviceInfoService.GetClientIp() ?? "-",
+            Country = locationInfo.CountryName ?? "-",
+            City = locationInfo.CityName ?? "-",
+            LocalTime = localTime.ToString("dd/MM/yyyy HH:mm") ?? "-",
+            UtcTime = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm"),
+            TimeZone = locationInfo.TimeZone ?? "-",
+            DeviceName = deviceInfo.DeviceName ?? "-",
+            DeviceType = deviceInfo.DeviceType ?? "-",
+            OperatingSystem = deviceInfo.OperatingSystem ?? "-",
+            ManageAccountUrl = "/account/manage"
         };
 
         await _userSessionRepository.AddAsync(session);
         await _userSessionRepository.SaveChangesAsync();
-        return session.Id;
+        return (session.Id, @event);
     }
 
     public async Task<ResponseDto> RevokeSessionAsync(string sessionId)

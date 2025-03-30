@@ -96,10 +96,12 @@ public static class ServicesRegistrator
 
     private static void AddEventsHandlers(this IServiceCollection services)
     {
+        services.AddTransient<NewUserLoginDetectedIntegrationEventHandler>();
         services.AddTransient<UserRegisteredIntegrationEventHandler>();
         services.AddTransient<UserEmailConfirmedIntegrationEventHandler>();
         services.AddTransient<UserPasswordResetRequestedIntegrationEventHandler>();
 
+        services.AddTransient<IIntegrationEventHandler<NewUserLoginDetectedIntegrationEvent>, NewUserLoginDetectedIntegrationEventHandler>();
         services.AddTransient<IIntegrationEventHandler<UserRegisteredIntegrationEvent>, UserRegisteredIntegrationEventHandler>();
         services.AddTransient<IIntegrationEventHandler<UserEmailConfirmedIntegrationEvent>, UserEmailConfirmedIntegrationEventHandler>();
         services.AddTransient<IIntegrationEventHandler<UserPasswordResetRequestedIntegrationEvent>, UserPasswordResetRequestedIntegrationEventHandler>();
@@ -108,6 +110,8 @@ public static class ServicesRegistrator
     public static void UseRabbitMqEventBus(this IApplicationBuilder app)
     {
         var eventBus = app.ApplicationServices.GetRequiredService<IEventBus>();
+
+        eventBus.Subscribe<NewUserLoginDetectedIntegrationEvent, NewUserLoginDetectedIntegrationEventHandler>();
         eventBus.Subscribe<UserRegisteredIntegrationEvent, UserRegisteredIntegrationEventHandler>();
         eventBus.Subscribe<UserEmailConfirmedIntegrationEvent, UserEmailConfirmedIntegrationEventHandler>();
         eventBus.Subscribe<UserPasswordResetRequestedIntegrationEvent, UserPasswordResetRequestedIntegrationEventHandler>();

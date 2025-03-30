@@ -3,14 +3,6 @@
 public interface IUserDeviceInfoService
 {
     string GetClientIp();
-
-    string GetUserAgent();
-
-    string GetDeviceType();
-
-    string GetBrowser();
-
-    string GetOs();
-
-    string GetDeviceName();
+    UserDeviceInfo GetUserDeviceInfo();
+    Task<UserLocationInfo> GetUserLocationInfo(string? ipAddress = null);
 }

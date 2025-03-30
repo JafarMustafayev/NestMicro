@@ -3,7 +3,8 @@
 public class UserSession : BaseEntityId
 {
     public string UserId { get; set; }
-    public string DeviceInfo { get; set; }
+    public string? DeviceInfo { get; set; }
+    public string? LocationInfo { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? ExpiresAt { get; set; }
     public bool IsRevoked { get; set; } = false;
@@ -17,6 +18,7 @@ public class UserSession : BaseEntityId
     {
         UserId = string.Empty;
         DeviceInfo = string.Empty;
+        LocationInfo = string.Empty;
         CreatedAt = DateTime.UtcNow;
         IsRevoked = false;
         CreatedByIp = string.Empty;

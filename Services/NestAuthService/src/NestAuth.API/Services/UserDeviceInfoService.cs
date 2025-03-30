@@ -23,19 +23,59 @@ public class UserDeviceInfoService : IUserDeviceInfoService
 
         if (ip != null && ip.Contains("::ffff:"))
         {
-            ip = ip.Replace("::ffff:", "");  // IPv6 mapped IPv4 formatını təmizlə
+            ip = ip.Replace("::ffff:", ""); // IPv6 mapped IPv4 formatını təmizlə
             return ip == "::1" ? "127.0.0.1" : ip;
         }
 
         return string.Empty;
     }
 
-    public string GetUserAgent()
+    public UserDeviceInfo GetUserDeviceInfo()
+    {
+        return new()
+        {
+            Browser = GetBrowser(),
+            DeviceType = GetDeviceType(),
+            DeviceName = GetDeviceName(),
+            OperatingSystem = GetOs(),
+            IpAddress = GetClientIp()
+        };
+    }
+
+    public async Task<UserLocationInfo> GetUserLocationInfo(string? ipAddress = null)
+    {
+        IP2LocationIOComponent.Configuration config = new()
+        {
+            ApiKey = Configurations.GetConfiguratinValue<string>("IPGeolocationToken")
+        };
+        IPGeolocation IPL = new(config);
+
+        if (ipAddress == null)
+        {
+            ipAddress = GetClientIp();
+        }
+
+        try
+        {
+            var ipResult = await IPL.Lookup(ipAddress);
+            var jsonString = JsonConvert.SerializeObject(ipResult, Formatting.Indented);
+
+            var locationResponse = JsonConvert.DeserializeObject<UserLocationInfo>(jsonString);
+
+            return locationResponse;
+        }
+        catch (Exception ex)
+        {
+            return new();
+        }
+    }
+
+    private string GetUserAgent()
     {
         return _httpContextAccessor?.HttpContext?.Request?.Headers.UserAgent.ToString() ?? string.Empty;
     }
 
-    public string GetDeviceType()
+    private string GetDeviceType()
     {
         var agent = GetUserAgent();
 
@@ -45,7 +85,7 @@ public class UserDeviceInfoService : IUserDeviceInfoService
         return clientInfo.Device.Family.ToString();
     }
 
-    public string GetBrowser()
+    private string GetBrowser()
     {
         var agent = GetUserAgent();
 
@@ -55,7 +95,7 @@ public class UserDeviceInfoService : IUserDeviceInfoService
         return $"{clientInfo.UA.Family} {clientInfo.UA.Major}";
     }
 
-    public string GetOs()
+    private string GetOs()
     {
         var agent = GetUserAgent();
 
@@ -65,7 +105,7 @@ public class UserDeviceInfoService : IUserDeviceInfoService
         return $"{clientInfo.OS.Family} {clientInfo.OS.Major}";
     }
 
-    public string GetDeviceName()
+    private string GetDeviceName()
     {
         var agent = GetUserAgent();
 

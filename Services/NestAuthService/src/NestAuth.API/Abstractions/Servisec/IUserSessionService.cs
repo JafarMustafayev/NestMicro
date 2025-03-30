@@ -8,7 +8,7 @@ public interface IUserSessionService
 
     //public IQueryable<UserSession> GetUserSessionsByDevice(string userId, string deviceId);
 
-    public Task<string> CreateSessionAsync(string userId);
+    public Task<(string sessionId, NewUserLoginDetectedIntegrationEvent @event)> CreateSessionAsync(AppUser user);
 
     public Task<ResponseDto> RevokeSessionAsync(string sessionId);
 

@@ -7,6 +7,7 @@ public class AuthService : IAuthService
     private readonly SignInManager<AppUser> _signInManager;
     private readonly ITokenService _tokenService;
     private readonly IUserSessionService _userSessionService;
+    private readonly IUserDeviceInfoService _deviceInfoService;
     private readonly IEventBus _eventBus;
 
     public AuthService(
@@ -15,7 +16,8 @@ public class AuthService : IAuthService
         RoleManager<AppRole> roleManager,
         ITokenService tokenService,
         IUserSessionService userSessionService,
-        IEventBus eventBus)
+        IEventBus eventBus,
+        IUserDeviceInfoService deviceInfoService)
 
     {
         _userManager = userManager;
@@ -24,6 +26,7 @@ public class AuthService : IAuthService
         _tokenService = tokenService;
         _userSessionService = userSessionService;
         _eventBus = eventBus;
+        _deviceInfoService = deviceInfoService;
     }
 
     public async Task<ResponseDto> RegisterAsync(RegisterRequest request)
@@ -156,8 +159,10 @@ public class AuthService : IAuthService
             throw new AuthenticationException("UserName or Password is invalid");
         }
 
-        var sessionId = await _userSessionService.CreateSessionAsync(user.Id);
-        var accessToken = await _tokenService.GenerateAccessTokenAsync(user, sessionId);
+        var session = await _userSessionService.CreateSessionAsync(user);
+        var accessToken = await _tokenService.GenerateAccessTokenAsync(user, session.sessionId);
+
+        await _eventBus.PublishAsync(session.@event);
 
         return new()
         {

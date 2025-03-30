@@ -38,3 +38,5 @@ global using EventBus.RabbitMq.Abstractions;
 global using EventBus.RabbitMq.Connections;
 global using EventBus.RabbitMq.Subscriptions;
 global using RabbitMQ.Client;
+global using IP2LocationIOComponent;
+global using Newtonsoft.Json;

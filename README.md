@@ -1,162 +1,190 @@
 # NestMicro E-Commerce Platform
 
 ## Overview
-NestMicro is an enterprise-grade e-commerce platform built with microservices architecture. The platform follows domain-driven design principles and implements a standardized approach to entity tracking and auditing through a shared BaseEntity structure.
+NestMicro is an enterprise-grade e-commerce platform built using a microservices architecture. The platform is designed for scalability, maintainability, and high availability, leveraging domain-driven design (DDD) principles and event-driven communication.
 
 ## Technology Stack
-- .NET 9
-- C# 12.0
-- Entity Framework Core 9.X.X
-- MassTransit with RabbitMQ 8.3.6
-- SQL Server
-- AutoMapper 12.0.1
-- Swagger/OpenAPI
-- Docker & Kubernetes
+
+- **Backend Framework:** .NET 8
+- **Programming Language:** C# 12.0
+- **ORM:** Entity Framework Core 8.0.8
+- **Message Broker:** EventBus with RabbitMQ 8.2.5
+- **Database:** SQL Server
+- **Object Mapping:** AutoMapper 12.0.1 & Mapster
+- **API Documentation:** Swagger/OpenAPI
+- **Containerization & Orchestration:** Docker & Kubernetes
+- **Service Discovery & Health Check:** Consul
+- **Caching:** Redis
 
 ## Core Features
 
 ### Base Entity Structure
-All entities in the system inherit from BaseEntity which provides:
-- Unique GUID-based identification
-- Creation tracking (date and user)
-- Modification tracking (date and user)
-- Soft delete functionality
-- Active status management
-- Audit trail capabilities
+All entities inherit from a shared `BaseEntity` class, which provides:
+
+- **GUID-based ID** for unique identification
+- **Creation & Modification Tracking** (timestamps and user IDs)
+- **Soft delete functionality** for logical data removal
+- **Active status management**
+- **Audit trail for entity changes**
 
 ### Microservices
-- **Auth Service**: User authentication and authorization
-- **Product Service**: Product and vendor management (Onion Architecture)
-- **Profile Service**: User profile and preferences
-- **Storage Service**: File and media management
-- **Stock Service**: Inventory management
-- **Payment Service**: Transaction processing
-- **Notification Service**: Communication handling
-- **Order Service**: Order processing
-- **Analytics Service**: Business intelligence
-- **Search Service**: Advanced search capabilities
+
+1. **Auth Service** - Handles authentication, authorization, and token management.
+2. **Product Service** - Manages products and vendors using Onion Architecture.
+3. **Stock Service** - Maintains product inventory and stock updates.
+4. **Storage Service** - Handles file and media uploads (product images, logos, profile pictures, etc.).
+5. **Order Service** - Manages order placement, processing, and status tracking.
+6. **Payment Service** - Handles transactions and payment processing.
+7. **Notification Service** - Sends email notifications (future plans for SMS and push notifications).
+8. **Report Service** - Generates analytics and user invoices.
+9. **Review Service** - Manages user reviews and ratings (Planed).
+10. **API Gateway** - Manages request routing, authentication, and health checks.
 
 ## Setup Instructions
 
 ### Prerequisites
+
 - .NET 9 SDK
 - SQL Server
 - RabbitMQ
+- Redis for cashing 
 - Docker Desktop
 - Kubernetes (optional)
+- Consul for service discovery
 
 ### Development Setup
 
 1. **Clone the Repository**
-```bash
-git clone https://github.com/JafarMustafayev/NestMicro.git
-cd NestMicro
-```
+   ```bash
+   git clone https://github.com/JafarMustafayev/NestMicro.git
+   cd NestMicro
+   ```
 
 2. **Restore Dependencies**
-```bash
-dotnet restore
-```
+   ```bash
+   dotnet restore
+   ```
 
 3. **Configure Environment**
-- Copy `appsettings.example.json` to `appsettings.Development.json`
-- Update connection strings and configuration settings
-- Set up user secrets for sensitive data:
-```bash
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" "your_connection_string"
-```
+    - Copy `appsettings.example.json` to `appsettings.Development.json`
+    - Update database connection strings and service URLs
+    - Configure user secrets for sensitive data:
+      ```bash
+      dotnet user-secrets set "ConnectionStrings:DefaultConnection" "your_connection_string"
+      ```
 
 4. **Database Setup**
-```bash
-# For each service that requires a database:
-cd src/ServiceName
-dotnet ef database update
-```
+   ```bash
+   # Apply migrations for each service that requires a database
+   cd Services/ServiceName
+   dotnet ef database update
+   ```
 
 5. **Run with Docker**
-```bash
-docker-compose up --build
-```
+   ```bash
+   docker-compose up --build
+   ```
 
 ### Production Deployment
 
 1. **Build Docker Images**
-```bash
-docker-compose -f docker-compose.prod.yml build
-```
+   ```bash
+   docker-compose -f docker-compose.prod.yml build
+   ```
 
 2. **Deploy to Kubernetes**
-```bash
-kubectl apply -f k8s/
-```
+   ```bash
+   kubectl apply -f k8s/
+   ```
 
 ## Project Structure
 
-```
+```plaintext
 NestMicro/
-├── src/
-│   ├── Services/
-│   │   ├── ProductService/    # Onion Architecture
-│   │   │   ├── API/
-│   │   │   ├── Application/
-│   │   │   ├── Domain/
-│   │   │   └── Infrastructure/
-│   │   └── OtherServices/     # Standard Structure
-│   │       ├── Controllers/
-│   │       ├── Services/
-│   │       ├── DTOs/
-│   │       └── etc...
-│   └── Shared/
-│       └── Nest.Shared/
-│           └── Entities/
-│               └── BaseEntity.cs
-├── tests/
-├── docs/
-│   ├── RFCs/
-│   └── PRD/
-└── docker/
+├── BuildingBlocks/
+│    └── EventBus/
+│        ├── EventBus.Abstractions/
+│        └── EventBus.RabbitMq/
+│
+├── Services/
+│   ├── ProductService/    # Onion Architecture
+│   │   ├── API/
+│   │   ├── Application/
+│   │   ├── Domain/
+│   │   └── Infrastructure/
+│   ├── StockService/
+│   ├── OrderService/
+│   ├── PaymentService/
+│   ├── NotificationService/
+│   ├── ReportService/
+│   ├── ReviewService/
+│   ├── AuthService/
+│   ├── StorageService/
+│   └──API Gateway/
+│ 
+├── Shared/
+│   └── Nest.Shared/
+│       ├── Entities/
+│       │   └── BaseEntity.cs
+│       ├── Exceptions/
+│       ├── Utils/
+│ 
+└── Deployments/
+   ├── Consul/
+   │   └── docker-compose.yml
+   ├── RabbitMq
+   │   └── docker-compose.yml
+   ├── Redis
+   │   └── docker-compose.yml
 ```
 
 ## Development Guidelines
 
 ### Entity Creation
-- All entities must inherit from BaseEntity
-- Use the provided audit fields for tracking
-- Implement soft delete using IsDelete flag
-- Maintain active status using IsActive
+
+- All entities must inherit from `BaseEntity`.
+- Use the provided audit fields for tracking changes.
+- Implement soft delete using `IsDeleted` flag.
+- Maintain active status using `IsActive` flag.
 
 ### API Standards
-- RESTful endpoints
-- Proper HTTP status codes
-- Comprehensive Swagger documentation
-- API versioning
-- DTOs for request/response
+
+- Follow RESTful API principles.
+- Use proper HTTP status codes.
+- Provide comprehensive Swagger documentation.
+- Implement API versioning.
+- Use DTOs for request/response objects.
 
 ### Database
-- Use EF Core with SQL Server
-- Implement proper migrations
-- Follow naming conventions
-- Respect soft delete pattern
+
+- Use Entity Framework Core with SQL Server.
+- Implement proper database migrations.
+- Follow consistent naming conventions.
+- Implement soft delete patterns.
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+1. Fork the repository.
+2. Create a feature branch.
+3. Commit your changes.
+4. Push to your branch.
+5. Create a Pull Request.
 
 ### Commit Convention
-- feat: New feature
-- fix: Bug fix
-- docs: Documentation
-- style: Formatting
-- refactor: Code restructuring
-- test: Adding tests
-- chore: Maintenance
+
+- **feat:** New feature implementation
+- **fix:** Bug fixes
+- **docs:** Documentation updates
+- **style:** Code formatting and style improvements
+- **refactor:** Code restructuring without functional changes
+- **test:** Adding or updating tests
+- **chore:** Maintenance tasks
 
 ## License
+
 This project is licensed under the MIT License. See LICENSE file for details.
 
 ## Support
-For support, please open an issue in the GitHub repository or contact the development team.
+
+For support, open an issue in the GitHub repository or contact the development team.
+

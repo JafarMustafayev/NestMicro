@@ -13,7 +13,7 @@ public static class ServicesRegistrator
 
         services.ConfigureRabbitMq(serverIsAvailable);
 
-        //services.AddConsul(serverIsAvailable);
+        services.AddConsul(serverIsAvailable);
 
         services.AddFluent();
 
@@ -121,7 +121,9 @@ public static class ServicesRegistrator
 
     private static void AddServices(this IServiceCollection services)
     {
-        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddScoped<IUserManagementService, UserManagementService>();
+        services.AddScoped<IPasswordManagementService, PasswordManagementService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IUserSessionService, UserSessionService>();
         services.AddScoped<IUserDeviceInfoService, UserDeviceInfoService>();

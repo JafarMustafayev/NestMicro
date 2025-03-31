@@ -4,8 +4,61 @@
       "UseServiceDiscovery": true,
       "ServiceName": "AuthService",
       "UpstreamPathTemplate": "/auth/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
       "DownstreamPathTemplate": "/api/auth/{everything}",
+      "DownstreamScheme": "http",
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "UseServiceDiscovery": true,
+      "ServiceName": "AuthService",
+      "UpstreamPathTemplate": "/password/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate": "/api/password/{everything}",
+      "DownstreamScheme": "http",
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "UseServiceDiscovery": true,
+      "ServiceName": "AuthService",
+      "UpstreamPathTemplate": "/Sessions/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate": "/api/Sessions/{everything}",
+      "DownstreamScheme": "http",
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "UseServiceDiscovery": true,
+      "ServiceName": "AuthService",
+      "UpstreamPathTemplate": "/UserManagement/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate": "/api/UserManagement/{everything}",
       "DownstreamScheme": "http",
       "LoadBalancerOptions": {
         "Type": "RoundRobin"
@@ -13,9 +66,10 @@
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://192.168.1.68:5005",
+    "BaseUrl": "http://192.168.1.67:5001",
     "ServiceDiscoveryProvider": {
-      "Host": "192.168.1.86", //Proqram run olunmamisdan once Consul serverin IP adresi yazilir
+      "Host": "192.168.1.86",
+      //Proqram run olunmamisdan once Consul serverin IP adresi yazilir
       "Port": 8500,
       "Type": "Consul",
       "PollingInterval": 1000

@@ -1,6 +1,5 @@
 ﻿namespace NestAPIGateway.Controllers;
 
-
 [Route("/[controller]")]
 [ApiController]
 public class HealthController : ControllerBase

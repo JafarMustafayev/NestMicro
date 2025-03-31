@@ -1,24 +1,23 @@
-﻿namespace NestNotification.API.Controllers
+﻿namespace NestNotification.API.Controllers;
+
+[Route("/[controller]")]
+[ApiController]
+public class HealthController : ControllerBase
 {
-    [Route("/[controller]")]
-    [ApiController]
-    public class HealthController : ControllerBase
+    private readonly IEmailService _mailService;
+
+    public HealthController(IEmailService mailService)
     {
-        private readonly IEmailService _mailService;
+        _mailService = mailService;
+    }
 
-        public HealthController(IEmailService mailService)
+    [HttpGet]
+    public IActionResult Get()
+    {
+        return Ok(new
         {
-            _mailService = mailService;
-        }
-
-        [HttpGet]
-        public IActionResult Get()
-        {
-            return Ok(new
-            {
-                Status = "Healthy",
-                Timestamp = DateTime.UtcNow
-            });
-        }
+            Status = "Healthy",
+            Timestamp = DateTime.UtcNow
+        });
     }
 }

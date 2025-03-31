@@ -1,17 +1,16 @@
-﻿namespace NestAuth.API.Controllers
+﻿namespace NestAuth.API.Controllers;
+
+[Route("/[controller]")]
+[ApiController]
+public class HealthController : ControllerBase
 {
-    [Route("/[controller]")]
-    [ApiController]
-    public class HealthController : ControllerBase
+    [HttpGet]
+    public IActionResult Get()
     {
-        [HttpGet]
-        public IActionResult Get()
+        return Ok(new
         {
-            return Ok(new
-            {
-                Status = "Healthy",
-                Timestamp = DateTime.UtcNow
-            });
-        }
+            Status = "Healthy",
+            Timestamp = DateTime.UtcNow
+        });
     }
 }

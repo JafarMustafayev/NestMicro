@@ -1,4 +1,5 @@
 # This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
 
 name: .NET CI
 
@@ -69,15 +70,15 @@ jobs:
         shell: bash
         run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//-/g')" >> $GITHUB_ENV
 
-      - name: Build and push Auth Service
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./DockerFiles/AuthService.Dockerfile
-          push: true
-          tags: |
-            ${{ secrets.DOCKER_REGISTRY }}/microshop-auth:${{ env.BRANCH_NAME }}
-            ${{ secrets.DOCKER_REGISTRY }}/microshop-auth:latest
+#      - name: Build and push Auth Service
+#        uses: docker/build-push-action@v5
+#        with:
+#          context: .
+#          file: ./DockerFiles/AuthService.Dockerfile
+#          push: true
+#          tags: |
+#            ${{ secrets.DOCKER_REGISTRY }}/microshop-auth:${{ env.BRANCH_NAME }}
+#            ${{ secrets.DOCKER_REGISTRY }}/microshop-auth:latest
 
   docker-build-notification-service:
     name: Build Notification Service
@@ -102,12 +103,12 @@ jobs:
         shell: bash
         run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//-/g')" >> $GITHUB_ENV
 
-      - name: Build and push Notification Service
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./DockerFiles/NotificationService.Dockerfile
-          push: true
-          tags: |
-            ${{ secrets.DOCKER_REGISTRY }}/microshop-notification:${{ env.BRANCH_NAME }}
-            ${{ secrets.DOCKER_REGISTRY }}/microshop-notification:latest
+#      - name: Build and push Notification Service
+#        uses: docker/build-push-action@v5
+#        with:
+#          context: .
+#          file: ./DockerFiles/NotificationService.Dockerfile
+#          push: true
+#          tags: |
+#            ${{ secrets.DOCKER_REGISTRY }}/microshop-notification:${{ env.BRANCH_NAME }}
+#            ${{ secrets.DOCKER_REGISTRY }}/microshop-notification:latest

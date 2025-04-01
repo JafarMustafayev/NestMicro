@@ -1,21 +1,23 @@
-﻿namespace NestAuth.API.Services;
+﻿using System.Security.Cryptography;
+
+namespace NestAuth.API.Services;
 
 public class TokenService : ITokenService
 {
-    //private readonly UserManager<AppUser> _userManager;
+    private readonly UserManager<AppUser> _userManager;
     private readonly ITokenRepository _tokenRepository;
 
     private readonly IUserDeviceInfoService _userDeviceInfoService;
 
     public TokenService(
-
-        //UserManager<AppUser> userManager,
+        UserManager<AppUser> userManager,
         ITokenRepository tokenRepository,
         IUserDeviceInfoService userDeviceInfoService)
     {
         //_userManager = userManager;
         _tokenRepository = tokenRepository;
         _userDeviceInfoService = userDeviceInfoService;
+        _userManager = userManager;
     }
 
     public async Task<JwtTokenResponse> GenerateAccessTokenAsync(AppUser user, string sessionId)
@@ -41,12 +43,12 @@ public class TokenService : ITokenService
             new Claim(ClaimTypes.Name, user.UserName ?? "UserName"),
         };
 
-        //var roles = await _userManager.GetRolesAsync(user);
+        var roles = await _userManager.GetRolesAsync(user);
 
-        //foreach (var role in roles)
-        //{
-        //    claims.Add(new Claim(ClaimTypes.Role, role));
-        //}
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
         JwtSecurityToken securityToken = new(
             audience: Configurations.GetConfiguratinValue<string>("IdentityParameters", "Audience"),
@@ -85,6 +87,7 @@ public class TokenService : ITokenService
         {
             throw new AuthenticationException("Invalid or expired refresh token.");
         }
+
         return token.SessionId;
     }
 
@@ -92,8 +95,8 @@ public class TokenService : ITokenService
     {
         var result = await _tokenRepository.AnyAsync(
             x => x.UserId == userId &&
-            x.Token == refreshToken &&
-            (!x.IsUsed && !x.IsRevoked && x.Expires > DateTime.UtcNow));
+                 x.Token == refreshToken &&
+                 (!x.IsUsed && !x.IsRevoked && x.Expires > DateTime.UtcNow));
 
         return result;
     }
@@ -143,6 +146,21 @@ public class TokenService : ITokenService
                 }
             }
         }
+
         await _tokenRepository.SaveChangesAsync();
+    }
+
+    public string GenerateOtpToken(int length = 6)
+    {
+        using var rng = RandomNumberGenerator.Create();
+        byte[] bytes = new byte[4];
+        rng.GetBytes(bytes);
+        int num = BitConverter.ToInt32(bytes) & 0x7FFFFFFF;
+        return num.ToString().PadLeft(length, '0').Substring(0, length);
+    }
+
+    public string GenerateTemporaryToken()
+    {
+        return $"{Guid.NewGuid().ToString()}-{Guid.NewGuid().ToString()}";
     }
 }

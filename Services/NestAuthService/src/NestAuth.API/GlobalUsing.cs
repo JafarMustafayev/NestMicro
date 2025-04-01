@@ -41,3 +41,4 @@ global using RabbitMQ.Client;
 global using IP2LocationIOComponent;
 global using Newtonsoft.Json;
 global using StackExchange.Redis;
+global using NestAuth.API.Tools;

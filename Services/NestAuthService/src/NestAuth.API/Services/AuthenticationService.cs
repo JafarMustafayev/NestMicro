@@ -1,32 +1,32 @@
-﻿namespace NestAuth.API.Services;
+﻿using AuthenticationException = Nest.Shared.Exceptions.AuthenticationException;
+
+namespace NestAuth.API.Services;
 
 public class AuthenticationService : IAuthenticationService
 {
     private readonly UserManager<AppUser> _userManager;
-    private readonly RoleManager<AppRole> _roleManager;
     private readonly SignInManager<AppUser> _signInManager;
     private readonly ITokenService _tokenService;
     private readonly IUserSessionService _userSessionService;
-    private readonly IUserDeviceInfoService _deviceInfoService;
     private readonly IEventBus _eventBus;
+    private readonly ICacheService _cacheService;
+
+    private readonly string _otpPrefix = "otp_";
 
     public AuthenticationService(
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager,
-        RoleManager<AppRole> roleManager,
         ITokenService tokenService,
         IUserSessionService userSessionService,
-        IEventBus eventBus,
-        IUserDeviceInfoService deviceInfoService)
+        IEventBus eventBus, ICacheService cacheService)
 
     {
         _userManager = userManager;
         _signInManager = signInManager;
-        _roleManager = roleManager;
         _tokenService = tokenService;
         _userSessionService = userSessionService;
         _eventBus = eventBus;
-        _deviceInfoService = deviceInfoService;
+        _cacheService = cacheService;
     }
 
     public async Task<ResponseDto> RegisterAsync(RegisterRequest request)
@@ -92,14 +92,13 @@ public class AuthenticationService : IAuthenticationService
 
     public async Task<ResponseDto> LoginAsync(LoginRequest request)
     {
-        AppUser? user = await _userManager.FindByEmailAsync(request.EmailOrUsername);
+        AppUser? user = Regex.IsMatch(request.EmailOrUsername, @"[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+")
+            ? await _userManager.FindByEmailAsync(request.EmailOrUsername)
+            : await _userManager.FindByNameAsync(request.EmailOrUsername);
+
         if (user == null)
         {
-            user = await _userManager.FindByNameAsync(request.EmailOrUsername);
-            if (user == null)
-            {
-                throw new AuthenticationException("UserName or Password is invalid");
-            }
+            throw new AuthenticationException("UserName or Password is invalid");
         }
 
         if (user.UserStatus == UserStatus.Banned)
@@ -107,21 +106,64 @@ public class AuthenticationService : IAuthenticationService
             throw new AuthenticationException("User is blocked");
         }
 
-        var result = await _signInManager.PasswordSignInAsync(user, request.Password, false, false);
+        var result = await _signInManager.PasswordSignInAsync(user, request.Password, false, true);
 
-        if (!result.Succeeded)
+        if (result.IsLockedOut)
+        {
+            throw new AuthenticationException("Your account is locked out. Kindly wait for 15 minutes and try again");
+        }
+
+        if (!result.Succeeded && !result.RequiresTwoFactor)
         {
             throw new AuthenticationException("UserName or Password is invalid");
         }
 
-        var session = await _userSessionService.CreateSessionAsync(user);
-        var accessToken = await _tokenService.GenerateAccessTokenAsync(user, session.sessionId);
+        if (await _userManager.GetTwoFactorEnabledAsync(user))
+        {
+            var otp = _tokenService.GenerateOtpToken();
+            var temporaryToken = _tokenService.GenerateTemporaryToken();
+            var expiresAt = TimeSpan.FromMinutes(1);
+            var key = $"{_otpPrefix}{temporaryToken}";
 
-        await _eventBus.PublishAsync(session.@event);
+            var cacheData = new TwoFaCache()
+            {
+                UserId = user.Id,
+                Otp = otp,
+                TemporaryToken = temporaryToken,
+                Expiration = expiresAt
+            };
+            await _cacheService.SetAsync(key,
+                cacheData,
+                expiresAt);
+
+            await _eventBus.PublishAsync(new User2FaOtpSentIntegrationEvent()
+            {
+                Email = user.Email ?? string.Empty,
+                UserName = user.UserName ?? string.Empty,
+                Otp = otp
+            });
+
+            return new()
+            {
+                IsSuccess = true,
+                Message = "OTP sent to your email.",
+                StatusCode = StatusCodes.Status202Accepted,
+                Data = new
+                {
+                    UserId = user.Id,
+                    ExpiresAt = expiresAt,
+                    TemporaryToken = temporaryToken,
+                    Email = EmailMasking.Mask(user.Email ?? string.Empty),
+                },
+            };
+        }
+
+        var (sessionId, @event) = await _userSessionService.CreateSessionAsync(user);
+        var accessToken = await _tokenService.GenerateAccessTokenAsync(user, sessionId);
+        await _eventBus.PublishAsync(@event);
 
         return new()
         {
-            Errors = null,
             IsSuccess = true,
             Message = "User logged in successfully",
             StatusCode = StatusCodes.Status200OK,
@@ -130,7 +172,7 @@ public class AuthenticationService : IAuthenticationService
                 TokenInfo = accessToken,
                 User = new
                 {
-                    Id = user.Id,
+                    UserId = user.Id,
                     UserName = user.UserName,
                     Email = user.Email,
                     Roles = await _userManager.GetRolesAsync(user)
@@ -139,86 +181,9 @@ public class AuthenticationService : IAuthenticationService
         };
     }
 
-    public async Task<ResponseDto> ForgotPasswordAsync(string email)
-    {
-        var isValid = Regex.IsMatch(email, "[^@ \\t\\r\\n]+@[^@ \\t\\r\\n]+\\.[^@ \\t\\r\\n]+");
-
-        if (!isValid)
-        {
-            throw new Nest.Shared.Exceptions.ValidationException("Invalid Email address");
-        }
-
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user == null)
-        {
-            throw new AuthenticationException("User not found");
-        }
-
-        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-
-        var clientUrl = Configurations.GetConfiguratinValue<string>("ClientUrl");
-        var resetUrl = string.Concat(clientUrl,
-            $"/auth/resetpassword?token={token.Encode()}&email={user?.Email?.Encode()}");
-
-        UserPasswordResetRequestedIntegrationEvent @event = new()
-        {
-            Email = user?.Email ?? string.Empty,
-            ResetUrl = resetUrl,
-            UserName = user?.UserName ?? string.Empty,
-        };
-        await _eventBus.PublishAsync(@event);
-
-        return new()
-        {
-            IsSuccess = true,
-            Message = "Password reset link sent to your email",
-            StatusCode = StatusCodes.Status200OK,
-            Errors = null,
-            Data = null
-        };
-    }
-
-    public async Task<ResponseDto> ResetPasswordAsync(ResetPasswordRequest request)
-    {
-        var isValid = Regex.IsMatch(request.Email.Decode(), "[^@ \\t\\r\\n]+@[^@ \\t\\r\\n]+\\.[^@ \\t\\r\\n]+");
-        if (!isValid)
-        {
-            throw new Nest.Shared.Exceptions.ValidationException("Invalid Email address");
-        }
-
-        var user = await _userManager.FindByEmailAsync(request.Email.Decode());
-        if (user == null)
-        {
-            throw new AuthenticationException("Invalid Email address");
-        }
-
-        var result = await _userManager.ResetPasswordAsync(user, request.Token.Decode(), request.NewPassword);
-
-        if (!result.Succeeded)
-        {
-            var errors = string.Empty;
-            foreach (var item in result.Errors.Select(e => e.Description).ToList())
-            {
-                errors += item + Environment.NewLine;
-            }
-
-            throw new OperationFailedException(errors);
-        }
-
-        await _userManager.UpdateSecurityStampAsync(user);
-
-        return new()
-        {
-            IsSuccess = true,
-            Message = "Password reset successfully",
-            Errors = null,
-            Data = null,
-            StatusCode = StatusCodes.Status200OK
-        };
-    }
-
     public async Task<ResponseDto> RefreshTokenAsync(RefreshTokenRequest request)
     {
+        //todo: userID back ile qebul olunacaq 
         if (string.IsNullOrEmpty(request.RefreshToken) || string.IsNullOrEmpty(request.UserId))
         {
             throw new AuthenticationException("Invalid refresh token or userId");
@@ -262,40 +227,9 @@ public class AuthenticationService : IAuthenticationService
         };
     }
 
-    public async Task<ResponseDto> ChangePasswordAsync(ChangePasswordRequest request)
-    {
-        var user = await _userManager.FindByIdAsync(request.UserId);
-        if (user == null)
-        {
-            throw new AuthenticationException("User not found");
-        }
-
-        var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.Password);
-        if (!result.Succeeded)
-        {
-            var errors = string.Empty;
-            foreach (var item in result.Errors.Select(e => e.Description).ToList())
-            {
-                errors += item + Environment.NewLine;
-            }
-
-            throw new OperationFailedException(errors);
-        }
-
-        await _userManager.UpdateSecurityStampAsync(user);
-
-        return new()
-        {
-            Errors = null,
-            IsSuccess = true,
-            Message = "Password changed successfully",
-            StatusCode = StatusCodes.Status200OK,
-            Data = null
-        };
-    }
-
     public async Task<ResponseDto> LogoutAsync(LogOutRequest request)
     {
+        //todo: userID back ile qebul olunacaq 
         var user = await _userManager.FindByIdAsync(request.UserId);
         if (user == null)
         {
@@ -317,6 +251,200 @@ public class AuthenticationService : IAuthenticationService
             Message = "User logged out successfully",
             StatusCode = StatusCodes.Status200OK,
             Data = null
+        };
+    }
+
+    public async Task<ResponseDto> EnableEmail2FAAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            throw new AuthenticationException("User not found");
+        }
+
+        if (user.UserStatus == UserStatus.Banned || user.UserStatus == UserStatus.LockedOut || await _userManager.IsLockedOutAsync(user))
+        {
+            throw new AuthenticationException("User is blocked");
+        }
+
+        if (await _userManager.GetTwoFactorEnabledAsync(user))
+        {
+            throw new InvalidOperationException("Function is already enabled");
+        }
+
+        var res = await _userManager.SetTwoFactorEnabledAsync(user, true);
+        if (!res.Succeeded)
+        {
+            var errors = string.Join(", ", res.Errors.Select(e => e.Description));
+            throw new OperationFailedException(errors);
+        }
+
+        return new ResponseDto
+        {
+            IsSuccess = true,
+            Message = "2FA enabled successfully",
+            StatusCode = StatusCodes.Status200OK
+        };
+    }
+
+    public async Task<ResponseDto> DisableEmail2FAAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            throw new AuthenticationException("User not found");
+        }
+
+        if (user.UserStatus == UserStatus.Banned || user.UserStatus == UserStatus.LockedOut || await _userManager.IsLockedOutAsync(user))
+        {
+            throw new AuthenticationException("User is blocked");
+        }
+
+        if (await _userManager.GetTwoFactorEnabledAsync(user))
+        {
+            throw new InvalidOperationException("The function is already passive");
+        }
+
+        var res = await _userManager.SetTwoFactorEnabledAsync(user, false);
+        if (!res.Succeeded)
+        {
+            var errors = string.Join(", ", res.Errors.Select(e => e.Description));
+            throw new OperationFailedException(errors);
+        }
+
+        return new ResponseDto
+        {
+            IsSuccess = true,
+            Message = "2FA enabled successfully",
+            StatusCode = StatusCodes.Status200OK
+        };
+    }
+
+    public async Task<ResponseDto> Regenerate2FACodeAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+        {
+            throw new AuthenticationException("UserName or Password is invalid");
+        }
+
+        if (user.UserStatus == UserStatus.Banned)
+        {
+            throw new AuthenticationException("User is blocked");
+        }
+
+        if (user.UserStatus == UserStatus.LockedOut || await _userManager.IsLockedOutAsync(user))
+        {
+            throw new AuthenticationException("Your account is locked out. Kindly wait for 15 minutes and try again");
+        }
+
+        var otp = _tokenService.GenerateOtpToken();
+        var temporaryToken = _tokenService.GenerateTemporaryToken();
+        var expiresAt = TimeSpan.FromMinutes(1);
+        var key = $"{_otpPrefix}{temporaryToken}";
+
+        var cacheData = new TwoFaCache()
+        {
+            UserId = user.Id,
+            Otp = otp,
+            TemporaryToken = temporaryToken,
+            Expiration = expiresAt
+        };
+        await _cacheService.SetAsync(key,
+            cacheData,
+            expiresAt);
+
+        await _eventBus.PublishAsync(new User2FaOtpSentIntegrationEvent()
+        {
+            Email = user.Email ?? string.Empty,
+            UserName = user.UserName ?? string.Empty,
+            Otp = otp
+        });
+
+        return new()
+        {
+            IsSuccess = true,
+            Message = "OTP sent to your email.",
+            StatusCode = StatusCodes.Status202Accepted,
+            Data = new
+            {
+                UserId = user.Id,
+                ExpiresAt = expiresAt,
+                TemporaryToken = temporaryToken,
+                Email = EmailMasking.Mask(user.Email ?? string.Empty),
+            },
+        };
+    }
+
+    public async Task<ResponseDto> Verify2FACodeAsync(Verify2FACodeRequest request)
+    {
+        var cacheKey = $"{_otpPrefix}{request.TemporaryToken}";
+        var cachedData = await _cacheService.GetAsync<TwoFaCache>(cacheKey);
+
+        if (cachedData == null)
+        {
+            throw new AuthenticationException("Invalid OTP code or expired session");
+        }
+
+        var user = await _userManager.FindByIdAsync(cachedData.UserId);
+        if (user == null)
+        {
+            throw new AuthenticationException("User not found");
+        }
+
+        if (user.UserStatus == UserStatus.LockedOut || await _userManager.IsLockedOutAsync(user))
+        {
+            throw new AuthenticationException("Your account is locked out. Kindly wait for 15 minutes and try again");
+        }
+
+        // OTP kodunu yoxlayırıq
+        if (cachedData.Otp.GetHashCode() != request.Code.GetHashCode())
+        {
+            // Yanlış cəhdləri izləyirik
+            string failedAttemptsKey = $"FAILED_ATTEMPTS_{user.Id}";
+            int failedAttempts = await _cacheService.GetAsync<int>(failedAttemptsKey);
+            failedAttempts++;
+
+            // Cache-i yeniləyirik
+            await _cacheService.SetAsync(failedAttemptsKey, failedAttempts, TimeSpan.FromMinutes(30));
+
+            // 5 və ya daha çox yanlış cəhd olubsa, hesabı kilidləyirik
+            if (failedAttempts >= 5)
+            {
+                await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.UtcNow.AddMinutes(15));
+                await _cacheService.RemoveAsync(failedAttemptsKey);
+                throw new AuthenticationException("Too many invalid attempts. Your account has been locked for 15 minutes");
+            }
+
+            throw new AuthenticationException($"Invalid OTP code. You have {5 - failedAttempts} attempts remaining");
+        }
+
+        // Uğurlu olduqda kilidlənmə cəhdlərini sıfırlayırıq
+        await _cacheService.RemoveAsync($"FAILED_ATTEMPTS_{user.Id}");
+        await _cacheService.RemoveAsync(cacheKey);
+
+        // Sessiya yaradıb token qaytarırıq
+        var (sessionId, @event) = await _userSessionService.CreateSessionAsync(user);
+        var accessToken = await _tokenService.GenerateAccessTokenAsync(user, sessionId);
+        await _eventBus.PublishAsync(@event);
+
+        return new ResponseDto
+        {
+            IsSuccess = true,
+            Message = "User logged in successfully",
+            StatusCode = StatusCodes.Status200OK,
+            Data = new
+            {
+                TokenInfo = accessToken,
+                User = new
+                {
+                    UserId = user.Id,
+                    Email = user.Email,
+                    UserName = user.UserName,
+                    Roles = await _userManager.GetRolesAsync(user)
+                }
+            }
         };
     }
 }

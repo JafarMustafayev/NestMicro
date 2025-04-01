@@ -50,6 +50,9 @@ public static class ServicesRegistrator
                 options.User.AllowedUserNameCharacters =
                     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._";
                 options.SignIn.RequireConfirmedEmail = true;
+                options.SignIn.RequireConfirmedAccount = false;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+                options.Lockout.MaxFailedAccessAttempts = 5;
             })
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
@@ -125,6 +128,8 @@ public static class ServicesRegistrator
         services.AddScoped<IUserManagementService, UserManagementService>();
         services.AddScoped<IPasswordManagementService, PasswordManagementService>();
         services.AddScoped<ITokenService, TokenService>();
+
+        services.AddScoped<ICurrentUserDataService, CurrentUserDataService>();
         services.AddScoped<IUserSessionService, UserSessionService>();
         services.AddScoped<IUserDeviceInfoService, UserDeviceInfoService>();
         services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();

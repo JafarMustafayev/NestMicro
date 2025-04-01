@@ -40,4 +40,18 @@ public class AuthController : ControllerBase
         var res = await _authenticationService.LogoutAsync(request);
         return StatusCode(res.StatusCode, res);
     }
+
+    [HttpPost]
+    public async Task<IActionResult> Verify2FaCode([FromBody] Verify2FACodeRequest request)
+    {
+        var res = await _authenticationService.Verify2FACodeAsync(request);
+        return StatusCode(res.StatusCode, res);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Regenerate2FaCode(string userId)
+    {
+        var res = await _authenticationService.Regenerate2FACodeAsync(userId);
+        return StatusCode(res.StatusCode, res);
+    }
 }

@@ -96,14 +96,16 @@ public static class ServicesRegistrator
 
     private static void AddEventsHandlers(this IServiceCollection services)
     {
-        services.AddTransient<NewUserLoginDetectedIntegrationEventHandler>();
+        services.AddTransient<User2FaOtpSentIntegrationEventHandler>();
         services.AddTransient<UserRegisteredIntegrationEventHandler>();
         services.AddTransient<UserEmailConfirmedIntegrationEventHandler>();
+        services.AddTransient<NewUserLoginDetectedIntegrationEventHandler>();
         services.AddTransient<UserPasswordResetRequestedIntegrationEventHandler>();
 
-        services.AddTransient<IIntegrationEventHandler<NewUserLoginDetectedIntegrationEvent>, NewUserLoginDetectedIntegrationEventHandler>();
+        services.AddTransient<IIntegrationEventHandler<User2FaOtpSentIntegrationEvent>, User2FaOtpSentIntegrationEventHandler>();
         services.AddTransient<IIntegrationEventHandler<UserRegisteredIntegrationEvent>, UserRegisteredIntegrationEventHandler>();
         services.AddTransient<IIntegrationEventHandler<UserEmailConfirmedIntegrationEvent>, UserEmailConfirmedIntegrationEventHandler>();
+        services.AddTransient<IIntegrationEventHandler<NewUserLoginDetectedIntegrationEvent>, NewUserLoginDetectedIntegrationEventHandler>();
         services.AddTransient<IIntegrationEventHandler<UserPasswordResetRequestedIntegrationEvent>, UserPasswordResetRequestedIntegrationEventHandler>();
     }
 
@@ -111,9 +113,10 @@ public static class ServicesRegistrator
     {
         var eventBus = app.ApplicationServices.GetRequiredService<IEventBus>();
 
-        eventBus.Subscribe<NewUserLoginDetectedIntegrationEvent, NewUserLoginDetectedIntegrationEventHandler>();
+        eventBus.Subscribe<User2FaOtpSentIntegrationEvent, User2FaOtpSentIntegrationEventHandler>();
         eventBus.Subscribe<UserRegisteredIntegrationEvent, UserRegisteredIntegrationEventHandler>();
         eventBus.Subscribe<UserEmailConfirmedIntegrationEvent, UserEmailConfirmedIntegrationEventHandler>();
+        eventBus.Subscribe<NewUserLoginDetectedIntegrationEvent, NewUserLoginDetectedIntegrationEventHandler>();
         eventBus.Subscribe<UserPasswordResetRequestedIntegrationEvent, UserPasswordResetRequestedIntegrationEventHandler>();
     }
 

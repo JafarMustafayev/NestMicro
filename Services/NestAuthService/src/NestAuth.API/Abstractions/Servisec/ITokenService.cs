@@ -15,4 +15,8 @@ public interface ITokenService
     public Task RevokeRefreshTokenAsync(string userId, string refreshToken);
 
     public Task RevokeUserRefreshAllTokens(string userId);
+
+    public string GenerateOtpToken(int length = 6);
+
+    public string GenerateTemporaryToken();
 }

@@ -1,4 +1,4 @@
-﻿namespace NestAuth.API.DTOs;
+﻿namespace NestAuth.API.DTOs.AuthDtos;
 
 public class LogOutRequest
 {

@@ -17,11 +17,11 @@ public interface IAuthenticationService
 
     Task<ResponseDto> Regenerate2FACodeAsync(string userId);
 
-    Task<ResponseDto> Verify2FACodeAsync(Verify2FACodeRequest request);
+    Task<ResponseDto> LoginWithEmailAuthenticator(Verify2FACodeRequest request);
 
-    // Task<ResponseDto> GenerateQRCodeForAuthenticatorAppAsync(string userId);
+    Task<ResponseDto> VerifyAuthenticator2FAAsync(string userId, string code);
 
-    // Task<ResponseDto> Setup2FAWithAuthenticatorAppAsync(string userId, string verificationCode);
+    Task<ResponseDto> SetupAuthenticator2FAAsync(string userId);
 
     //Task<ResponseDto> Generate2FARecoveryCodesAsync(string userId);
 }

@@ -5,8 +5,6 @@
 public class AuthController : ControllerBase
 {
     private readonly IAuthenticationService _authenticationService;
-    private readonly IUserSessionRepository _userSessionService;
-    private readonly ICacheService _cacheService;
 
     public AuthController(IAuthenticationService authenticationService)
     {
@@ -42,9 +40,9 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Verify2FaCode([FromBody] Verify2FACodeRequest request)
+    public async Task<IActionResult> LoginWith2Fa([FromBody] Verify2FACodeRequest request)
     {
-        var res = await _authenticationService.Verify2FACodeAsync(request);
+        var res = await _authenticationService.LoginWithEmailAuthenticator(request);
         return StatusCode(res.StatusCode, res);
     }
 
@@ -54,4 +52,40 @@ public class AuthController : ControllerBase
         var res = await _authenticationService.Regenerate2FACodeAsync(userId);
         return StatusCode(res.StatusCode, res);
     }
+
+    #region Authenticator With App
+
+    [HttpPost]
+    public async Task<IActionResult> SetupAuthenticator2Fa(string userId)
+    {
+        var res = await _authenticationService.SetupAuthenticator2FAAsync(userId);
+        return StatusCode(res.StatusCode, res);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> VerifyAuthenticator2Fa(string userId, string code)
+    {
+        var res = await _authenticationService.VerifyAuthenticator2FAAsync(userId, code);
+        return StatusCode(res.StatusCode, res);
+    }
+
+    #endregion
+
+    #region Authenticator With Email
+
+    [HttpPost]
+    public async Task<IActionResult> EnableEmailAuthenticator(string userId)
+    {
+        var res = await _authenticationService.EnableEmail2FAAsync(userId);
+        return StatusCode(res.StatusCode, res);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> DisableEmailAuthenticator(string userId)
+    {
+        var res = await _authenticationService.DisableEmail2FAAsync(userId);
+        return StatusCode(res.StatusCode, res);
+    }
+
+    #endregion
 }

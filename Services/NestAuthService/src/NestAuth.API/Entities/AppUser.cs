@@ -3,8 +3,9 @@
 public class AppUser : IdentityUser<string>
 {
     public DateTime CreatedAt { get; set; }
-
     public UserStatus UserStatus { get; set; }
+    public string? TwoFactorSecret { get; set; }
+    public IEnumerable<string>? RecoveryCodes { get; set; }
 
     public virtual ICollection<UserRefreshToken> RefreshTokens { get; set; } = new HashSet<UserRefreshToken>();
     public virtual ICollection<UserSession> Sessions { get; set; } = new HashSet<UserSession>();
@@ -13,5 +14,7 @@ public class AppUser : IdentityUser<string>
     {
         Id = Guid.NewGuid().ToString();
         UserStatus = UserStatus.PendingVerification;
+        TwoFactorSecret = string.Empty;
+        RecoveryCodes = null;
     }
 }

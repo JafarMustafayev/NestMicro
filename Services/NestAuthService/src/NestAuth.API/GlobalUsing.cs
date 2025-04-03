@@ -18,6 +18,7 @@ global using NestAuth.API.Abstractions.Servisec;
 global using NestAuth.API.Consts;
 global using NestAuth.API.Context;
 global using NestAuth.API.DTOs;
+global using NestAuth.API.DTOs.AuthDtos;
 global using NestAuth.API.Entities;
 global using NestAuth.API.Extensions;
 global using NestAuth.API.Middlewares;

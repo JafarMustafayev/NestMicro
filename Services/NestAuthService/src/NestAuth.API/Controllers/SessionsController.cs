@@ -33,7 +33,7 @@ public class SessionsController : ControllerBase
     }
 
     [HttpDelete("{userId}")]
-    public async Task<IActionResult> RevokeAll(string userId)
+    public async Task<IActionResult> RevokeAllSessions(string userId)
     {
         var res = await _userSessionService.RevokeAllSessionsAsync(userId);
         return StatusCode(res.StatusCode, res);

@@ -12,28 +12,28 @@ public class BulkEmailController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Send([FromBody] SendBulkEmailDto emailDto)
+    public async Task<IActionResult> SendBulkEmail([FromBody] SendBulkEmailDto emailDto)
     {
         var res = await _emailService.SendBulkEmailAsync(emailDto);
         return StatusCode(res.StatusCode, res);
     }
 
     [HttpPost]
-    public async Task<IActionResult> SendBulkTemplated([FromBody] SendBulkTemplatedEmailDto emailDto)
+    public async Task<IActionResult>  SendBulkTemplatedEmail([FromBody] SendBulkTemplatedEmailDto emailDto)
     {
         var res = await _emailService.SendBulkTemplatedEmailAsync(emailDto);
         return StatusCode(res.StatusCode, res);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Schedule([FromBody] SendScheduleBulkEmailDto sendScheduleBulkEmailDto)
+    public async Task<IActionResult> ScheduleBulkEmail([FromBody] SendScheduleBulkEmailDto sendScheduleBulkEmailDto)
     {
         var res = await _emailService.ScheduleBulkEmailAsync(sendScheduleBulkEmailDto);
         return StatusCode(res.StatusCode, res);
     }
 
     [HttpPost]
-    public async Task<IActionResult> ScheduleBulkTemplated([FromBody] SendScheduleBulkTemplatedEmailDto sendScheduleBulkTemplatedEmailDto)
+    public async Task<IActionResult> ScheduleBulkTemplatedEmail ([FromBody] SendScheduleBulkTemplatedEmailDto sendScheduleBulkTemplatedEmailDto)
     {
         var res = await _emailService.ScheduleBulkTemplatedEmailAsync(sendScheduleBulkTemplatedEmailDto);
         return StatusCode(res.StatusCode, res);

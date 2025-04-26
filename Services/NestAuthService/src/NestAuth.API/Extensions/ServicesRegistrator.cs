@@ -67,6 +67,7 @@ public static class ServicesRegistrator
             var factory = new ConnectionFactory()
             {
                 HostName = Configurations.GetConfiguratinValue<string>("RabbitMq", subSection, "HostName"),
+                Port = Configurations.GetConfiguratinValue<int>("RabbitMq", subSection, "Port"),
                 UserName = Configurations.GetConfiguratinValue<string>("RabbitMq", subSection, "UserName"),
                 Password = Configurations.GetConfiguratinValue<string>("RabbitMq", subSection, "Password"),
                 DispatchConsumersAsync = true,

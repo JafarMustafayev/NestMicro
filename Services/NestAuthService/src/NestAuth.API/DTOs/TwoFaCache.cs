@@ -13,4 +13,4 @@ public class TwoFaCache
         TemporaryToken = string.Empty;
         UserId = string.Empty;
     }
-}
+}   

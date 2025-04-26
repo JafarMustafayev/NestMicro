@@ -42,8 +42,9 @@ public class RabbitMqPersistentConnection : IRabbitMqPersistentConnection
             _logger.LogInformation("RabbitMQ connection successfully established");
             return true;
         }
-        catch (BrokerUnreachableException)
+        catch (BrokerUnreachableException ex)
         {
+            Console.WriteLine(ex.Message);
             Thread.Sleep(2000);
             return TryConnect();
         }

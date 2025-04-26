@@ -32,3 +32,4 @@ public class UserManagementController : ControllerBase
         return StatusCode(res.StatusCode, res);
     }
 }
+

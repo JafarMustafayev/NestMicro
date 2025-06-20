@@ -28,25 +28,23 @@ public class EmailService : IEmailService
     {
         try
         {
-            var smtpClient = new SmtpClient()
+            var emailProvider = Configurations.GetConfiguration<NotificationProviders>().Email;
+
+            var smtpClient = new SmtpClient
             {
-                EnableSsl = Configurations.GetConfiguratinValue<bool>("MailSettings", "EnableSSL"),
-                Timeout = Configurations.GetConfiguratinValue<int>("MailSettings", "SMTPTimeout"),
-                Host = Configurations.GetConfiguratinValue<string>("MailSettings", "Host"),
-                Port = Configurations.GetConfiguratinValue<int>("MailSettings", "Port"),
-                Credentials = new NetworkCredential(
-                    Configurations.GetConfiguratinValue<string>("MailSettings", "Username"),
-                    Configurations.GetConfiguratinValue<string>("MailSettings", "Password"))
+                Host = emailProvider.Primary.SmtpSettings.Host,
+                Port = emailProvider.Primary.SmtpSettings.Port,
+                Credentials = new NetworkCredential(emailProvider.Primary.SmtpSettings.Username, emailProvider.Primary.SmtpSettings.Password),
+                EnableSsl = emailProvider.Primary.SmtpSettings.EnableSsl,
+                Timeout = emailProvider.Primary.SmtpSettings.TimeoutInSeconds
             };
 
             var message = new MailMessage
             {
                 Subject = request.Subject,
                 Body = request.Body,
-                IsBodyHtml = (request.Body.Contains("</html>") || request.Body.Contains("</body>")),
-                From = new MailAddress(
-                    Configurations.GetConfiguratinValue<string>("MailSettings", "Mail"),
-                    Configurations.GetConfiguratinValue<string>("MailSettings", "DisplayName")),
+                IsBodyHtml = request.Body.Contains("</html>") || request.Body.Contains("</body>"),
+                From = new(emailProvider.Primary.FromEmail, emailProvider.Primary.DisplayName)
             };
             message.To.Add(request.ToEmail);
 
@@ -55,7 +53,7 @@ public class EmailService : IEmailService
                 foreach (var attachment in request.Attachments)
                 {
                     using var ms = new MemoryStream(attachment.File);
-                    message.Attachments.Add(new Attachment(ms, attachment.FileName, attachment.FileMimeType));
+                    message.Attachments.Add(new(ms, attachment.FileName, attachment.FileMimeType));
                 }
             }
 
@@ -180,7 +178,7 @@ public class EmailService : IEmailService
 
         foreach (var recipient in emailDto.Recipients)
         {
-            emailQueues.Add(new EmailQueue
+            emailQueues.Add(new()
             {
                 ToEmail = recipient,
                 Subject = template.Subject,
@@ -243,7 +241,7 @@ public class EmailService : IEmailService
         var email = await _emailQueueRepository.GetByIdAsync(emailId);
         if (email == null || email.Status != EmailStatus.Failed)
         {
-            throw new Exception($"Email with ID {emailId} not found or is not in Failed status");
+            throw new($"Email with ID {emailId} not found or is not in Failed status");
         }
 
         email.Status = EmailStatus.Pending;
@@ -426,7 +424,7 @@ public class EmailService : IEmailService
 
         foreach (var recipient in emailDto.Recipients)
         {
-            emailQueues.Add(new EmailQueue
+            emailQueues.Add(new()
             {
                 ToEmail = recipient,
                 Subject = emailDto.Subject,
@@ -470,7 +468,7 @@ public class EmailService : IEmailService
                 body = body.Replace($"{{{param.Key}}}", param.Value);
             }
 
-            emailQueues.Add(new EmailQueue
+            emailQueues.Add(new()
             {
                 ToEmail = recipient,
                 Subject = template.Subject,
@@ -570,12 +568,8 @@ public class EmailService : IEmailService
 
                 Console.WriteLine(DateTime.Now.ToLongTimeString());
 
-                var repetitionInterval =
-                    Configurations.GetConfiguratinValue<int>("RetryPolicy", "RepetitionIntervalTimeSpan");
-
-                //int repetitionIntervalSeconds = int.Parse(repetitionInterval);
-
-                await Task.Delay(repetitionInterval, cancellationToken);
+                var retryPolicy = Configurations.GetConfiguration<ResiliencePatterns>().RetryPolicy;
+                await Task.Delay(retryPolicy.RetryDelayMilliseconds, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -607,9 +601,9 @@ public class EmailService : IEmailService
             email.RetryCount++;
             email.ErrorMessage = ex.Message;
 
-            // Maksimum cəhd sayını aşıbsa, uğursuz olaraq işarələ
+            var retryPolicy = Configurations.GetConfiguration<ResiliencePatterns>().RetryPolicy;
 
-            var retryCount = Configurations.GetConfiguratinValue<int>("RetryPolicy", "RetryCount");
+            var retryCount = retryPolicy.MaxRetryAttempts;
 
             if (email.RetryCount >= retryCount)
             {

@@ -15,8 +15,7 @@ if (builder.Environment.IsDevelopment())
 
     builder.WebHost.ConfigureKestrel(serverOptions =>
     {
-        serverOptions.ListenAnyIP(
-            Configurations.GetConfiguratinValue<int>("Consul", "ConsulClientRegister", "ServerPort"));
+        serverOptions.ListenAnyIP(Configurations.GetConfiguration<ServiceDiscovery>().Consul.ServiceRegistration.Port);
     });
 }
 
@@ -36,7 +35,7 @@ app.MapControllers();
 
 app.UseCustomExceptionHandler();
 
-//await app.RegisterWithConsul(app.Lifetime);
+await app.RegisterWithConsul(app.Lifetime);
 app.UseRabbitMqEventBus();
 
-app.Run();
+await app.RunAsync();

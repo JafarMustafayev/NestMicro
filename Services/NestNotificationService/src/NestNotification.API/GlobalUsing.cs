@@ -41,3 +41,4 @@ global using EventBus.RabbitMq.Connections;
 global using EventBus.RabbitMq.Subscriptions;
 global using RabbitMQ.Client;
 global using NestNotification.API.Consts;
+global using NestNotification.API.ConfigurationModels;

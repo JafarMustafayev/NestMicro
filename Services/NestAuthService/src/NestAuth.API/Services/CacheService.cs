@@ -5,12 +5,19 @@ public class CacheService : ICacheService
     private readonly ILogger<CacheService> _logger;
     private readonly IDatabase _database;
     private readonly IConnectionMultiplexer _redis;
-    private readonly string _redisInstanceName = Configurations.GetConfiguratinValue<string>("RedisServer", "RedisInstanceName");
+
+    private readonly string _redisInstanceName = string.Empty;
+    private readonly int _defaultExpiry = 0;
 
     public CacheService(
         ILogger<CacheService> logger,
         IConnectionMultiplexer redis)
     {
+        var redisCaching = Configurations.GetConfiguration<Caching>().Redis;
+        var redisConfig = Configurations.IsProduction() ? redisCaching.Production : redisCaching.Development;
+        _redisInstanceName = redisConfig.KeyPrefix;
+        _defaultExpiry = redisConfig.DefaultExpirationMinutes;
+
         _logger = logger;
         _redis = redis;
         _database = _redis.GetDatabase();
@@ -22,6 +29,9 @@ public class CacheService : ICacheService
         try
         {
             var json = JsonConvert.SerializeObject(value);
+
+            expiry = expiry ?? TimeSpan.FromHours(_defaultExpiry);
+
             return await _database.StringSetAsync(prefixedKey, json, expiry);
         }
         catch (Exception ex)
@@ -165,7 +175,7 @@ public class CacheService : ICacheService
         {
             var values = await _database.StringGetAsync(prefixedKeys.Select(k => (RedisKey)k).ToArray());
 
-            for (int i = 0; i < prefixedKeys.Length; i++)
+            for (var i = 0; i < prefixedKeys.Length; i++)
             {
                 if (values[i].HasValue)
                 {
@@ -214,7 +224,10 @@ public class CacheService : ICacheService
         try
         {
             var cachedValue = await GetAsync<T>(prefixedKey);
-            if (cachedValue != null) return cachedValue;
+            if (cachedValue != null)
+            {
+                return cachedValue;
+            }
 
             var newValue = factory();
             await SetAsync(prefixedKey, newValue, expiry);
@@ -250,5 +263,8 @@ public class CacheService : ICacheService
         }
     }
 
-    private string GetPrefixedKey(string? key) => $"{_redisInstanceName}__{key}";
+    private string GetPrefixedKey(string? key)
+    {
+        return $"{_redisInstanceName}__{key}";
+    }
 }

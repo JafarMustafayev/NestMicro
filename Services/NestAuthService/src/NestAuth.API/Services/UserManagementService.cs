@@ -43,7 +43,7 @@ public class UserManagementService : IUserManagementService
             UserId = user.Id,
             UserName = user?.UserName ?? string.Empty,
             Email = user?.Email ?? string.Empty,
-            ClientUrl = Configurations.GetConfiguratinValue<string>("ClientUrl"),
+            ClientUrl = Configurations.GetConfiguration<ExternalServices>().ClientUrl
         };
 
         await _eventBus.PublishAsync(@enent);

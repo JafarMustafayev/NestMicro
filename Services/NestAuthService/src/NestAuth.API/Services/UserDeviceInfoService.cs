@@ -46,7 +46,7 @@ public class UserDeviceInfoService : IUserDeviceInfoService
     {
         IP2LocationIOComponent.Configuration config = new()
         {
-            ApiKey = Configurations.GetConfiguratinValue<string>("IPGeolocationToken")
+            ApiKey = Configurations.GetConfiguration<ExternalServices>().IPGeolocationToken
         };
         IPGeolocation IPL = new(config);
 

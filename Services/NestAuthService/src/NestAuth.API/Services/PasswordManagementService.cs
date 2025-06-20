@@ -30,7 +30,7 @@ public class PasswordManagementService : IPasswordManagementService
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
-        var clientUrl = Configurations.GetConfiguratinValue<string>("ClientUrl");
+        var clientUrl = Configurations.GetConfiguration<ExternalServices>().ClientUrl;
         var resetUrl = string.Concat(clientUrl,
             $"/auth/resetpassword?token={token.Encode()}&email={user?.Email?.Encode()}");
 
@@ -38,7 +38,7 @@ public class PasswordManagementService : IPasswordManagementService
         {
             Email = user?.Email ?? string.Empty,
             ResetUrl = resetUrl,
-            UserName = user?.UserName ?? string.Empty,
+            UserName = user?.UserName ?? string.Empty
         };
         await _eventBus.PublishAsync(@event);
 

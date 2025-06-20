@@ -4,12 +4,9 @@ public static class ServicesRegistrator
 {
     public static void AddNotificationServices(this IServiceCollection services)
     {
-        var serverIsAvailable = InternetChecker
-            .IsServerAvailable(Configurations.GetConfiguratinValue<string>("ServerIP")).Result;
+        services.ConnectSqlServer();
 
-        services.ConnectSqlServer(serverIsAvailable);
-
-        services.AddConsul(serverIsAvailable);
+        //services.AddConsul();
 
         services.AddFluent();
 
@@ -21,25 +18,23 @@ public static class ServicesRegistrator
 
         services.AddAutoMapper(typeof(GetEmailTemplateDto).Assembly);
 
-        services.ConfigureRabbitMq(serverIsAvailable);
+        services.ConfigureRabbitMq();
     }
 
-    private static void ConnectSqlServer(this IServiceCollection services, bool serverIsAvailable)
+    private static void ConnectSqlServer(this IServiceCollection services)
     {
-        services.AddDbContext<AppDbContext>(options =>
-        {
-            options.UseSqlServer(Configurations.GetConfiguratinValue<string>("ConnectionStrings",
-                serverIsAvailable ? "SqlConnectionOnServer" : "SqlConnectionOnPrem"));
-        });
+        services.AddDbContext<AppDbContext>(options => { options.UseSqlServer(Configurations.GetConnectionString("DefaultConnection")); });
     }
 
-    private static void AddConsul(this IServiceCollection services, bool serverIsAvailable)
+    private static void AddConsul(this IServiceCollection services)
     {
-        services.AddSingleton<IConsulClient, ConsulClient>(p => new ConsulClient(consulConfig =>
+        var consul = Configurations.GetConfiguration<ServiceDiscovery>();
+        var address = consul.Consul.Endpoints;
+
+        services.AddSingleton<IConsulClient, ConsulClient>(p => new(consulConfig =>
         {
-            consulConfig.Address = new Uri(Configurations.GetConfiguratinValue<string>("Consul",
-                "ConsulServer",
-                serverIsAvailable ? "ConsulServerOnServer" : "ConsulServerOnPrem")); //Consul server address
+            consulConfig.Address = new(
+                Configurations.IsProduction() ? address.Production : address.Production); //Consul server address
         }));
     }
 
@@ -72,21 +67,22 @@ public static class ServicesRegistrator
             ));
     }
 
-    private static void ConfigureRabbitMq(this IServiceCollection services, bool serverIsAvailable)
+    private static void ConfigureRabbitMq(this IServiceCollection services)
     {
         services.AddSingleton<IRabbitMqPersistentConnection>(sp =>
         {
-            var subSection = (serverIsAvailable ? "DockerHostOnServer" : "DockerHostOnPrem");
+            var messageBroker = Configurations.GetConfiguration<MessageBroker>();
 
-            var factory = new ConnectionFactory()
+            var config = Configurations.IsProduction() ? messageBroker.RabbitMQ.Production : messageBroker.RabbitMQ.Development;
+
+            var factory = new ConnectionFactory
             {
-                HostName = Configurations.GetConfiguratinValue<string>("RabbitMq", subSection, "HostName"),
-                Port = Configurations.GetConfiguratinValue<int>("RabbitMq", subSection, "Port"),
-                UserName = Configurations.GetConfiguratinValue<string>("RabbitMq", subSection, "UserName"),
-                Password = Configurations.GetConfiguratinValue<string>("RabbitMq", subSection, "Password"),
-                DispatchConsumersAsync = true,
-                AutomaticRecoveryEnabled = true
-                
+                HostName = config.HostName,
+                Port = config.Port,
+                UserName = config.UserName,
+                Password = config.Password,
+                DispatchConsumersAsync = config.DispatchConsumersAsync,
+                AutomaticRecoveryEnabled = config.AutomaticRecoveryEnabled
             };
 
             return new RabbitMqPersistentConnection(
@@ -124,34 +120,26 @@ public static class ServicesRegistrator
 
     public static async Task RegisterWithConsul(this IApplicationBuilder app, IHostApplicationLifetime lifetime)
     {
-        var section = "Consul";
-
-        var serverIsAvailable = InternetChecker
-            .IsServerAvailable(Configurations.GetConfiguratinValue<string>("ServerIP")).Result;
-
-        var route = Configurations.GetConfiguratinValue<string>(section, "ConsulClientHealthCheck", "HealthCheckRoute");
-
-        var consulClientHealthCheck =
-            $"{Configurations.GetConfiguratinValue<string>(section, "ConsulClientHealthCheck",
-                (serverIsAvailable ? "HealthCheckAddressOnServer" : "HealthCheckAddressOnPrem"))}{route}";
+        var serviceDiscovery = Configurations.GetConfiguration<ServiceDiscovery>().Consul;
+        var endpoint = Configurations.IsProduction() ? serviceDiscovery.HealthCheck.Endpoints.Production : serviceDiscovery.HealthCheck.Endpoints.Production;
 
         var consulClient = app.ApplicationServices.GetRequiredService<IConsulClient>();
-        var registration = new AgentServiceRegistration()
+        var registration = new AgentServiceRegistration
         {
-            ID = Configurations.GetConfiguratinValue<string>(section, "ConsulClientRegister", "ServerId"),
-            Name = Configurations.GetConfiguratinValue<string>(section, "ConsulClientRegister", "ServerName"),
-            Address = Configurations.GetConfiguratinValue<string>(section, "ConsulClientRegister", "ServerAddress"),
-            Port = Configurations.GetConfiguratinValue<int>(section, "ConsulClientRegister", "ServerPort"),
-            Tags = new[] { "NestA0uth", "Auth", "Identity", "Server" },
-            Check = new AgentServiceCheck()
+            ID = serviceDiscovery.ServiceRegistration.ServiceId,
+            Name = serviceDiscovery.ServiceRegistration.ServiceName,
+            Address = serviceDiscovery.ServiceRegistration.Address,
+            Port = serviceDiscovery.ServiceRegistration.Port,
+            Tags = serviceDiscovery.ServiceRegistration.Tags,
+            Check = new()
             {
-                HTTP = consulClientHealthCheck, // health check address
-                Timeout = TimeSpan.FromSeconds(5),
-                Interval = TimeSpan.FromSeconds(5),
-                DeregisterCriticalServiceAfter = TimeSpan.FromMinutes(1),
-                TLSSkipVerify = true
+                HTTP = $"{endpoint}{serviceDiscovery.HealthCheck.HealthCheckPath}", // health check address
+                Timeout = TimeSpan.FromSeconds(serviceDiscovery.HealthCheck.Timeout),
+                Interval = TimeSpan.FromSeconds(serviceDiscovery.HealthCheck.Interval),
+                DeregisterCriticalServiceAfter = TimeSpan.FromMinutes(serviceDiscovery.HealthCheck.DeregisterCriticalServiceAfter),
+                TLSSkipVerify = serviceDiscovery.HealthCheck.TLSSkipVerify
             },
-            EnableTagOverride = true
+            EnableTagOverride = serviceDiscovery.ServiceRegistration.EnableTagOverride
         };
         try
         {

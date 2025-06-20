@@ -69,7 +69,7 @@ public class AuthenticationService : IAuthenticationService
 
         // Generate email confirmation token and URL
         var confirmedEmailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        var clientUrl = Configurations.GetConfiguratinValue<string>("ClientUrl");
+        var clientUrl = Configurations.GetConfiguration<ExternalServices>().ClientUrl;
         var confirmedUrl = $"{clientUrl}/auth/verifyemail?token={confirmedEmailToken.Encode()}&userId={user.Id.Encode()}&email={user.Email?.Encode()}";
 
         // Publish user registration event
@@ -77,10 +77,10 @@ public class AuthenticationService : IAuthenticationService
         {
             Email = user.Email ?? string.Empty,
             ConfirmedUrl = confirmedUrl,
-            UserName = user.UserName ?? string.Empty,
+            UserName = user.UserName ?? string.Empty
         });
 
-        return new ResponseDto
+        return new()
         {
             IsSuccess = true,
             Message = "User registered successfully",
@@ -142,7 +142,7 @@ public class AuthenticationService : IAuthenticationService
         {
             await _cacheService.SetAsync(key, cacheData, expiresAt);
 
-            return new ResponseDto
+            return new()
             {
                 IsSuccess = true,
                 StatusCode = StatusCodes.Status202Accepted,
@@ -152,7 +152,7 @@ public class AuthenticationService : IAuthenticationService
                     UserId = user.Id,
                     ExpiresAt = expiresAt,
                     RequiresAuthenticator = true,
-                    TemporaryToken = temporaryToken,
+                    TemporaryToken = temporaryToken
                 }
             };
         }
@@ -170,7 +170,7 @@ public class AuthenticationService : IAuthenticationService
                 Otp = otp
             });
 
-            return new ResponseDto
+            return new()
             {
                 IsSuccess = true,
                 Message = "OTP sent to your email.",
@@ -181,7 +181,7 @@ public class AuthenticationService : IAuthenticationService
                     ExpiresAt = expiresAt,
                     TemporaryToken = temporaryToken,
                     RequiresEmailAuthenticator = true,
-                    Email = EmailMasking.Mask(user.Email ?? string.Empty),
+                    Email = EmailMasking.Mask(user.Email ?? string.Empty)
                 }
             };
         }
@@ -196,7 +196,7 @@ public class AuthenticationService : IAuthenticationService
         var accessToken = await _tokenService.GenerateAccessTokenAsync(user, sessionId);
         await _eventBus.PublishAsync(@event);
 
-        return new ResponseDto
+        return new()
         {
             IsSuccess = true,
             Message = "User logged in successfully",
@@ -242,7 +242,7 @@ public class AuthenticationService : IAuthenticationService
 
         var tokenResponse = await _tokenService.GenerateAccessTokenAsync(user, sessionId);
 
-        return new ResponseDto
+        return new()
         {
             IsSuccess = true,
             Message = "Token refreshed successfully",
@@ -280,7 +280,7 @@ public class AuthenticationService : IAuthenticationService
         await _userSessionService.RevokeSessionAsync(sessionId);
         await _tokenService.RevokeRefreshTokenAsync(request.UserId, request.RefreshToken);
 
-        return new ResponseDto
+        return new()
         {
             IsSuccess = true,
             Message = "User logged out successfully",
@@ -304,7 +304,7 @@ public class AuthenticationService : IAuthenticationService
             throw new OperationFailedException(errors);
         }
 
-        return new ResponseDto
+        return new()
         {
             IsSuccess = true,
             Message = "2FA enabled successfully",
@@ -328,7 +328,7 @@ public class AuthenticationService : IAuthenticationService
             throw new OperationFailedException(errors);
         }
 
-        return new ResponseDto
+        return new()
         {
             IsSuccess = true,
             Message = "2FA disabled successfully",
@@ -362,7 +362,7 @@ public class AuthenticationService : IAuthenticationService
             Otp = otp
         });
 
-        return new ResponseDto
+        return new()
         {
             IsSuccess = true,
             Message = "OTP sent to your email.",
@@ -372,7 +372,7 @@ public class AuthenticationService : IAuthenticationService
                 UserId = user.Id,
                 ExpiresAt = expiresAt,
                 TemporaryToken = temporaryToken,
-                Email = EmailMasking.Mask(user.Email ?? string.Empty),
+                Email = EmailMasking.Mask(user.Email ?? string.Empty)
             }
         };
     }
@@ -448,7 +448,7 @@ public class AuthenticationService : IAuthenticationService
         user.RecoveryCodes = recoveryCodes;
         await _userManager.UpdateAsync(user);
 
-        return new ResponseDto
+        return new()
         {
             IsSuccess = true,
             Data = new
@@ -474,7 +474,7 @@ public class AuthenticationService : IAuthenticationService
         var issuer = "NestAuth"; // Get from configuration
         var qrCodeUri = GenerateQrCodeUri(user.Email, secretKey, issuer);
 
-        return new ResponseDto
+        return new()
         {
             IsSuccess = true,
             StatusCode = StatusCodes.Status200OK,
@@ -516,8 +516,8 @@ public class AuthenticationService : IAuthenticationService
 
     private async Task HandleFailedAuthenticationAttempt(string userId)
     {
-        string failedAttemptsKey = $"{FAILED_ATTEMPTS_PREFIX}{userId}";
-        int failedAttempts = await _cacheService.GetAsync<int>(failedAttemptsKey);
+        var failedAttemptsKey = $"{FAILED_ATTEMPTS_PREFIX}{userId}";
+        var failedAttempts = await _cacheService.GetAsync<int>(failedAttemptsKey);
         failedAttempts++;
 
         // Update cache

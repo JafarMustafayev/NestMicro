@@ -22,37 +22,35 @@ public class TokenService : ITokenService
 
     public async Task<JwtTokenResponse> GenerateAccessTokenAsync(AppUser user, string sessionId)
     {
-        var addMinutes = Configurations.GetConfiguratinValue<int>("IdentityParameters", "TokenExpirationInMinutes");
-
         var rft = await GenerateRefreshTokenAsync(user.Id, sessionId);
 
         JwtTokenResponse response = new()
         {
             RefreshToken = rft.Token,
-            ExpiresIn = DateTime.UtcNow.AddMinutes(addMinutes),
-            IssuedAt = rft.CreatedAt,
+            ExpiresIn = DateTime.UtcNow.AddMinutes(Configurations.GetConfiguration<IdentityParameters>().Expiration.AccessTokenExpiration.Minute),
+            IssuedAt = rft.CreatedAt
         };
 
-        SymmetricSecurityKey securityKey = new(Encoding.UTF8.GetBytes(Configurations.GetConfiguratinValue<string>("IdentityParameters", "SecurityKey")));
+        SymmetricSecurityKey securityKey = new(Encoding.UTF8.GetBytes(Configurations.GetConfiguration<IdentityParameters>().SecurityKey));
         SigningCredentials signingCredentials = new(securityKey, SecurityAlgorithms.HmacSha256Signature);
 
-        var claims = new List<Claim>()
+        var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.Email ?? "Email"),
-            new Claim(ClaimTypes.Name, user.UserName ?? "UserName"),
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(ClaimTypes.Email, user.Email ?? "Email"),
+            new(ClaimTypes.Name, user.UserName ?? "UserName")
         };
 
         var roles = await _userManager.GetRolesAsync(user);
 
         foreach (var role in roles)
         {
-            claims.Add(new Claim(ClaimTypes.Role, role));
+            claims.Add(new(ClaimTypes.Role, role));
         }
 
         JwtSecurityToken securityToken = new(
-            audience: Configurations.GetConfiguratinValue<string>("IdentityParameters", "Audience"),
-            issuer: Configurations.GetConfiguratinValue<string>("IdentityParameters", "Issuer"),
+            audience: Configurations.GetConfiguration<IdentityParameters>().JwtConfiguration.Audience,
+            issuer: Configurations.GetConfiguration<IdentityParameters>().JwtConfiguration.Issuer,
             expires: response.ExpiresIn,
             signingCredentials: signingCredentials,
             claims: claims
@@ -69,9 +67,9 @@ public class TokenService : ITokenService
         UserRefreshToken refreshToken = new()
         {
             UserId = userId,
-            Expires = DateTime.UtcNow.AddMinutes(Configurations.GetConfiguratinValue<int>("IdentityParameters", "RefreshTokenExpirationInMinutes")),
+            Expires = DateTime.UtcNow.AddMinutes(Configurations.GetConfiguration<IdentityParameters>().Expiration.AccessTokenExpiration.Minute),
             CreatedByIp = _userDeviceInfoService.GetClientIp(),
-            SessionId = sessionId,
+            SessionId = sessionId
         };
 
         await _tokenRepository.AddAsync(refreshToken);
@@ -93,10 +91,9 @@ public class TokenService : ITokenService
 
     public async Task<bool> ValidateRefreshTokenAsync(string userId, string refreshToken)
     {
-        var result = await _tokenRepository.AnyAsync(
-            x => x.UserId == userId &&
-                 x.Token == refreshToken &&
-                 (!x.IsUsed && !x.IsRevoked && x.Expires > DateTime.UtcNow));
+        var result = await _tokenRepository.AnyAsync(x => x.UserId == userId &&
+                                                          x.Token == refreshToken &&
+                                                          !x.IsUsed && !x.IsRevoked && x.Expires > DateTime.UtcNow);
 
         return result;
     }
@@ -153,9 +150,9 @@ public class TokenService : ITokenService
     public string GenerateOtpToken(int length = 6)
     {
         using var rng = RandomNumberGenerator.Create();
-        byte[] bytes = new byte[4];
+        var bytes = new byte[4];
         rng.GetBytes(bytes);
-        int num = BitConverter.ToInt32(bytes) & 0x7FFFFFFF;
+        var num = BitConverter.ToInt32(bytes) & 0x7FFFFFFF;
         return num.ToString().PadLeft(length, '0').Substring(0, length);
     }
 

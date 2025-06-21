@@ -5,3 +5,4 @@ global using NestAPIGateway.Extensions;
 global using Ocelot.DependencyInjection;
 global using Ocelot.Middleware;
 global using Ocelot.Provider.Consul;
+global using NestAPIGateway.ConfigurationModels;

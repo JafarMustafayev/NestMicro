@@ -42,6 +42,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DockerFiles", "DockerFiles"
 	ProjectSection(SolutionItems) = preProject
 		DockerFiles\AuthService.Dockerfile = DockerFiles\AuthService.Dockerfile
 		DockerFiles\NotificationService.Dockerfile = DockerFiles\NotificationService.Dockerfile
+		DockerFiles\StorageService.Dockerfile = DockerFiles\StorageService.Dockerfile
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Consul", "Consul", "{2CA3E659-8C4E-42A3-844D-94C9484589D1}"

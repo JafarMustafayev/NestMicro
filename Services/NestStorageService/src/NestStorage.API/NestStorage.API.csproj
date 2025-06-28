@@ -7,7 +7,7 @@
         <UserSecretsId>ec19c56d-d737-482f-9baa-429e8a90170c</UserSecretsId>
     </PropertyGroup>
 
-	<ItemGroup>
+    <ItemGroup>
 
         <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1"/>
         <PackageReference Include="Consul" Version="1.7.14.6"/>
@@ -40,6 +40,6 @@
         <ProjectReference Include="..\..\..\..\BuildingBlocks\EventBus\EventBus.Abstractions\EventBus.Abstractions.csproj"/>
         <ProjectReference Include="..\..\..\..\BuildingBlocks\EventBus\EventBus.RabbitMq\EventBus.RabbitMq.csproj"/>
         <ProjectReference Include="..\..\..\..\Shared\Nest.Shared\Nest.Shared.csproj"/>
-	</ItemGroup>
+    </ItemGroup>
 
 </Project>

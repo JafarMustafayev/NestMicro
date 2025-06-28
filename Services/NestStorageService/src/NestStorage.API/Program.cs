@@ -3,6 +3,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddStorageServices();
 
 var app = builder.Build();
 
@@ -18,4 +19,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+//await app.RegisterWithConsul(app.Lifetime);
+//app.UseRabbitMqEventBus();
+//app.UseCustomExceptionHandler();
 app.Run();

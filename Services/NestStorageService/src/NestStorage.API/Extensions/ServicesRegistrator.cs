@@ -88,9 +88,6 @@ public static class ServicesRegistrator
 
     private static void AddEventsHandlers(this IServiceCollection services)
     {
-        //services.AddTransient<User2FaOtpSentIntegrationEventHandler>();
-
-        //services.AddTransient<IIntegrationEventHandler<User2FaOtpSentIntegrationEvent>, User2FaOtpSentIntegrationEventHandler>();
     }
 
     public static void UseRabbitMqEventBus(this IApplicationBuilder app)

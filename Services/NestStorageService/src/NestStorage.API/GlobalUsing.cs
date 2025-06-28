@@ -19,3 +19,4 @@ global using NestStorage.API.Enums;
 global using NestStorage.API.Extensions;
 global using RabbitMQ.Client;
 global using System.Net;
+global using NestStorage.API.ModelConfigurations;

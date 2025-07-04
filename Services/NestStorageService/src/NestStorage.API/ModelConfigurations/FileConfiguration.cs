@@ -30,5 +30,10 @@ public class FileConfiguration : IEntityTypeConfiguration<Entities.File>
 
         builder.Property(x => x.RelatedEntityType)
             .HasMaxLength(50);
+
+        builder.Property(x => x.FromIp)
+            .HasMaxLength(15)
+            .IsRequired()
+            .HasDefaultValue("0.0.0.0");
     }
 }

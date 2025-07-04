@@ -11,6 +11,7 @@ public class File : BaseEntity
     public FileCategory FileCategory { get; set; }
     public string RelatedEntityId { get; set; }
     public string RelatedEntityType { get; set; }
+    public string FromIp { get; set; }
     public string FullPath => Path.Combine(StorageBucket.BasePath, StorageBucket.Name, RelativePath); // bas folder daxil olmaqla tam yolu 
     public virtual required StorageBucket StorageBucket { get; set; }
 
@@ -18,6 +19,7 @@ public class File : BaseEntity
 
     public File()
     {
+        FromIp = string.Empty;
         FileName = string.Empty;
         StorageName = string.Empty;
         RelativePath = string.Empty;

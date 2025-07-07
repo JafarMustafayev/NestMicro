@@ -25,7 +25,9 @@ public static class ServicesRegistrator
 
     private static void ConnectSqlServer(this IServiceCollection services)
     {
-        services.AddDbContext<AppDbContext>(options => { options.UseSqlServer(Configurations.GetConnectionString("DefaultConnection")); });
+        var connectionString = Configurations.GetConnectionString(
+            Configurations.IsProduction() ? "DefaultConnection" : "LocalConnection");
+        services.AddDbContext<AppDbContext>(options => { options.UseSqlServer(connectionString); });
     }
 
     private static void AddIdentity(this IServiceCollection services)
@@ -86,7 +88,7 @@ public static class ServicesRegistrator
         services.AddSingleton<IConsulClient, ConsulClient>(p => new(consulConfig =>
         {
             consulConfig.Address = new(
-                Configurations.IsProduction() ? address.Production : address.Production); //Consul server address
+                Configurations.IsProduction() ? address.Production : address.Development); //Consul server address
         }));
     }
 
@@ -137,7 +139,7 @@ public static class ServicesRegistrator
     public static async Task RegisterWithConsul(this IApplicationBuilder app, IHostApplicationLifetime lifetime)
     {
         var serviceDiscovery = Configurations.GetConfiguration<ServiceDiscovery>().Consul;
-        var endpoint = Configurations.IsProduction() ? serviceDiscovery.HealthCheck.Endpoints.Production : serviceDiscovery.HealthCheck.Endpoints.Production;
+        var endpoint = Configurations.IsProduction() ? serviceDiscovery.HealthCheck.Endpoints.Production : serviceDiscovery.HealthCheck.Endpoints.Development;
 
         var consulClient = app.ApplicationServices.GetRequiredService<IConsulClient>();
         var registration = new AgentServiceRegistration

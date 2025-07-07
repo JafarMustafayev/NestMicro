@@ -15,14 +15,14 @@ public static class ServicesRegistrator
         services.AddSingleton<IConsulClient, ConsulClient>(p => new(consulConfig =>
         {
             consulConfig.Address = new(
-                Configurations.IsProduction() ? address.Production : address.Production); //Consul server address
+                Configurations.IsProduction() ? address.Production : address.Development); //Consul server address
         }));
     }
 
     public static async Task RegisterWithConsul(this IApplicationBuilder app, IHostApplicationLifetime lifetime)
     {
         var serviceDiscovery = Configurations.GetConfiguration<ServiceDiscovery>().Consul;
-        var endpoint = Configurations.IsProduction() ? serviceDiscovery.HealthCheck.Endpoints.Production : serviceDiscovery.HealthCheck.Endpoints.Production;
+        var endpoint = Configurations.IsProduction() ? serviceDiscovery.HealthCheck.Endpoints.Production : serviceDiscovery.HealthCheck.Endpoints.Development;
 
         var consulClient = app.ApplicationServices.GetRequiredService<IConsulClient>();
         var registration = new AgentServiceRegistration

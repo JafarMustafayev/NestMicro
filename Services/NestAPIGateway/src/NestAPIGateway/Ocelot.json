@@ -68,7 +68,7 @@
   "GlobalConfiguration": {
     "BaseUrl": "http://192.168.1.67:5001",
     "ServiceDiscoveryProvider": {
-      "Host": "192.168.1.86",
+      "Host": "localhost",
       //Proqram run olunmamisdan once Consul serverin IP adresi yazilir
       "Port": 8500,
       "Type": "Consul",

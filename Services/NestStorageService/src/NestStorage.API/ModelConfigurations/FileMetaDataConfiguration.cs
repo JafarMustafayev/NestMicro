@@ -1,8 +1,8 @@
 ﻿namespace NestStorage.API.ModelConfigurations;
 
-public class FileMetaDataConfiguration : IEntityTypeConfiguration<FileMetaData>
+public class FileMetaDataConfiguration : IEntityTypeConfiguration<FileMetadata>
 {
-    public void Configure(EntityTypeBuilder<FileMetaData> builder)
+    public void Configure(EntityTypeBuilder<FileMetadata> builder)
     {
         builder.Property(x => x.Key)
             .IsRequired()

@@ -21,10 +21,6 @@ public class FileConfiguration : IEntityTypeConfiguration<Entities.File>
         builder.Property(x => x.Size)
             .IsRequired();
 
-        builder.Property(x => x.MimeType)
-            .HasMaxLength(255)
-            .IsRequired();
-
         builder.Property(x => x.RelatedEntityId)
             .HasMaxLength(36);
 
@@ -35,5 +31,8 @@ public class FileConfiguration : IEntityTypeConfiguration<Entities.File>
             .HasMaxLength(15)
             .IsRequired()
             .HasDefaultValue("0.0.0.0");
+
+        builder.Property(x => x.IsPublic)
+            .HasDefaultValue(true);
     }
 }

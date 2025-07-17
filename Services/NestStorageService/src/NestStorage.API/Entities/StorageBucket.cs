@@ -7,7 +7,7 @@ public class StorageBucket : BaseEntity
     public string BasePath { get; set; }
     public bool IsPublic { get; set; }
 
-    public virtual ICollection<File>? Files { get; set; }
+    public ICollection<File>? Files { get; set; }
 
     public StorageBucket()
     {

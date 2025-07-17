@@ -1,4 +1,7 @@
-﻿namespace NestStorage.API.Extensions;
+﻿using Microsoft.OpenApi.Models;
+using NestStorage.API.IntegrationHandlers;
+
+namespace NestStorage.API.Extensions;
 
 public static class ServicesRegistrator
 {
@@ -23,7 +26,9 @@ public static class ServicesRegistrator
 
     private static void ConnectSqlServer(this IServiceCollection services)
     {
-        services.AddDbContext<AppDbContext>(options => { options.UseSqlServer(Configurations.GetConnectionString("DefaultConnection")); });
+        var connectionString = Configurations.GetConnectionString(
+            Configurations.IsProduction() ? "DefaultConnection" : "LocalConnection");
+        services.AddDbContext<AppDbContext>(options => { options.UseSqlServer(connectionString); });
     }
 
     private static void AddConsul(this IServiceCollection services)
@@ -34,7 +39,7 @@ public static class ServicesRegistrator
         services.AddSingleton<IConsulClient, ConsulClient>(p => new(consulConfig =>
         {
             consulConfig.Address = new(
-                Configurations.IsProduction() ? address.Production : address.Production); //Consul server address
+                Configurations.IsProduction() ? address.Production : address.Development); //Consul server address
         }));
     }
 
@@ -47,17 +52,24 @@ public static class ServicesRegistrator
 
     private static void AddRepository(this IServiceCollection services)
     {
+        services.AddScoped<IFileRepository, FileRepository>();
+        services.AddScoped<IFileMetadataRepository, FileMetadataRepository>();
+        services.AddScoped<IStorageBucketRepository, StorageBucketRepository>();
+        services.AddScoped<IMimeCategoryRepository, MimeCategoryRepository>();
+        services.AddScoped<IMimeTypeRepository, MimeTypeRepository>();
     }
 
     private static void AddServices(this IServiceCollection services)
     {
+        services.AddScoped<IFileValidationService, FileValidationService>();
+
         services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
         services.AddSingleton<IEventBus>(sp =>
             new EventBusRabbitMq(
                 sp.GetRequiredService<IRabbitMqPersistentConnection>(),
                 sp.GetRequiredService<IEventBusSubscriptionsManager>(),
                 sp.GetRequiredService<IServiceScopeFactory>(),
-                "Storage"
+                "Storage_"
             ));
     }
 
@@ -88,11 +100,15 @@ public static class ServicesRegistrator
 
     private static void AddEventsHandlers(this IServiceCollection services)
     {
+        services.AddTransient<FileUploadRequestedIntegrationEventHandler>();
+
+        services.AddTransient<IIntegrationEventHandler<FileUploadRequestedIntegrationEvent>, FileUploadRequestedIntegrationEventHandler>();
     }
 
     public static void UseRabbitMqEventBus(this IApplicationBuilder app)
     {
         var eventBus = app.ApplicationServices.GetRequiredService<IEventBus>();
+        eventBus.Subscribe<FileUploadRequestedIntegrationEvent, FileUploadRequestedIntegrationEventHandler>();
     }
 
     public static async Task RegisterWithConsul(this IApplicationBuilder app, IHostApplicationLifetime lifetime)

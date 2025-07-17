@@ -4,6 +4,8 @@ public class ExternalServices
 {
     public ApiGatewayConfig ApiGateway { get; set; } = new();
     public string ServerIp { get; set; } = string.Empty;
+
+    public ClamAvConfig ClamAv { get; set; } = new();
 }
 
 public class ApiGatewayConfig
@@ -23,4 +25,18 @@ public class RetryPolicy
 {
     public int MaxRetryAttempts { get; set; } = 3;
     public string DelayBetweenRetries { get; set; } = "00:00:02";
+}
+
+public class ClamAvConfig
+{
+    public ClamAvEnvironment Development { get; set; } = new();
+    public ClamAvEnvironment Production { get; set; } = new();
+}
+
+public class ClamAvEnvironment
+{
+    public string BaseUrl { get; set; } = string.Empty;
+    public int Port { get; set; }
+    public long MaxStreamSize { get; set; }
+    public int MaxChunkSize { get; set; }
 }

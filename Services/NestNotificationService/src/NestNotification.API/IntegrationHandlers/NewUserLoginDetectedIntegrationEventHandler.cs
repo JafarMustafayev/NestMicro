@@ -18,8 +18,6 @@ public class NewUserLoginDetectedIntegrationEventHandler : IIntegrationEventHand
 
     public async Task Handle(NewUserLoginDetectedIntegrationEvent @event)
     {
-        Console.WriteLine("User logged in successfully");
-
         var template =
             await _emailTemplateRepository.GetByExpressionAsync(x =>
                 x.TemplateName == EmailTemplatesNames.NewLogin);
@@ -31,14 +29,14 @@ public class NewUserLoginDetectedIntegrationEventHandler : IIntegrationEventHand
 
         await _emailService.SendTemplatedEmailAsync(new()
         {
-            TemplateId = template?.Id ?? String.Empty,
+            TemplateId = template?.Id ?? string.Empty,
             Priority = EmailPriority.High,
             ToEmail = @event.Email,
             Placeholders = new()
             {
                 { "$UserName", @event.UserName },
                 { "$Ip_Address", @event.IpAddress },
-                { "$Location", (@event.City + ", " + @event.Country) },
+                { "$Location", @event.City + ", " + @event.Country },
                 { "$Utc_Time", @event.UtcTime },
                 { "$Local_Time", @event.LocalTime },
                 { "$Time_Zone", @event.TimeZone },

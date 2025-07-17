@@ -32,7 +32,7 @@ public class PasswordManagementService : IPasswordManagementService
 
         var clientUrl = Configurations.GetConfiguration<ExternalServices>().ClientUrl;
         var resetUrl = string.Concat(clientUrl,
-            $"/auth/resetpassword?token={token.Encode()}&email={user?.Email?.Encode()}");
+            $"auth/resetpassword?token={token.Encode()}&email={user?.Email?.Encode()}");
 
         UserPasswordResetRequestedIntegrationEvent @event = new()
         {
@@ -108,7 +108,7 @@ public class PasswordManagementService : IPasswordManagementService
                 errors += item + Environment.NewLine;
             }
 
-            throw new OperationFailedException(errors);
+            throw new AuthenticationException(errors);
         }
 
         await _userManager.UpdateSecurityStampAsync(user);

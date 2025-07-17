@@ -1,4 +1,4 @@
-# This file is used to define the Consul service in the docker-compose file.
+﻿# This file is used to define the Consul service in the docker-compose file.
 version: '3.8'
 
 networks:
@@ -26,8 +26,8 @@ services:
       -ui
       -client="0.0.0.0"
       -data-dir=/consul/data
-      -node="192.168.1.67"               
-      -advertise=192.168.1.67
+      -node="127.0.0.1"               
+      -advertise=127.0.0.1
 
 volumes:
   consul-data:

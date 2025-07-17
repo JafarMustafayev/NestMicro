@@ -1,0 +1,20 @@
+﻿version: '3.9'
+
+services:
+  clamav:
+    image: clamav/clamav:1.4.3
+    container_name: clamav
+    ports:
+      - "3310:3310"  # clamd TCP portu — .NET və ya başqa servis buradan qoşulur
+    restart: unless-stopped
+    networks:
+      - clamavnet
+    healthcheck:
+      test: [ "CMD", "clamdscan", "--version" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  clamavnet:
+    driver: bridge

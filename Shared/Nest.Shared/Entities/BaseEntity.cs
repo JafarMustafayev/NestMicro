@@ -26,7 +26,7 @@ public class BaseEntity : BaseEntityId
 
     public DateTime? LastModifiedAt { get; set; }
 
-    public EntityStatus IsActive { get; set; }
+    public bool IsActive { get; set; }
 
     public BaseEntity()
     {
@@ -35,7 +35,7 @@ public class BaseEntity : BaseEntityId
         CreatedBy = string.Empty;
         DeletedBy = string.Empty;
         LastModifiedBy = string.Empty;
-        IsActive = EntityStatus.Active;
+        IsActive = true;
         LastModifiedAt = null;
         DeletedAt = null;
     }
